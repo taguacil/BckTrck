@@ -1,0 +1,10 @@
+{
+    "xlimits"           : [0,100],
+    "ylimits"           : [0,100],
+    "bPlotRealPath"     : true,
+    "workingDir"        : "",
+    "currentTime"       : 0,
+    "RESULTS"           : {
+        "data_2d" : [0,0]
+    }
+}
