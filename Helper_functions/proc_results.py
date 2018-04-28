@@ -41,25 +41,25 @@ def process_data (params):
 class cProcessFile:
     ## Constructor
     def __init__(self,struct):
-        self.localStruct = struct
-        self.filename =  struct['workingDir'] + '\\Results\\' + 'BckTrk_Res_' + struct['currentTime'].strftime("%Y-%m-%d")+'.txt'  
+        self.m_localStruct = struct
+        self.m_filename =  struct['workingDir'] + '\\Results\\' + 'BckTrk_Res_' + struct['currentTime'].strftime("%Y-%m-%d")+'.txt'  
         
     ## Write dictionary into pickle format to txt file    
     def set_pickle_file(self) :
         with open (self.filename, 'wb') as txt_file:
-            pickle.dump(self.localStruct, txt_file)
+            pickle.dump(self.m_localStruct, txt_file)
             
     ## Read from txt file pickle format into dictionary        
     def get_pickle_file(self):
-        with open (self.filename, 'rb' ) as txt_file_read :
+        with open (self.m_filename, 'rb' ) as txt_file_read :
             return pickle.load (txt_file_read)
     
     ## Real path in 2D plotting
     def plot_real_path_2d(self) : 
         #Set of params
-        path2d = self.localStruct['RESULTS']['data_2d']
-        xlim = self.localStruct['xlimits']
-        ylim = self.localStruct ['ylimits']
+        path2d = self.m_localStruct['RESULTS']['data_2d']
+        xlim = self.m_localStruct['xlimits']
+        ylim = self.m_localStruct ['ylimits']
 
         #Plotting
         plt.plot(path2d[0],path2d[1],'r.-',lw=3)
