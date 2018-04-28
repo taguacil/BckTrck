@@ -6,7 +6,7 @@ This project is intented to develop a simulation environment in Python as a proo
 ## Getting Started
 
 ## Prerequisites
-
+Python Anaconda with Spyder IDE is required
 
 ## Installation
 
