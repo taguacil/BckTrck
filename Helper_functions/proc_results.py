@@ -40,9 +40,9 @@ def process_data (params):
         
 class cProcessFile:
     ## Constructor
-    def __init__(self,struct):
-        self.localStruct = struct
-        self.filename =  struct['workingDir'] + '\\Results\\' + 'BckTrk_Res_' + struct['currentTime'].strftime("%Y-%m-%d")+'.txt'  
+    def __init__(self,m_struct):
+        self.localStruct = m_struct
+        self.filename =  m_struct['workingDir'] + '\\Results\\' + 'BckTrk_Res_' + m_struct['currentTime'].strftime("%Y-%m-%d")+'.txt'  
         
     ## Write dictionary into pickle format to txt file    
     def set_pickle_file(self) :

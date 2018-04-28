@@ -1,7 +1,10 @@
 {
     "xlimits"           : [0,100],
     "ylimits"           : [0,100],
-    "bPlotRealPath"     : true,
+    "bPlotRealPath"     : True,
+    "number_of_steps"   : 100,
+    "random_seed"       : 123,
+    "use_random_seed"   : True,
     "workingDir"        : "",
     "currentTime"       : 0,
     "RESULTS"           : {

@@ -31,6 +31,7 @@ import logging
 
 ## User-defined library import
 from Helper_functions.proc_results import process_data 
+from Navigation.Random_walker import random_2d_path_generator
 
 ## Parameters / Config files handling
 workingDir = os.getcwd()
@@ -105,10 +106,10 @@ else :
 def main() :
             
     ##Generate random data
-    x = np.random.randint(0,100,size=(2,20))
+    path = random_2d_path_generator(local_struct)
     
     #Store data in local struct
-    local_struct['RESULTS']['data_2d'] = x
+    local_struct['RESULTS']['data_2d'] = path
     process_data(local_struct)
     exit_framework()
     
