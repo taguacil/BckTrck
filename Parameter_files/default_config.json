@@ -1,13 +1,15 @@
 {
-    "xlimits"           : [-25,25],
-    "ylimits"           : [-25,25],
-    "bPlotRealPath"     : true,
-    "number_of_steps"   : 1000,
-    "random_seed"       : 123,
-    "use_random_seed"   : true,
-    "workingDir"        : "",
-    "currentTime"       : 0,
-    "RESULTS"           : {
+    "gps_freq_Hz"               : 1,
+    "realization"               : 1,
+    "acquisition_time_sec"      : 1000,
+    "random_seed"               : 123,
+    "use_random_seed"           : true,
+    "xlimits"                   : [-25,25],
+    "ylimits"                   : [-25,25],
+    "bPlotRealPath"             : true,
+    "workingDir"                : "",
+    "currentTime"               : 0,
+    "RESULTS"                   : {
         "data_2d" : [0,0]
     }
 }
