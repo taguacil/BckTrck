@@ -46,7 +46,7 @@ class cProcessFile:
         
     ## Write dictionary into pickle format to txt file    
     def set_pickle_file(self) :
-        with open (self.filename, 'wb') as txt_file:
+        with open (self.m_filename, 'wb') as txt_file:
             pickle.dump(self.m_localStruct, txt_file)
             
     ## Read from txt file pickle format into dictionary        
