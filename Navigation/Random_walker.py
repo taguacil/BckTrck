@@ -50,7 +50,7 @@ class cRandomPath:
         self.m_stepsize = struct['stepsize']
         if self.m_use_random_seed :
             np.random.seed(self.m_random_seed)
-        np.random.seed(self.m_random_seed)
+        
             
         
     ## Set randomly initial position (longitute and lattitude)

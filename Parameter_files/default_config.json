@@ -5,6 +5,7 @@
     "random_seed"               : 123,
     "use_random_seed"           : true,
     "stepsize"                  : 1,
+    "noise_level"               : 5,
     "xlimits"                   : [-25,25],
     "ylimits"                   : [-25,25],
     "bPlotRealPath"             : true,
