@@ -106,10 +106,12 @@ else :
 def main() :
             
     ##Generate random data
-    path = random_2d_path_generator(local_struct)
+    logger.info ('Generating random data')
+    paths_xy = random_2d_path_generator(local_struct)
     
     #Store data in local struct
-    local_struct['RESULTS']['data_2d'] = path
+    local_struct['RESULTS']['data_2d'] = paths_xy
+    logger.info ('Generating results and plotting')
     process_data(local_struct)
     exit_framework()
     

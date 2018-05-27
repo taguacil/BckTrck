@@ -1,4 +1,25 @@
 # -*- coding: utf-8 -*-
+"""
+ =============================================================================
+ Title       : Generate and add noise to incoming data
+ Project     : Simulation environment for BckTrk app
+ File        : AWGN.py
+ -----------------------------------------------------------------------------
+
+   Description :
+
+
+   
+   References :
+
+   -
+ -----------------------------------------------------------------------------
+ Revisions   :
+   Date         Version  Name      Description
+   26-Mai-2018  1.0      Rami      File created
+ =============================================================================
+ 
+"""
 
 import numpy as np 
 import pygeodesy as geo 

@@ -1,11 +1,12 @@
 {
     "gps_freq_Hz"               : 1,
-    "realization"               : 1,
+    "realization"               : 2,
     "acquisition_time_sec"      : 1000,
     "random_seed"               : 123,
     "use_random_seed"           : true,
     "stepsize"                  : 1,
     "noise_level"               : 5,
+    "use_random_noise"          : true,
     "xlimits"                   : [-25,25],
     "ylimits"                   : [-25,25],
     "bPlotRealPath"             : true,
