@@ -29,50 +29,47 @@ import Navigation.Coordinates as cord
 
 ## Bring the logger
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('BckTrk')
 
 ## the main processing function 
 def random_2d_path_generator(params):
     data_obj = cRandomPath(params)
     data_obj.initialize_position()
-    data_obj.generate_path()
-    paths_xy = data_obj.m_positions_xy
-    return paths_xy
+    data_obj.generate_wm_path()
+
+    path_wm = data_obj.m_positions_wm
+    path_latlon = data_obj.m_positions_latlon
+    return (path_wm,path_latlon)
 
 class cRandomPath:
     ## Constructor
     def __init__(self,struct):
-        self.m_localStruct = struct
+        logger.debug("Initializing cRandomPath")
         # Controls whether we want to use our random seed or let numpy initialize the randomstate "randomly"
-        self.m_use_random_seed = struct['use_random_seed']
-        self.m_random_seed = struct['random_seed']
-        self.m_acquisition_length = struct['gps_freq_Hz']*struct['acquisition_time_sec']
-        self.m_realizations = struct['realization']
-        self.m_positions_xy = np.zeros((2,self.m_acquisition_length,self.m_realizations))
-        self.m_initial_position_latlon = np.empty(self.m_realizations,dtype=object)
-        self.m_stepsize = struct['stepsize']
-        if self.m_use_random_seed :
-            np.random.seed(self.m_random_seed)
-        
+        self.m_acquisition_length = struct['acquisition_length']
+        self.m_positions_wm = np.zeros((2,self.m_acquisition_length))
+        self.m_positions_latlon = np.zeros((2,self.m_acquisition_length))
+        self.m_stepsize = struct['stepsize'] 
             
         
     ## Set randomly initial position (longitute and lattitude)
     def initialize_position(self) :
-        lat = np.random.uniform(-85.051,85.051,self.m_realizations) # Generates random lattitude in degrees limits set by webmercator
-        lon = np.random.uniform(-180.0,180.0,self.m_realizations) #Generates random longitude in degrees
-        for i in range(self.m_realizations-1):
-            self.m_initial_position_latlon[i] = geo.ellipsoidalVincenty.LatLon(lat[i],lon[i])
+        logger.debug("Generating initial position in LatLon")
+        lat = np.random.uniform(-85.051,85.051) # Generates random lattitude in degrees limits set by webmercator
+        lon = np.random.uniform(-180.0,180.0) #Generates random longitude in degrees
+        self.m_initial_position_latlon = geo.ellipsoidalVincenty.LatLon(lat,lon)
         
-    def generate_path(self) :
-        """generates a path of (x,y) coordinates"""
-        initial_position_wm = cord.convert_elatlon_to_wm(self.m_initial_position_latlon)
-        theta = np.random.uniform(0,2*np.pi,(self.m_acquisition_length,self.m_realizations))
-        for k in range(self.m_realizations-1):
-            self.m_positions_xy[:,0,k] = np.array([initial_position_wm[k].x,initial_position_wm[k].y])
-            for i in range(self.m_acquisition_length-1):
-                self.m_positions_xy[:,i+1,k] = self.m_positions_xy[:,i,k] + self.m_stepsize*np.array([np.cos(theta[i,k]),np.sin(theta[i,k])])
+    ## Generate data in cartesian plane
+    def generate_wm_path(self) :
+        logger.debug("Generating a path of WM coordinates")
+        initial_position_wm = geo.toWm(self.m_initial_position_latlon)
+        bearing = np.random.uniform(0,2*np.pi,(self.m_acquisition_length))
+     
+        self.m_positions_wm[:,0] = np.array([initial_position_wm.x,initial_position_wm.y])
+        for i in range(self.m_acquisition_length-1):
+            self.m_positions_wm[:,i+1] = self.m_positions_wm[:,i] + self.m_stepsize*np.array([np.cos(bearing[i]),np.sin(bearing[i])])
         
-        
+        self.m_positions_latlon = cord.generate_latlon_array(self.m_positions_wm)
 
     
     

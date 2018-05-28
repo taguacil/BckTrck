@@ -29,7 +29,7 @@ import _pickle  as pickle
 
 ## Bring the logger
 import logging
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('BckTrk')
     
 ## the main processing function 
 def process_data (params):
@@ -57,17 +57,68 @@ class cProcessFile:
     ## Real path in 2D plotting
     def plot_real_path_2d(self) : 
         #Set of params
-        path2d = self.m_localStruct['RESULTS']['data_2d']
-        xlim = self.m_localStruct['xlimits']
-        ylim = self.m_localStruct ['ylimits']
+        paths_wm_org = self.m_localStruct['RESULTS']['paths_wm_org']
+        paths_latlon_org = self.m_localStruct['RESULTS']['paths_latlon_org']
+        
+        acquisition_length = self.m_localStruct['gps_freq_Hz']*self.m_localStruct['acquisition_time_sec']
+        x_axis = range(0, acquisition_length)
+        number_realization = self.m_localStruct ['realization']
 
-        #Plotting
-        plt.plot(path2d[0],path2d[1],'r.-',lw=3)
-        plt.xlim(xlim[0], xlim[1])
-        plt.ylim(ylim[0], ylim[1])
+        ####################
+        logger.info ('Plotting original path in webmercator coordinates')
+        logger.warning ('Plotting only first realization for visibility')
+        for i in range (number_realization):
+            plt.plot(paths_wm_org[0,:,0],paths_wm_org[1,:,0],'b-*')
+            
         plt.grid()
-        plt.title('Real Path')
+        plt.title('Original cartesian Path')
         plt.xlabel('x-coordinates')
         plt.ylabel('y-coordinates')
-        plt.show()    
+        plt.show() 
+        
+        ####################
+        logger.info ('Plotting original path in webmercator coordinates')
+        logger.warning ('Plotting only first realization for visibility')
+        #Plotting x coordinates
+        for i in range (number_realization):
+            plt.plot(x_axis,paths_wm_org[0,:,0],'b-*')
             
+        plt.grid()
+        plt.title('Original webmercator Path -X')
+        plt.xlabel('Number of steps')
+        plt.ylabel('x-coordinates')
+        plt.show()  
+        
+        #Plotting y coordinates
+        for i in range (number_realization):
+            plt.plot(x_axis, paths_wm_org[1,:,0],'r-*')
+            
+        plt.grid()
+        plt.title('Original webmercator Path -Y')
+        plt.xlabel('Number of steps')
+        plt.ylabel('y-coordinates')
+        plt.show() 
+        
+        ####################
+        logger.info ('Plotting original longitude and lattitude')
+        logger.warning ('Plotting only first realization for visibility')
+          
+        #Plotting Latitude
+        for i in range (number_realization):
+            plt.plot(x_axis, paths_latlon_org[0,:,0],'r-*')
+            
+        plt.grid()
+        plt.title('Original lattitude')
+        plt.xlabel('Number of steps')
+        plt.ylabel('Lattitude')
+        plt.show() 
+            
+        #Plotting Longitude
+        for i in range (number_realization):
+            plt.plot(x_axis,paths_latlon_org[1,:,0],'b-*')
+            
+        plt.grid()
+        plt.title('Original longitude')
+        plt.xlabel('Number of steps')
+        plt.ylabel('Longitude')
+        plt.show()

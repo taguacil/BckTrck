@@ -13,6 +13,7 @@
     "workingDir"                : "",
     "currentTime"               : 0,
     "RESULTS"                   : {
-        "data_2d" : [0,0]
+        "paths_wm_org"     : [0,0,0],
+        "paths_latlon_org" : [0,0,0]
     }
 }

@@ -32,6 +32,7 @@ import logging
 ## User-defined library import
 from Helper_functions.proc_results import process_data 
 from Navigation.Random_walker import random_2d_path_generator
+from Navigation.AWGN import noise_generator
 
 ## Parameters / Config files handling
 workingDir = os.getcwd()
@@ -104,13 +105,32 @@ else :
 
 ## Main function definition 
 def main() :
+    ##Variables initialization
+    use_random_seed = local_struct['use_random_seed']
+    random_seed = local_struct['random_seed']
+    numberOfRealizations = local_struct['realization']
+    acquisition_length = local_struct['gps_freq_Hz']*local_struct['acquisition_time_sec']
+    local_struct['acquisition_length']= acquisition_length
+    paths_wm_org = np.zeros((2,acquisition_length,numberOfRealizations))
+    paths_latlon_org = np.zeros((2,acquisition_length,numberOfRealizations))
+    paths_wm_noisy = np.zeros((2,acquisition_length,numberOfRealizations))
+    paths_latlon_noisy = np.zeros((2,acquisition_length,numberOfRealizations))
+    ##Set seed
+    if use_random_seed :
+        np.random.seed(random_seed)
             
-    ##Generate random data
-    logger.info ('Generating random data')
-    paths_xy = random_2d_path_generator(local_struct)
+    for realization in range(numberOfRealizations):
+        ##Generate random data
+        logger.info ('Generating random data for realization %d',realization)
+        (paths_wm_org[:,:,realization],paths_latlon_org[:,:,realization]) = random_2d_path_generator(local_struct)
+        (paths_wm_noisy[:,:,realization],paths_latlon_noisy[:,:,realization]) = noise_generator(local_struct,paths_wm_org[:,:,realization])
     
     #Store data in local struct
-    local_struct['RESULTS']['data_2d'] = paths_xy
+    local_struct['RESULTS']['paths_wm_org'] = paths_wm_org
+    local_struct['RESULTS']['paths_latlon_org'] = paths_latlon_org
+    local_struct['RESULTS']['paths_wm_noisy'] = paths_wm_noisy
+    local_struct['RESULTS']['paths_latlon_noisy'] = paths_latlon_noisy
+    
     logger.info ('Generating results and plotting')
     process_data(local_struct)
     exit_framework()
