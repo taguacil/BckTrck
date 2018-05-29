@@ -29,19 +29,19 @@ import logging
 logger = logging.getLogger('BckTrk')
 
 ## the main processing function 
-def noise_generator(params, positions_wm):
-    data_obj = cAWGN(params)
+def noise_generator(params, positions_wm,noise_level):
+    data_obj = cAWGN(params,noise_level)
     noise = data_obj.generate_noisy_signal_dist(positions_wm) ##if noise needed later
     return (data_obj.m_noisy_positions_wm,data_obj.m_noisy_positions_latlon)
 
 class cAWGN():
     ## Constructor
-    def __init__(self, struct):
+    def __init__(self, struct,noise_level):
         logger.debug("Initializing cAWGN")
         self.m_acquisition_length = struct['gps_freq_Hz']*struct['acquisition_time_sec']
         self.m_noisy_positions_latlon = np.zeros((2,self.m_acquisition_length))
         self.m_noisy_positions_wm = np.zeros((2,self.m_acquisition_length))
-        self.m_noise_level = struct['noise_level']
+        self.m_noise_level = noise_level
  
     ## noise generation based on the distance
     def generate_noisy_signal_dist(self, positions_wm):

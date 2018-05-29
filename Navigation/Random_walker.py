@@ -47,6 +47,7 @@ class cRandomPath:
         logger.debug("Initializing cRandomPath")
         # Controls whether we want to use our random seed or let numpy initialize the randomstate "randomly"
         self.m_acquisition_length = struct['acquisition_length']
+        self.m_use_static_init = struct['use_static_init']
         self.m_positions_wm = np.zeros((2,self.m_acquisition_length))
         self.m_positions_latlon = np.zeros((2,self.m_acquisition_length))
         self.m_stepsize = struct['stepsize'] 
@@ -55,8 +56,15 @@ class cRandomPath:
     ## Set randomly initial position (longitute and lattitude)
     def initialize_position(self) :
         logger.debug("Generating initial position in LatLon")
-        lat = np.random.uniform(-85.051,85.051) # Generates random lattitude in degrees limits set by webmercator
-        lon = np.random.uniform(-180.0,180.0) #Generates random longitude in degrees
+        if self.m_use_static_init:
+            # Arbitrary    
+            lat = 47.7136
+            lon = 8.6582
+            logger.debug("Latitude and longitude used respectively <%f> <%f>",lat,lon)
+        else:
+            lat = np.random.uniform(-85.051,85.051) # Generates random lattitude in degrees limits set by webmercator
+            lon = np.random.uniform(-180.0,180.0) #Generates random longitude in degrees
+        
         self.m_initial_position_latlon = geo.ellipsoidalVincenty.LatLon(lat,lon)
         
     ## Generate data in cartesian plane

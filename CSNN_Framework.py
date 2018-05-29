@@ -51,19 +51,19 @@ except :
      
 # create logger with 'spam_application'
 logger = logging.getLogger('BckTrk')
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 # create file handler which logs even debug messages
 now = datetime.datetime.now()
 fh = logging.FileHandler(workingDir + '\\Logs\\' + 'BckTrk_Log_' + now.strftime("%Y-%m-%d")+'.log')
-fh.setLevel(logging.DEBUG)
+fh.setLevel(logging.INFO)
 
 local_struct['currentTime']=now
 local_struct['workingDir'] = workingDir
 
 # create console handler with same log level
 ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
+ch.setLevel(logging.INFO)
 
 # create formatter and add it to the handlers
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -109,21 +109,26 @@ def main() :
     use_random_seed = local_struct['use_random_seed']
     random_seed = local_struct['random_seed']
     numberOfRealizations = local_struct['realization']
+    noise_level = local_struct['noise_level']
+    noise_level_len = len(noise_level)
+    
     acquisition_length = local_struct['gps_freq_Hz']*local_struct['acquisition_time_sec']
     local_struct['acquisition_length']= acquisition_length
     paths_wm_org = np.zeros((2,acquisition_length,numberOfRealizations))
     paths_latlon_org = np.zeros((2,acquisition_length,numberOfRealizations))
-    paths_wm_noisy = np.zeros((2,acquisition_length,numberOfRealizations))
-    paths_latlon_noisy = np.zeros((2,acquisition_length,numberOfRealizations))
+    paths_wm_noisy = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
+    paths_latlon_noisy = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
     ##Set seed
     if use_random_seed :
         np.random.seed(random_seed)
-            
+        
+    ##Iterate over the total number of realizations        
     for realization in range(numberOfRealizations):
         ##Generate random data
-        logger.info ('Generating random data for realization %d',realization)
+        logger.info ('Generating random data for realization <%d>',realization)
         (paths_wm_org[:,:,realization],paths_latlon_org[:,:,realization]) = random_2d_path_generator(local_struct)
-        (paths_wm_noisy[:,:,realization],paths_latlon_noisy[:,:,realization]) = noise_generator(local_struct,paths_wm_org[:,:,realization])
+        for lvl in range(noise_level_len):
+            (paths_wm_noisy[:,:,realization,lvl],paths_latlon_noisy[:,:,realization,lvl]) = noise_generator(local_struct,paths_wm_org[:,:,realization],noise_level[lvl])
     
     #Store data in local struct
     local_struct['RESULTS']['paths_wm_org'] = paths_wm_org
