@@ -58,8 +58,10 @@ class cRandomPath:
         logger.debug("Generating initial position in LatLon")
         if self.m_use_static_init:
             # Arbitrary    
-            lat = 47.7136
-            lon = 8.6582
+            #lat = 47.7136
+            #lon = 8.6582
+            lat = 85
+            lon = 179
             logger.debug("Latitude and longitude used respectively <%f> <%f>",lat,lon)
         else:
             lat = np.random.uniform(-85.051,85.051) # Generates random lattitude in degrees limits set by webmercator
@@ -79,7 +81,4 @@ class cRandomPath:
         
         self.m_positions_latlon = cord.generate_latlon_array(self.m_positions_wm)
 
-    
-    
-    
         

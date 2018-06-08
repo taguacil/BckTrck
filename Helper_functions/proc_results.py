@@ -173,7 +173,7 @@ class cProcessFile:
                     y = paths_wm_noisy[1,:,0]-paths_wm_org[1,:,0]
                     h = plt.hist2d(x,y,100,norm=LogNorm())
                    
-                buf = "Cartesian noise distribution for noise level %d (meters)" % (noise_level)    
+                buf = "Cartesian noise distribution for noise level %d (meters)" % (noise_level[noise])    
                 plt.colorbar(h[3])    
                 plt.grid()
                 plt.title(buf)
@@ -194,7 +194,7 @@ class cProcessFile:
                     y = paths_latlon_noisy[1,:,0]-paths_latlon_org[1,:,0]
                     h = plt.hist2d(x,y,100,norm=LogNorm())
                 
-                buf = "LatLon noise distribution for noise level %d (meters)" % (noise_level)
+                buf = "LatLon noise distribution for noise level %d (meters)" % (noise_level[noise])
                 plt.colorbar(h[3])    
                 plt.grid()
                 plt.title(buf)
@@ -213,7 +213,7 @@ class cProcessFile:
                     plt.plot(x_axis,paths_wm_noisy[0,:,0],'b-*')
                     
                 #Plotting x coordinates noisy
-                buf = "Noisy webmercator Path -X for noise level %d (meters)" % (noise_level)
+                buf = "Noisy webmercator Path -X for noise level %d (meters)" % (noise_level[noise])
                 plt.grid()
                 plt.title(buf)
                 plt.xlabel('Number of steps')
@@ -227,7 +227,7 @@ class cProcessFile:
                      plt.plot(x_axis, paths_wm_noisy[1,:,0],'r-*')
             
                 #Plotting y coordinates
-                buf = "Noisy webmercator Path -Y for noise level %d (meters)" % (noise_level)
+                buf = "Noisy webmercator Path -Y for noise level %d (meters)" % (noise_level[noise])
                 plt.grid()
                 plt.title(buf)
                 plt.xlabel('Number of steps')
@@ -245,7 +245,7 @@ class cProcessFile:
                     plt.plot(x_axis, paths_latlon_noisy[0,:,0],'r-*')
                     
                 #Plotting Latitude
-                buf = "Noisy latitude for noise level %d (meters)" % (noise_level)
+                buf = "Noisy latitude for noise level %d (meters)" % (noise_level[noise])
                 plt.grid()
                 plt.title(buf)
                 plt.xlabel('Number of steps')
@@ -259,14 +259,14 @@ class cProcessFile:
                     plt.plot(x_axis,paths_latlon_noisy[1,:,0],'b-*')
             
                 #Plotting Longitude
-                buf = "Noisy longitude for noise level %d (meters)" % (noise_level)
+                buf = "Noisy longitude for noise level %d (meters)" % (noise_level[noise])
                 plt.grid()
                 plt.title(buf)
                 plt.xlabel('Number of steps')
                 plt.ylabel('Longitude')
                 plt.show()
             
-    ## Plot MSE - distance error rate
+    ## Plot MSE - mean error rate
     def plot_MSE(self) : 
         if self.m_localStruct['bPlotDER']: 
             #Set of params
@@ -286,7 +286,7 @@ class cProcessFile:
             ax = plt.gca()
             ax.invert_xaxis()
             plt.yscale('log')
-            plt.xscale('log')
+            #plt.xscale('log')
             plt.grid()
             plt.title('Mean square error')
             plt.xlabel('Noise level (meters)')

@@ -3,7 +3,7 @@
  =============================================================================
  Title       : Compressive sensing framework
  Project     : Simulation environment for BckTrk app
- File        : CSNN_sim.py
+ File        : CSNN_Framework.py
  -----------------------------------------------------------------------------
 
    Description :
