@@ -1,17 +1,30 @@
 {
     "gps_freq_Hz"               : 1,
-    "realization"               : 1,
-    "acquisition_time_sec"      : 1000,
+    "realization"               : 1000,
+    "acquisition_time_sec"      : 2000,
     "random_seed"               : 123,
     "use_random_seed"           : true,
     "stepsize"                  : 1,
-    "noise_level"               : 5,
+    "noise_level"               : [1000,800,500,200,100,50,40,30,20,10,5,1,0.5,0.0005],
+    "use_random_noise"          : true,
+    "use_static_init"           : true,
     "xlimits"                   : [-25,25],
     "ylimits"                   : [-25,25],
-    "bPlotRealPath"             : true,
+    "bPlotAllrealizations"      : true,
+    "bPlotPath_WM_org"          : false,
+    "bPlotPath_WM_noisy"        : false,
+    "bPlotPath_LonLat_noisy"    : false,
+    "bPlotWM_time_org"          : false,
+    "bPlotLonLat_time_org"      : false,
+    "bPlotWM_time_noisy"        : false,
+    "bPlotLonLat_time_noisy"    : false,
+    "bPlotDER"                  : true,
     "workingDir"                : "",
     "currentTime"               : 0,
     "RESULTS"                   : {
-        "data_2d" : [0,0]
+        "paths_wm_org"      : [0,0,0],
+        "paths_latlon_org"  : [0,0,0],
+        "paths_wm_noisy"    : [0,0,0,0],
+        "paths_latlon_noisy": [0,0,0,0]
     }
 }
