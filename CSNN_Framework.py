@@ -31,8 +31,10 @@ import logging
 
 ## User-defined library import
 from Helper_functions.proc_results import process_data 
+from Helper_functions.transforms import transforms 
 from Navigation.Random_walker import random_2d_path_generator
 from Navigation.AWGN import noise_generator
+
 
 ## Parameters / Config files handling
 workingDir = os.getcwd()
@@ -118,6 +120,9 @@ def main() :
     paths_latlon_org = np.zeros((2,acquisition_length,numberOfRealizations))
     paths_wm_noisy = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
     paths_latlon_noisy = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
+    noise_vals = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
+    transformed_paths = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
+    
     ##Set seed
     if use_random_seed :
         np.random.seed(random_seed)
@@ -128,13 +133,15 @@ def main() :
         logger.info ('Generating random data for realization <%d>',realization)
         (paths_wm_org[:,:,realization],paths_latlon_org[:,:,realization]) = random_2d_path_generator(local_struct)
         for lvl in range(noise_level_len):
-            (paths_wm_noisy[:,:,realization,lvl],paths_latlon_noisy[:,:,realization,lvl]) = noise_generator(local_struct,paths_wm_org[:,:,realization],noise_level[lvl])
+            (paths_wm_noisy[:,:,realization,lvl],paths_latlon_noisy[:,:,realization,lvl],noise_vals[:,:,realization,lvl]) = noise_generator(local_struct,paths_wm_org[:,:,realization],noise_level[lvl])
+            transformed_paths[:,:,realization,lvl]=transforms(local_struct,paths_latlon_noisy[:,:,realization,lvl])
     
     #Store data in local struct
     local_struct['RESULTS']['paths_wm_org'] = paths_wm_org
     local_struct['RESULTS']['paths_latlon_org'] = paths_latlon_org
     local_struct['RESULTS']['paths_wm_noisy'] = paths_wm_noisy
     local_struct['RESULTS']['paths_latlon_noisy'] = paths_latlon_noisy
+    local_struct['RESULTS']['transformed_paths'] = transformed_paths
     
     logger.info ('Generating results and plotting')
     process_data(local_struct)

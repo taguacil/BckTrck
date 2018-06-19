@@ -99,7 +99,8 @@ for i in range(500) :
     generated_path = path(np.array([0,0]),1,5000)
     transformed_x = ft.dct(generated_path[0])
     transformed_y = ft.dct(generated_path[1])
-    average_x[0] += np.sum(np.abs(transformed_x)/np.abs(transformed_x[0])<0.05)
+    value = np.abs(transformed_x)/np.abs(transformed_x[0])<0.05
+    average_x[0] += np.sum(value)
     average_x[1] += np.sum(np.abs(transformed_x)/np.abs(transformed_x[0])<0.01)
     average_x[2] += np.sum(np.abs(transformed_x)/np.abs(transformed_x[0])<0.005)
     average_y[0] += np.sum(np.abs(transformed_y)/np.abs(transformed_y[0])<0.05)

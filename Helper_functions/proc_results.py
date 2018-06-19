@@ -40,6 +40,7 @@ def process_data (params):
     data_obj.plot_path_org_2d()
     data_obj.plot_path_noisy_2d()
     data_obj.plot_MSE()
+    data_obj.analyze_DCT()
     
 class cProcessFile:
     ## Constructor
@@ -50,6 +51,7 @@ class cProcessFile:
         self.m_paths_latlon_org = self.m_localStruct['RESULTS']['paths_latlon_org']
         self.m_paths_wm_noisy = self.m_localStruct['RESULTS']['paths_wm_noisy']
         self.m_paths_latlon_noisy = self.m_localStruct['RESULTS']['paths_latlon_noisy']
+        self.transformed_paths = self.m_localStruct['RESULTS']['transformed_paths']
         self.m_acquisition_length = self.m_localStruct['gps_freq_Hz']*self.m_localStruct['acquisition_time_sec']
         self.m_number_realization = self.m_localStruct ['realization']
         
@@ -269,6 +271,7 @@ class cProcessFile:
     ## Plot MSE - mean error rate
     def plot_MSE(self) : 
         if self.m_localStruct['bPlotDER']: 
+            logger.info ('Plotting MSE of WM and latlon values')
             #Set of params
             x_axis = self.m_localStruct['noise_level']
             paths_wm_org_ext=np.transpose(np.array([self.m_paths_wm_org,]*len(x_axis)),(1,2,3,0))
@@ -282,7 +285,7 @@ class cProcessFile:
             
             plt.plot(x_axis,MSE_WM,'b-*',x_axis,MSE_latlon,'r-*')
             
-            # Plotting Longitude
+            # Plotting MSE
             ax = plt.gca()
             ax.invert_xaxis()
             plt.yscale('log')
@@ -292,4 +295,33 @@ class cProcessFile:
             plt.xlabel('Noise level (meters)')
             plt.ylabel('MSE')
             plt.show()
-      
+     
+    ## DCT analysis
+    def analyze_DCT(self) : 
+        if self.m_localStruct['bDCTAnalysis']:
+            logger.info ('Triggering DCT analysis for latlon coordinates')
+            x_axis = self.m_localStruct['noise_level']
+            transformed_paths=self.transformed_paths
+            percentiles = [0.05,0.01,0.005]
+            
+            percent_len=len(percentiles)
+            noise_level_len=len(x_axis)
+            
+            average_lat = np.zeros((percent_len,noise_level_len))
+            average_lon = np.zeros((percent_len,noise_level_len))
+            
+            for per in range(percent_len):
+                value = (np.abs(transformed_paths[0,:,:,:])/np.abs(transformed_paths[0,0,:,:])<percentiles[per])
+                average_lat[per,:] = np.mean(value, axis=(0,1))
+                average_lon[per,:] = np.mean((np.abs(self.transformed_paths[1,:,:,:])/np.abs(self.transformed_paths[1,0,:,:])<percentiles[per]), axis=(0,1))
+                
+            plt.plot(x_axis,average_lat[0,:],"b-*",x_axis,average_lat[1,:],"r-*",x_axis,average_lat[2,:],"g-*")
+            
+            # Plotting percentages wrt. noise levels for lattitude
+            ax = plt.gca()
+            ax.invert_xaxis()
+            plt.grid()
+            plt.title('DCT analysis')
+            plt.xlabel('Noise level (meters)')
+            plt.ylabel('Percentage')
+            plt.show()
