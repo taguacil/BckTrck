@@ -240,7 +240,7 @@ class cProcessFile:
             if self.m_localStruct['bPlotLonLat_time_noisy']:
                 logger.info ('Plotting noisy longitude and latitude')
                 if self.m_localStruct['bPlotAllrealizations']:
-                    for i in range (self.m_number_realization):
+                    for k in range (self.m_number_realization):
                         plt.plot(x_axis, paths_latlon_noisy[0,:,k],'r-*')
                 else:
                     logger.warning ('Plotting only first realization for visibility')
@@ -270,7 +270,7 @@ class cProcessFile:
             
     ## Plot MSE - mean error rate
     def plot_MSE(self) : 
-        if self.m_localStruct['bPlotDER']: 
+        if self.m_localStruct['bPlotMSE']: 
             logger.info ('Plotting MSE of WM and latlon values')
             #Set of params
             x_axis = self.m_localStruct['noise_level']
@@ -289,7 +289,7 @@ class cProcessFile:
             ax = plt.gca()
             ax.invert_xaxis()
             plt.yscale('log')
-            #plt.xscale('log')
+            plt.xscale('log')
             plt.grid()
             plt.title('Mean square error')
             plt.xlabel('Noise level (meters)')
@@ -314,14 +314,33 @@ class cProcessFile:
                 value = (np.abs(transformed_paths[0,:,:,:])/np.abs(transformed_paths[0,0,:,:])<percentiles[per])
                 average_lat[per,:] = np.mean(value, axis=(0,1))
                 average_lon[per,:] = np.mean((np.abs(self.transformed_paths[1,:,:,:])/np.abs(self.transformed_paths[1,0,:,:])<percentiles[per]), axis=(0,1))
-                
+            
+            average_lat=average_lat*100
+            average_lon=average_lon*100
+            
             plt.plot(x_axis,average_lat[0,:],"b-*",x_axis,average_lat[1,:],"r-*",x_axis,average_lat[2,:],"g-*")
             
             # Plotting percentages wrt. noise levels for lattitude
-            ax = plt.gca()
-            ax.invert_xaxis()
+            #ax = plt.gca()
+            #ax.invert_xaxis()
+            #plt.yscale('log')
+            plt.xscale('log')
             plt.grid()
-            plt.title('DCT analysis')
+            plt.title('DCT analysis for lattitude')
             plt.xlabel('Noise level (meters)')
             plt.ylabel('Percentage')
             plt.show()
+
+            plt.plot(x_axis,average_lon[0,:],"b-*",x_axis,average_lon[1,:],"r-*",x_axis,average_lon[2,:],"g-*")
+            
+            # Plotting percentages wrt. noise levels for lattitude
+            #ax = plt.gca()
+            #ax.invert_xaxis()
+            #plt.yscale('log')
+            plt.xscale('log')
+            plt.grid()
+            plt.title('DCT analysis for longitute')
+            plt.xlabel('Noise level (meters)')
+            plt.ylabel('Percentage')
+            plt.show()
+

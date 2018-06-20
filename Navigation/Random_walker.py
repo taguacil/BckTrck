@@ -51,17 +51,15 @@ class cRandomPath:
         self.m_positions_wm = np.zeros((2,self.m_acquisition_length))
         self.m_positions_latlon = np.zeros((2,self.m_acquisition_length))
         self.m_stepsize = struct['stepsize'] 
-            
+        self.m_static_lat = struct['staticLat']
+        self.m_static_lon = struct['staticLon']
         
     ## Set randomly initial position (longitute and lattitude)
     def initialize_position(self) :
         logger.debug("Generating initial position in LatLon")
         if self.m_use_static_init:
-            # Arbitrary    
-            #lat = 47.7136
-            #lon = 8.6582
-            lat = 85
-            lon = 179
+            lat = self.m_static_lat
+            lon = self.m_static_lon
             logger.debug("Latitude and longitude used respectively <%f> <%f>",lat,lon)
         else:
             lat = np.random.uniform(-85.051,85.051) # Generates random lattitude in degrees limits set by webmercator

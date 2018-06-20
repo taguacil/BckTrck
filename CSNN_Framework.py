@@ -38,8 +38,8 @@ from Navigation.AWGN import noise_generator
 
 ## Parameters / Config files handling
 workingDir = os.getcwd()
-paramPath = workingDir + '\\Parameter_files\\'
-local_struct = json.load(open(paramPath + 'default_config.json', 'r'))
+paramPath = workingDir + '\\'
+local_struct = json.load(open(paramPath + 'Parameter_files\\default_config.json', 'r'))
 
 try :
     os.stat (workingDir+'\\Logs\\')
@@ -135,7 +135,7 @@ def main() :
         for lvl in range(noise_level_len):
             (paths_wm_noisy[:,:,realization,lvl],paths_latlon_noisy[:,:,realization,lvl],noise_vals[:,:,realization,lvl]) = noise_generator(local_struct,paths_wm_org[:,:,realization],noise_level[lvl])
             transformed_paths[:,:,realization,lvl]=transforms(local_struct,paths_latlon_noisy[:,:,realization,lvl])
-    
+            
     #Store data in local struct
     local_struct['RESULTS']['paths_wm_org'] = paths_wm_org
     local_struct['RESULTS']['paths_latlon_org'] = paths_latlon_org

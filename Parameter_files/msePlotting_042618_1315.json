@@ -7,7 +7,6 @@
     "noise_level"               : [1000,800,500,200,100,50,40,30,20,10,5,1,0.5,0.0005],
     "use_random_noise"          : true,
     "use_static_init"           : false,
-    "bPlotAllrealizations"      : false,
     "bPlotPath_WM_org"          : false,
     "bPlotPath_WM_noisy"        : false,
     "bPlotPath_LonLat_noisy"    : false,
@@ -15,5 +14,5 @@
     "bPlotLonLat_time_org"      : false,
     "bPlotWM_time_noisy"        : false,
     "bPlotLonLat_time_noisy"    : false,
-    "bPlotDER"                  : true
+    "bPlotMSE"                  : true
 }
