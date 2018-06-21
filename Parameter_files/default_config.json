@@ -13,6 +13,11 @@
     "ylimits"                   : [-25,25],
     "staticLat"                 : 0,
     "staticLon"                 : 0,
+    "reconstruct"               : false,
+    "reconstruct_from_dct"           : false,
+    "reconstruct_lasso"         : false,
+    "lasso_learning_rate"       : 0.01,
+    "sampling_ratio"            : 0.25, 
     "bPlotAllrealizations"      : true,
     "bPlotPath_WM_org"          : false,
     "bPlotPath_WM_noisy"        : false,
@@ -30,6 +35,7 @@
         "paths_latlon_org"  : [0,0,0],
         "paths_wm_noisy"    : [0,0,0,0],
         "paths_latlon_noisy": [0,0,0,0],
-        "transformed_paths" : [0,0,0,0]
+        "transformed_paths" : [0,0,0,0],
+        "reconstructed_paths" : {}
     }
 }
