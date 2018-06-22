@@ -41,7 +41,11 @@ def reconstructor(params, path) :
     """returns dictionary of different path reconstructions using different algorithms"""
     logger.debug('Returns dictionary of different path reconstructions using different algorithms')
     reconstructed_paths = {}
+    mean =np.repeat(np.expand_dims(np.mean(path, axis=1),axis=1),params['acquisition_length'],axis=1)
+    var = np.repeat(np.expand_dims(np.var(path, axis=1),axis=1),params['acquisition_length'],axis=1)
+    normalized_path = (path-mean)/np.sqrt(var)
     if params["reconstruct_lasso"] :
-        temp = np.array([lasso_algo(params, path[0]),lasso_algo(params, path[1])])
-        reconstructed_paths["Lasso"] = temp
+        temp = np.array([lasso_algo(params, normalized_path[0]),lasso_algo(params, normalized_path[1])])
+        rescaled_temp = np.sqrt(var)*temp + mean
+        reconstructed_paths["Lasso"] = rescaled_temp
     return reconstructed_paths
