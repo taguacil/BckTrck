@@ -1,0 +1,20 @@
+{
+    "realization"               : 1,
+    "acquisition_time_sec"      : 1000,
+    "random_seed"               : 8941,
+    "use_random_seed"           : true,
+    "stepsize"                  : 1,
+    "noise_level"               : [0.0005],
+    "noise_std"                 : 20,
+    "use_random_noise"          : true,
+    "use_static_init"           : true,
+    "staticLat"                 : 0,
+    "staticLon"                 : 0,
+    "reconstruct"               : true,
+    "reconstruct_from_dct"      : true,
+    "reconstruct_lasso"         : true,
+    "lasso_learning_rate"       : 0.01,
+    "sampling_ratio"            : 0.5,
+    "bPlotAllrealizations"      : false,
+    "bPlotLonLat_time_reconst"  : true
+}

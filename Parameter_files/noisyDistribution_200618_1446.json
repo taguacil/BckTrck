@@ -1,0 +1,12 @@
+{
+    "realization"               : 1000,
+    "acquisition_time_sec"      : 1000,
+    "random_seed"               : 8941,
+    "use_random_seed"           : true,
+    "stepsize"                  : 1,
+    "noise_level"               : [10],
+    "use_random_noise"          : true,
+    "bPlotAllrealizations"      : true,
+    "bPlotPath_WM_noisy"        : true,
+    "bPlotPath_LonLat_noisy"    : true
+}

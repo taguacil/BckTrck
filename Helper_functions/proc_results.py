@@ -40,6 +40,7 @@ def process_data (params):
     data_obj.plot_path_org_2d()
     data_obj.plot_path_noisy_2d()
     data_obj.plot_MSE()
+    data_obj.analyze_DCT()
     
 class cProcessFile:
     ## Constructor
@@ -50,6 +51,8 @@ class cProcessFile:
         self.m_paths_latlon_org = self.m_localStruct['RESULTS']['paths_latlon_org']
         self.m_paths_wm_noisy = self.m_localStruct['RESULTS']['paths_wm_noisy']
         self.m_paths_latlon_noisy = self.m_localStruct['RESULTS']['paths_latlon_noisy']
+        self.transformed_paths = self.m_localStruct['RESULTS']['transformed_paths']
+        self.reconstructed_paths = self.m_localStruct['RESULTS']['reconstructed_paths']
         self.m_acquisition_length = self.m_localStruct['gps_freq_Hz']*self.m_localStruct['acquisition_time_sec']
         self.m_number_realization = self.m_localStruct ['realization']
         
@@ -238,7 +241,7 @@ class cProcessFile:
             if self.m_localStruct['bPlotLonLat_time_noisy']:
                 logger.info ('Plotting noisy longitude and latitude')
                 if self.m_localStruct['bPlotAllrealizations']:
-                    for i in range (self.m_number_realization):
+                    for k in range (self.m_number_realization):
                         plt.plot(x_axis, paths_latlon_noisy[0,:,k],'r-*')
                 else:
                     logger.warning ('Plotting only first realization for visibility')
@@ -265,31 +268,161 @@ class cProcessFile:
                 plt.xlabel('Number of steps')
                 plt.ylabel('Longitude')
                 plt.show()
+           
+             ####################
+            if self.m_localStruct['bPlotLonLat_time_reconst']:
+                logger.info ('Plotting reconstructed path in comparison to original')
+                if self.m_localStruct['bPlotAllrealizations']:
+                    for k in range (self.m_number_realization):
+                        plt.plot(x_axis, paths_latlon_org[0,:,k],'-*',label="Original latitude for realization %.1f"%(k))
+                        
+                    if self.m_localStruct['reconstruct'] :
+                        logger.info('Plotting MSE of reconstructed paths')
+                
+                        for key in self.reconstructed_paths.keys():
+                            r_path = self.reconstructed_paths[key]
+                            plt.plot(x_axis,r_path[0,:,k,noise],'-*',label="Latitude for %s with %.1f %% sampling ratio"%(key, self.m_localStruct['sampling_ratio']*100  ))
+                        
+                else:
+                    logger.warning ('Plotting only first realization for visibility')
+                    plt.plot(x_axis, paths_latlon_org[0,:,0],'-*',label="Original latitude")
+                    
+                    if self.m_localStruct['reconstruct'] :
+                        logger.info('Plotting MSE of reconstructed paths')
+                
+                        for key in self.reconstructed_paths.keys():
+                            r_path = self.reconstructed_paths[key]
+                            plt.plot(x_axis,r_path[0,:,0,noise],'-*',label="Latitude for %s with %.1f %% sampling ratio"%(key, self.m_localStruct['sampling_ratio']*100  ))
+                      
+                    
+                #Plotting Latitude
+                buf = "Noisy latitude for noise level %d (meters)" % (noise_level[noise])
+                plt.grid()
+                plt.title(buf)
+                plt.legend(loc="upper right")
+                plt.xlabel('Number of steps')
+                plt.ylabel('Latitude')
+                plt.show() 
+                
+                if self.m_localStruct['bPlotAllrealizations']:
+                    for k in range (self.m_number_realization):
+                        plt.plot(x_axis,paths_latlon_org[1,:,k],'-*',label="Original longitude for realization %.1f"%(k))
+                    if self.m_localStruct['reconstruct'] :
+                        logger.info('Plotting MSE of reconstructed paths')
+                
+                        for key in self.reconstructed_paths.keys():
+                            r_path = self.reconstructed_paths[key]
+                            plt.plot(x_axis,r_path[1,:,0,noise],'-*',label="Longitude for %s with %.1f %% sampling ratio"%(key, self.m_localStruct['sampling_ratio']*100  ))
+                          
+                else:
+                    plt.plot(x_axis,paths_latlon_org[1,:,0],'-*',label="Original longitude")
+                    if self.m_localStruct['reconstruct'] :
+                        logger.info('Plotting MSE of reconstructed paths')
+                
+                        for key in self.reconstructed_paths.keys():
+                            r_path = self.reconstructed_paths[key]
+                            plt.plot(x_axis,r_path[1,:,0,noise],'-*',label="Longitude for %s with %.1f %% sampling ratio"%(key, self.m_localStruct['sampling_ratio']*100  ))
+                      
+            
+                #Plotting Longitude
+                buf = "Noisy longitude for noise level %d (meters)" % (noise_level[noise])
+                plt.grid()
+                plt.title(buf)
+                plt.legend(loc="upper right")
+                plt.xlabel('Number of steps')
+                plt.ylabel('Longitude')
+                plt.show()
+                
             
     ## Plot MSE - mean error rate
     def plot_MSE(self) : 
-        if self.m_localStruct['bPlotDER']: 
+        if self.m_localStruct['bPlotMSE']: 
+            logger.info ('Plotting MSE of WM and latlon values')
             #Set of params
             x_axis = self.m_localStruct['noise_level']
-            paths_wm_org_ext=np.transpose(np.array([self.m_paths_wm_org,]*len(x_axis)),(1,2,3,0))
+#           paths_wm_org_ext=np.transpose(np.array([self.m_paths_wm_org,]*len(x_axis)),(1,2,3,0))
             paths_latlon_org_ext=np.transpose(np.array([self.m_paths_latlon_org,]*len(x_axis)),(1,2,3,0))
             
-            l2_wm=np.sqrt((paths_wm_org_ext[0,:,:,:]-self.m_paths_wm_noisy[0,:,:,:])**2+(paths_wm_org_ext[1,:,:,:]-self.m_paths_wm_noisy[1,:,:,:])**2)
-            l2_latlon=np.sqrt((paths_latlon_org_ext[0,:,:,:]-self.m_paths_latlon_noisy[0,:,:,:])**2+(paths_latlon_org_ext[1,:,:,:]-self.m_paths_latlon_noisy[1,:,:,:])**2)
+#            l2_noise_wm=np.sqrt(np.mean((paths_wm_org_ext[0,:,:,:]-self.m_paths_wm_noisy[0,:,:,:])**2+(paths_wm_org_ext[1,:,:,:]-self.m_paths_wm_noisy[1,:,:,:])**2,axis=0))
+            l2_noise_latlon=np.sqrt(np.mean((paths_latlon_org_ext[0,:,:,:]-self.m_paths_latlon_noisy[0,:,:,:])**2+(paths_latlon_org_ext[1,:,:,:]-self.m_paths_latlon_noisy[1,:,:,:])**2,axis=0))
             
-            MSE_WM = np.mean(l2_wm,axis=(0,1))
-            MSE_latlon = np.mean(l2_latlon,axis=(0,1))
+#            MSE_noise_WM = np.mean(l2_wm,axis=0)
+            MSE_noise_latlon = np.mean(l2_noise_latlon,axis=0)
             
-            plt.plot(x_axis,MSE_WM,'b-*',x_axis,MSE_latlon,'r-*')
             
-            # Plotting Longitude
+            if self.m_localStruct['reconstruct'] :
+                logger.info('Plotting MSE of reconstructed paths')
+                
+                for key in self.reconstructed_paths.keys():
+                    r_path = self.reconstructed_paths[key]
+                    
+                    l2_r_latlon=np.sqrt(np.mean((paths_latlon_org_ext[0,:,:,:]-r_path[0,:,:,:])**2+(paths_latlon_org_ext[1,:,:,:]-r_path[1,:,:,:])**2,axis=0))
+                    MSE_r_latlon = np.mean(l2_r_latlon,axis=0)
+                    plt.plot(x_axis,MSE_r_latlon,'-*',label="MSE_latlon for %s with %.1f %% sampling ratio"%(key, self.m_localStruct['sampling_ratio']*100  ))
+                    
+            
+            # Plotting MSE
+            plt.plot(x_axis,MSE_noise_latlon,'-*',label="MSE_latlon")
+#           plt.plot(x_axis,MSE_noise_WM,'-*',label="MSE_WM")
             ax = plt.gca()
             ax.invert_xaxis()
             plt.yscale('log')
-            #plt.xscale('log')
+            plt.xscale('log')
             plt.grid()
-            plt.title('Mean square error')
+            plt.legend(loc="upper right")
+            plt.title('Mean square error for %d samples and %d iteratirons'%(self.m_acquisition_length, self.m_localStruct['realization']))
             plt.xlabel('Noise level (meters)')
             plt.ylabel('MSE')
             plt.show()
-      
+            
+            
+    
+    ## DCT analysis
+    def analyze_DCT(self) : 
+        if self.m_localStruct['bDCTAnalysis']:
+            logger.info ('Triggering DCT analysis for latlon coordinates')
+            x_axis = self.m_localStruct['noise_level']
+            transformed_paths=self.transformed_paths
+            percentiles = [0.05,0.01,0.005]
+            
+            percent_len=len(percentiles)
+            noise_level_len=len(x_axis)
+            
+            average_lat = np.zeros((percent_len,noise_level_len))
+            average_lon = np.zeros((percent_len,noise_level_len))
+            
+            for per in range(percent_len):
+                value = (np.abs(transformed_paths[0,:,:,:])/np.abs(transformed_paths[0,0,:,:])<percentiles[per])
+                average_lat[per,:] = np.mean(value, axis=(0,1))
+                average_lon[per,:] = np.mean((np.abs(self.transformed_paths[1,:,:,:])/np.abs(self.transformed_paths[1,0,:,:])<percentiles[per]), axis=(0,1))
+            
+            for i in range(percent_len):
+                plt.plot(x_axis,average_lat[i,:]*100,"-*",label="%.2f %%"%(percentiles[i]*100))
+            
+            # Plotting percentages wrt. noise levels for lattitude
+            #ax = plt.gca()
+            #ax.invert_xaxis()
+            #plt.yscale('log')
+            plt.xscale('log')
+            plt.grid()
+            plt.legend(loc="upper right")
+            plt.title('DCT analysis for lattitude')
+            plt.xlabel('Noise level (meters)')
+            plt.ylabel('Percentage')
+            plt.show()
+
+            for i in range(percent_len) :
+                plt.plot(x_axis,average_lon[i,:]*100,"-*",label="%.2f %%"%(percentiles[i]*100))
+            
+            # Plotting percentages wrt. noise levels for lattitude
+            #ax = plt.gca()
+            #ax.invert_xaxis()
+            #plt.yscale('log')
+            plt.xscale('log')
+            plt.grid()
+            plt.legend(loc="upper right")
+            plt.title('DCT analysis for longitute')
+            plt.xlabel('Noise level (meters)')
+            plt.ylabel('Percentage')
+            plt.show()
+
