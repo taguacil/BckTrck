@@ -27,6 +27,7 @@ import sys
 import os
 import json
 import datetime
+import collections
 import logging
 
 ## User-defined library import
@@ -38,9 +39,9 @@ from Reconstruction_algorithms.Master_reconstruction import reconstructor, ident
 
 
 ## Parameters / Config files handling
-workingDir = os.getcwd()
-paramPath = workingDir + '\\'
-local_struct = json.load(open(paramPath + 'Parameter_files\\default_config.json', 'r'))
+workingDir      = os.getcwd()
+paramPath       = workingDir + '\\'
+local_struct    = json.load(open(paramPath + 'Parameter_files\\default_config.json', 'r'))
 
 try :
     os.stat (workingDir+'\\Logs\\')
@@ -61,8 +62,8 @@ now = datetime.datetime.now()
 fh = logging.FileHandler(workingDir + '\\Logs\\' + 'BckTrk_Log_' + now.strftime("%Y-%m-%d")+'.log')
 fh.setLevel(logging.INFO)
 
-local_struct['currentTime']=now
-local_struct['workingDir'] = workingDir
+local_struct['currentTime'] = now
+local_struct['workingDir']  = workingDir
 
 # create console handler with same log level
 ch = logging.StreamHandler()
@@ -91,6 +92,14 @@ def exit_framework():
     logger.removeHandler(ch)
     sys.exit(0)
 
+def update(dictionary, updateDict):
+    for k, v in updateDict.items():
+        if isinstance(v, collections.Mapping):
+            dictionary[k] = update(dictionary.get(k, {}), v)
+        else:
+            dictionary[k] = v
+    return dictionary
+
 ## Business logic for input arguments to main function 
 numberOfArgument =  len(sys.argv)  
 if numberOfArgument == 1 :
@@ -99,8 +108,7 @@ if numberOfArgument == 1 :
 elif numberOfArgument == 2 :
     parameters_filename = sys.argv[1] #first argument should be the parameters filename
     updated_config = json.load(open( paramPath + parameters_filename, 'r')) #JSON loads a dictionary written in a JSON file as a python dictionary
-    for key in updated_config :
-        local_struct[key] = updated_config[key]
+    local_struct = update (local_struct,updated_config)
 else :
     logger.error ('Invalid number of arguments %d' %numberOfArgument)
     exit_framework()
@@ -109,24 +117,25 @@ else :
 ## Main function definition 
 def main() :
     ##Variables initialization
-    use_random_seed = local_struct['use_random_seed']
-    random_seed = local_struct['random_seed']
-    numberOfRealizations = local_struct['realization']
-    noise_level = local_struct['noise_level']
-    noise_level_len = len(noise_level)
-    reconstruction_algorithms = identify_algorithms(local_struct)
+    use_random_seed                     = local_struct['bUse_random_seed']
+    random_seed                         = local_struct['random_seed']
+    numberOfRealizations                = local_struct['realization']
+    noise_level                         = local_struct['noise_level_meter']
+    noise_level_len                     = len(noise_level)
     
-    acquisition_length = local_struct['gps_freq_Hz']*local_struct['acquisition_time_sec']
-    local_struct['acquisition_length']= acquisition_length
-    paths_wm_org = np.zeros((2,acquisition_length,numberOfRealizations))
-    paths_latlon_org = np.zeros((2,acquisition_length,numberOfRealizations))
-    paths_wm_noisy = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
-    paths_latlon_noisy = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
-    noise_vals = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
-    transformed_paths = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
-    reconstructed_paths = {}
+    acquisition_length                  = local_struct['gps_freq_Hz']*local_struct['acquisition_time_sec']
+    local_struct['acquisition_length']  = acquisition_length
+    paths_wm_org                        = np.zeros((2,acquisition_length,numberOfRealizations))
+    paths_latlon_org                    = np.zeros((2,acquisition_length,numberOfRealizations))
+    paths_wm_noisy                      = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
+    paths_latlon_noisy                  = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
+    noise_vals                          = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
+    transformed_paths                   = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
+    reconstructed_paths                 = {}
+    
+    reconstruction_algorithms           = identify_algorithms(local_struct)
     for algorithm in reconstruction_algorithms:
-        reconstructed_paths[algorithm] = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
+        reconstructed_paths[algorithm]  = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
     
     ##Set seed
     if use_random_seed :
@@ -136,22 +145,23 @@ def main() :
     for realization in range(numberOfRealizations):
         ##Generate random data
         logger.info ('Generating random data for realization <%d>',realization)
+        
         (paths_wm_org[:,:,realization],paths_latlon_org[:,:,realization]) = random_2d_path_generator(local_struct)
         for lvl in range(noise_level_len):
             (paths_wm_noisy[:,:,realization,lvl],paths_latlon_noisy[:,:,realization,lvl],noise_vals[:,:,realization,lvl]) = noise_generator(local_struct,paths_wm_org[:,:,realization],noise_level[lvl])
             transformed_paths[:,:,realization,lvl]=transforms(local_struct,paths_latlon_noisy[:,:,realization,lvl])
-            if local_struct['reconstruct'] :
+            if local_struct['bReconstruct'] :
                 temp = reconstructor(local_struct, paths_latlon_noisy[:,:,realization,lvl])
                 for algorithm in reconstruction_algorithms :
                     reconstructed_paths[algorithm][:,:,realization,lvl] = temp[algorithm][:,:]
                     
     #Store data in local struct
-    local_struct['RESULTS']['paths_wm_org'] = paths_wm_org
-    local_struct['RESULTS']['paths_latlon_org'] = paths_latlon_org
-    local_struct['RESULTS']['paths_wm_noisy'] = paths_wm_noisy
-    local_struct['RESULTS']['paths_latlon_noisy'] = paths_latlon_noisy
-    local_struct['RESULTS']['transformed_paths'] = transformed_paths
-    local_struct['RESULTS']['reconstructed_paths'] = reconstructed_paths
+    local_struct['RESULTS']['paths_wm_org']             = paths_wm_org
+    local_struct['RESULTS']['paths_latlon_org']         = paths_latlon_org
+    local_struct['RESULTS']['paths_wm_noisy']           = paths_wm_noisy
+    local_struct['RESULTS']['paths_latlon_noisy']       = paths_latlon_noisy
+    local_struct['RESULTS']['transformed_paths']        = transformed_paths
+    local_struct['RESULTS']['reconstructed_paths']      = reconstructed_paths
     
     logger.info ('Generating results and plotting')
     process_data(local_struct)
