@@ -36,7 +36,7 @@ logger = logging.getLogger('BckTrk')
 ## the main processing function 
 def process_data (params):
     data_obj = cProcessFile (params)
-    data_obj.set_pickle_file()
+    data_obj.set_pickle_file(params)
     data_obj.plot_path_org_2d()
     data_obj.plot_path_noisy_2d()
     data_obj.plot_MSE()
@@ -45,21 +45,30 @@ def process_data (params):
 class cProcessFile:
     ## Constructor
     def __init__(self,struct):
-        self.m_localStruct = struct
-        self.m_filename =  struct['workingDir'] + '\\Results\\' + 'BckTrk_Res_' + struct['currentTime'].strftime("%Y-%m-%d")+'.txt'  
-        self.m_paths_wm_org = self.m_localStruct['RESULTS']['paths_wm_org']
-        self.m_paths_latlon_org = self.m_localStruct['RESULTS']['paths_latlon_org']
-        self.m_paths_wm_noisy = self.m_localStruct['RESULTS']['paths_wm_noisy']
-        self.m_paths_latlon_noisy = self.m_localStruct['RESULTS']['paths_latlon_noisy']
-        self.transformed_paths = self.m_localStruct['RESULTS']['transformed_paths']
-        self.reconstructed_paths = self.m_localStruct['RESULTS']['reconstructed_paths']
-        self.m_acquisition_length = self.m_localStruct['gps_freq_Hz']*self.m_localStruct['acquisition_time_sec']
-        self.m_number_realization = self.m_localStruct ['realization']
+        self.m_plotStruct           = struct['PLOT']
+    
+        self.m_filename             = struct['workingDir'] + '\\Results\\' + 'BckTrk_Res_' + struct['currentTime'].strftime("%Y-%m-%d")+'.txt' 
+        
+        self.m_acquisition_length   = struct['gps_freq_Hz']*struct['acquisition_time_sec']
+        self.m_number_realization   = struct ['realization']
+        
+        self.m_noise_level_meter    = struct['noise_level_meter']
+        
+        self.m_bReconstruct         = struct['bReconstruct']
+        self.m_lasso_sampling_ratio = struct['RCT_ALG_LASSO']['sampling_ratio']
+    
+        self.m_paths_wm_org         = struct['RESULTS']['paths_wm_org']
+        self.m_paths_latlon_org     = struct['RESULTS']['paths_latlon_org']
+        self.m_paths_wm_noisy       = struct['RESULTS']['paths_wm_noisy']
+        self.m_paths_latlon_noisy   = struct['RESULTS']['paths_latlon_noisy']
+        self.transformed_paths      = struct['RESULTS']['transformed_paths']
+        self.reconstructed_paths    = struct['RESULTS']['reconstructed_paths']
+        
         
     ## Write dictionary into pickle format to txt file    
-    def set_pickle_file(self) :
+    def set_pickle_file(self,struct) :
         with open (self.m_filename, 'wb') as txt_file:
-            pickle.dump(self.m_localStruct, txt_file)
+            pickle.dump(struct, txt_file)
             
     ## Read from txt file pickle format into dictionary        
     def get_pickle_file(self):
@@ -72,9 +81,9 @@ class cProcessFile:
         x_axis = range(0, self.m_acquisition_length)
 
         ####################
-        if self.m_localStruct['bPlotPath_WM_org']:
+        if self.m_plotStruct['bPlotPath_WM_org']:
             logger.info ('Plotting original path in webmercator coordinates')
-            if self.m_localStruct['bPlotAllrealizations']:
+            if self.m_plotStruct['bPlotAllrealizations']:
                 for k in range (self.m_number_realization):
                     plt.plot(self.m_paths_wm_org[0,:,k],self.m_paths_wm_org[1,:,k],'b-*')
             else:
@@ -88,9 +97,9 @@ class cProcessFile:
             plt.show() 
         
         ####################
-        if self.m_localStruct['bPlotWM_time_org']:
+        if self.m_plotStruct['bPlotWM_time_org']:
             logger.info ('Plotting original path in webmercator coordinates')
-            if self.m_localStruct['bPlotAllrealizations']:
+            if self.m_plotStruct['bPlotAllrealizations']:
                 for k in range (self.m_number_realization):
                     plt.plot(x_axis,self.m_paths_wm_org[0,:,k],'b-*')
                      
@@ -106,7 +115,7 @@ class cProcessFile:
             plt.show()  
         
             #Plotting y coordinates
-            if self.m_localStruct['bPlotAllrealizations']:
+            if self.m_plotStruct['bPlotAllrealizations']:
                 for k in range (self.m_number_realization):
                     plt.plot(x_axis,self.m_paths_wm_org[1,:,k],'r-*')
                      
@@ -120,9 +129,9 @@ class cProcessFile:
             plt.show() 
         
         ####################
-        if self.m_localStruct['bPlotLonLat_time_org']:
+        if self.m_plotStruct['bPlotLonLat_time_org']:
             logger.info ('Plotting original longitude and latitude')
-            if self.m_localStruct['bPlotAllrealizations']:
+            if self.m_plotStruct['bPlotAllrealizations']:
                 for k in range (self.m_number_realization):
                     plt.plot(x_axis,self.m_paths_latlon_org[0,:,k],'r-*')
                      
@@ -138,7 +147,7 @@ class cProcessFile:
             plt.show() 
             
             #Plotting Longitude
-            if self.m_localStruct['bPlotAllrealizations']:
+            if self.m_plotStruct['bPlotAllrealizations']:
                 for k in range (self.m_number_realization):
                     plt.plot(x_axis,self.m_paths_latlon_org[1,:,k],'b-*')
                      
@@ -156,7 +165,7 @@ class cProcessFile:
     def plot_path_noisy_2d(self) : 
         #Set of params
         x_axis = range(0, self.m_acquisition_length)
-        noise_level = self.m_localStruct['noise_level']
+        noise_level = self.m_noise_level_meter
         
         for noise in range(len(noise_level)):
             paths_wm_noisy      = self.m_paths_wm_noisy[:,:,:,noise]
@@ -164,9 +173,9 @@ class cProcessFile:
             paths_latlon_noisy  = self.m_paths_latlon_noisy[:,:,:,noise]
             paths_latlon_org    = self.m_paths_latlon_org
             
-            if self.m_localStruct['bPlotPath_WM_noisy']:
+            if self.m_plotStruct['bPlotPath_WM_noisy']:
                 logger.info ('Plotting noisy path in webmercator coordinates')
-                if self.m_localStruct['bPlotAllrealizations']:
+                if self.m_plotStruct['bPlotAllrealizations']:
                    x = paths_wm_noisy[0,:,:]-paths_wm_org[0,:,:]
                    y = paths_wm_noisy[1,:,:]-paths_wm_org[1,:,:]
                    h = plt.hist2d(x.flatten(),y.flatten(),100,norm=LogNorm()) 
@@ -185,9 +194,9 @@ class cProcessFile:
                 plt.show() 
             
                     ####################
-            if self.m_localStruct['bPlotPath_LonLat_noisy']:
+            if self.m_plotStruct['bPlotPath_LonLat_noisy']:
                 logger.info ('Plotting noisy path in lonlat coordinates')
-                if self.m_localStruct['bPlotAllrealizations']:
+                if self.m_plotStruct['bPlotAllrealizations']:
                     x = paths_latlon_noisy[0,:,:]-paths_latlon_org[0,:,:]
                     y = paths_latlon_noisy[1,:,:]-paths_latlon_org[1,:,:]
                     h = plt.hist2d(x.flatten(),y.flatten(),100,norm=LogNorm()) 
@@ -206,9 +215,9 @@ class cProcessFile:
                 plt.show() 
                 
             ####################
-            if self.m_localStruct['bPlotWM_time_noisy']:
+            if self.m_plotStruct['bPlotWM_time_noisy']:
                 logger.info ('Plotting noisy path in webmercator coordinates')
-                if self.m_localStruct['bPlotAllrealizations']:
+                if self.m_plotStruct['bPlotAllrealizations']:
                     for k in range (self.m_number_realization):
                         plt.plot(x_axis,paths_wm_noisy[0,:,k],'b-*')
                 else:
@@ -223,7 +232,7 @@ class cProcessFile:
                 plt.ylabel('x-coordinates')
                 plt.show()  
             
-                if self.m_localStruct['bPlotAllrealizations']:
+                if self.m_plotStruct['bPlotAllrealizations']:
                     for k in range (self.m_number_realization):
                         plt.plot(x_axis, paths_wm_noisy[1,:,k],'r-*')
                 else:
@@ -238,9 +247,9 @@ class cProcessFile:
                 plt.show() 
             
             ####################
-            if self.m_localStruct['bPlotLonLat_time_noisy']:
+            if self.m_plotStruct['bPlotLonLat_time_noisy']:
                 logger.info ('Plotting noisy longitude and latitude')
-                if self.m_localStruct['bPlotAllrealizations']:
+                if self.m_plotStruct['bPlotAllrealizations']:
                     for k in range (self.m_number_realization):
                         plt.plot(x_axis, paths_latlon_noisy[0,:,k],'r-*')
                 else:
@@ -255,7 +264,7 @@ class cProcessFile:
                 plt.ylabel('Latitude')
                 plt.show() 
                 
-                if self.m_localStruct['bPlotAllrealizations']:
+                if self.m_plotStruct['bPlotAllrealizations']:
                     for k in range (self.m_number_realization):
                         plt.plot(x_axis,paths_latlon_noisy[1,:,k],'b-*')
                 else:
@@ -270,29 +279,29 @@ class cProcessFile:
                 plt.show()
            
              ####################
-            if self.m_localStruct['bPlotLonLat_time_reconst']:
+            if self.m_plotStruct['bPlotLonLat_time_reconst']:
                 logger.info ('Plotting reconstructed path in comparison to original')
-                if self.m_localStruct['bPlotAllrealizations']:
+                if self.m_plotStruct['bPlotAllrealizations']:
                     for k in range (self.m_number_realization):
                         plt.plot(x_axis, paths_latlon_org[0,:,k],'-*',label="Original latitude for realization %.1f"%(k))
                         
-                    if self.m_localStruct['reconstruct'] :
+                    if self.m_bReconstruct:
                         logger.info('Plotting MSE of reconstructed paths')
                 
                         for key in self.reconstructed_paths.keys():
                             r_path = self.reconstructed_paths[key]
-                            plt.plot(x_axis,r_path[0,:,k,noise],'-*',label="Latitude for %s with %.1f %% sampling ratio"%(key, self.m_localStruct['sampling_ratio']*100  ))
+                            plt.plot(x_axis,r_path[0,:,k,noise],'-*',label="Latitude for %s with %.1f %% sampling ratio"%(key, self.m_lasso_sampling_ratio*100  ))
                         
                 else:
                     logger.warning ('Plotting only first realization for visibility')
                     plt.plot(x_axis, paths_latlon_org[0,:,0],'-*',label="Original latitude")
                     
-                    if self.m_localStruct['reconstruct'] :
+                    if self.m_bReconstruct:
                         logger.info('Plotting MSE of reconstructed paths')
                 
                         for key in self.reconstructed_paths.keys():
                             r_path = self.reconstructed_paths[key]
-                            plt.plot(x_axis,r_path[0,:,0,noise],'-*',label="Latitude for %s with %.1f %% sampling ratio"%(key, self.m_localStruct['sampling_ratio']*100  ))
+                            plt.plot(x_axis,r_path[0,:,0,noise],'-*',label="Latitude for %s with %.1f %% sampling ratio"%(key, self.m_lasso_sampling_ratio*100  ))
                       
                     
                 #Plotting Latitude
@@ -304,24 +313,24 @@ class cProcessFile:
                 plt.ylabel('Latitude')
                 plt.show() 
                 
-                if self.m_localStruct['bPlotAllrealizations']:
+                if self.m_plotStruct['bPlotAllrealizations']:
                     for k in range (self.m_number_realization):
                         plt.plot(x_axis,paths_latlon_org[1,:,k],'-*',label="Original longitude for realization %.1f"%(k))
-                    if self.m_localStruct['reconstruct'] :
+                    if self.m_bReconstruct:
                         logger.info('Plotting MSE of reconstructed paths')
                 
                         for key in self.reconstructed_paths.keys():
                             r_path = self.reconstructed_paths[key]
-                            plt.plot(x_axis,r_path[1,:,0,noise],'-*',label="Longitude for %s with %.1f %% sampling ratio"%(key, self.m_localStruct['sampling_ratio']*100  ))
+                            plt.plot(x_axis,r_path[1,:,0,noise],'-*',label="Longitude for %s with %.1f %% sampling ratio"%(key, self.m_lasso_sampling_ratio*100  ))
                           
                 else:
                     plt.plot(x_axis,paths_latlon_org[1,:,0],'-*',label="Original longitude")
-                    if self.m_localStruct['reconstruct'] :
+                    if self.m_bReconstruct:
                         logger.info('Plotting MSE of reconstructed paths')
                 
                         for key in self.reconstructed_paths.keys():
                             r_path = self.reconstructed_paths[key]
-                            plt.plot(x_axis,r_path[1,:,0,noise],'-*',label="Longitude for %s with %.1f %% sampling ratio"%(key, self.m_localStruct['sampling_ratio']*100  ))
+                            plt.plot(x_axis,r_path[1,:,0,noise],'-*',label="Longitude for %s with %.1f %% sampling ratio"%(key, self.m_lasso_sampling_ratio*100  ))
                       
             
                 #Plotting Longitude
@@ -336,10 +345,10 @@ class cProcessFile:
             
     ## Plot MSE - mean error rate
     def plot_MSE(self) : 
-        if self.m_localStruct['bPlotMSE']: 
+        if self.m_plotStruct['bPlotMSE']: 
             logger.info ('Plotting MSE of WM and latlon values')
             #Set of params
-            x_axis = self.m_localStruct['noise_level']
+            x_axis = self.m_noise_level_meter
 #           paths_wm_org_ext=np.transpose(np.array([self.m_paths_wm_org,]*len(x_axis)),(1,2,3,0))
             paths_latlon_org_ext=np.transpose(np.array([self.m_paths_latlon_org,]*len(x_axis)),(1,2,3,0))
             
@@ -350,7 +359,7 @@ class cProcessFile:
             MSE_noise_latlon = np.mean(l2_noise_latlon,axis=0)
             
             
-            if self.m_localStruct['reconstruct'] :
+            if self.m_bReconstruct:
                 logger.info('Plotting MSE of reconstructed paths')
                 
                 for key in self.reconstructed_paths.keys():
@@ -358,7 +367,7 @@ class cProcessFile:
                     
                     l2_r_latlon=np.sqrt(np.mean((paths_latlon_org_ext[0,:,:,:]-r_path[0,:,:,:])**2+(paths_latlon_org_ext[1,:,:,:]-r_path[1,:,:,:])**2,axis=0))
                     MSE_r_latlon = np.mean(l2_r_latlon,axis=0)
-                    plt.plot(x_axis,MSE_r_latlon,'-*',label="MSE_latlon for %s with %.1f %% sampling ratio"%(key, self.m_localStruct['sampling_ratio']*100  ))
+                    plt.plot(x_axis,MSE_r_latlon,'-*',label="MSE_latlon for %s with %.1f %% sampling ratio"%(key, self.m_lasso_sampling_ratio*100  ))
                     
             
             # Plotting MSE
@@ -370,7 +379,7 @@ class cProcessFile:
             plt.xscale('log')
             plt.grid()
             plt.legend(loc="upper right")
-            plt.title('Mean square error for %d samples and %d iteratirons'%(self.m_acquisition_length, self.m_localStruct['realization']))
+            plt.title('Mean square error for %d samples and %d iteratirons'%(self.m_acquisition_length, self.m_number_realization))
             plt.xlabel('Noise level (meters)')
             plt.ylabel('MSE')
             plt.show()
@@ -379,9 +388,9 @@ class cProcessFile:
     
     ## DCT analysis
     def analyze_DCT(self) : 
-        if self.m_localStruct['bDCTAnalysis']:
+        if self.m_plotStruct['bPlotDCTAnalysis']:
             logger.info ('Triggering DCT analysis for latlon coordinates')
-            x_axis = self.m_localStruct['noise_level']
+            x_axis = self.m_noise_level_meter
             transformed_paths=self.transformed_paths
             percentiles = [0.05,0.01,0.005]
             

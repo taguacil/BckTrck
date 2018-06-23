@@ -2,15 +2,22 @@
     "gps_freq_Hz"               : 1,
     "realization"               : 100,
     "acquisition_time_sec"      : 1000,
+    
     "random_seed"               : 55,
-    "use_random_seed"           : true,
-    "stepsize"                  : 1,
-    "noise_level"               : [1000,800,500,200,100,50,40,30,20,10,5,1],
-    "noise_std"                 : 20,
-    "use_random_noise"          : true,
-    "use_static_init"           : true,
-    "dctTransform"              : true,
+    "bUse_random_seed"          : true,
+    
+    "noise_level_meter"         : [1000,800,500,200,100,50,40,30,20,10,5,1],
+    "noise_std_meter"           : 20,
+    
+    "bUse_static_init"          : true,
     "staticLat"                 : 0,
     "staticLon"                 : 0,
-    "bDCTAnalysis"              : true
+    
+    "TRANSFORM"                 : {
+        "bDctTransform"             : true
+    },
+    
+    "PLOT"                      : {
+        "bPlotDCTAnalysis"              : true
+    }
 }

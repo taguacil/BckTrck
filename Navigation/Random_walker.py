@@ -46,13 +46,15 @@ class cRandomPath:
     def __init__(self,struct):
         logger.debug("Initializing cRandomPath")
         # Controls whether we want to use our random seed or let numpy initialize the randomstate "randomly"
-        self.m_acquisition_length = struct['acquisition_length']
-        self.m_use_static_init = struct['use_static_init']
-        self.m_positions_wm = np.zeros((2,self.m_acquisition_length))
-        self.m_positions_latlon = np.zeros((2,self.m_acquisition_length))
-        self.m_stepsize = struct['stepsize'] 
-        self.m_static_lat = struct['staticLat']
-        self.m_static_lon = struct['staticLon']
+        self.m_acquisition_length   = struct['acquisition_length']
+        self.m_stepsize             = struct['stepsize']
+        self.m_use_static_init      = struct['bUse_static_init']
+        self.m_static_lat           = struct['staticLat']
+        self.m_static_lon           = struct['staticLon']
+        
+        self.m_positions_wm         = np.zeros((2,self.m_acquisition_length))
+        self.m_positions_latlon     = np.zeros((2,self.m_acquisition_length))
+
         
     ## Set randomly initial position (longitute and lattitude)
     def initialize_position(self) :
@@ -71,7 +73,7 @@ class cRandomPath:
     def generate_wm_path(self) :
         logger.debug("Generating a path of WM coordinates")
         initial_position_wm = geo.toWm(self.m_initial_position_latlon)
-        bearing = np.random.uniform(0,2*np.pi,(self.m_acquisition_length))
+        bearing             = np.random.uniform(0,2*np.pi,(self.m_acquisition_length))
      
         self.m_positions_wm[:,0] = np.array([initial_position_wm.x,initial_position_wm.y])
         for i in range(self.m_acquisition_length-1):
