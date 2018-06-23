@@ -34,6 +34,7 @@ import logging
 from Helper_functions.proc_results import process_data 
 from Helper_functions.transforms import transforms 
 from Navigation.Random_walker import random_2d_path_generator
+import Navigation.Coordinates as cord
 from Navigation.AWGN import noise_generator
 from Reconstruction_algorithms.Master_reconstruction import reconstructor, identify_algorithms
 
@@ -131,11 +132,13 @@ def main() :
     paths_latlon_noisy                  = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
     noise_vals                          = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
     transformed_paths                   = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
-    reconstructed_paths                 = {}
+    reconstructed_latlon_paths          = {}
+    reconstructed_WM_paths              = {}
     
     reconstruction_algorithms           = identify_algorithms(local_struct)
     for algorithm in reconstruction_algorithms:
-        reconstructed_paths[algorithm]  = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
+        reconstructed_latlon_paths[algorithm]  = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
+        reconstructed_WM_paths[algorithm]      = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
     
     ##Set seed
     if use_random_seed :
@@ -153,15 +156,16 @@ def main() :
             if local_struct['bReconstruct'] :
                 temp = reconstructor(local_struct, paths_latlon_noisy[:,:,realization,lvl])
                 for algorithm in reconstruction_algorithms :
-                    reconstructed_paths[algorithm][:,:,realization,lvl] = temp[algorithm][:,:]
-                    
+                    reconstructed_latlon_paths[algorithm][:,:,realization,lvl] = temp[algorithm][:,:]
+                    reconstructed_WM_paths[algorithm][:,:,realization,lvl] = cord.generate_WM_array(temp[algorithm][:,:])
     #Store data in local struct
-    local_struct['RESULTS']['paths_wm_org']             = paths_wm_org
-    local_struct['RESULTS']['paths_latlon_org']         = paths_latlon_org
-    local_struct['RESULTS']['paths_wm_noisy']           = paths_wm_noisy
-    local_struct['RESULTS']['paths_latlon_noisy']       = paths_latlon_noisy
-    local_struct['RESULTS']['transformed_paths']        = transformed_paths
-    local_struct['RESULTS']['reconstructed_paths']      = reconstructed_paths
+    local_struct['RESULTS']['paths_wm_org']                     = paths_wm_org
+    local_struct['RESULTS']['paths_latlon_org']                 = paths_latlon_org
+    local_struct['RESULTS']['paths_wm_noisy']                   = paths_wm_noisy
+    local_struct['RESULTS']['paths_latlon_noisy']               = paths_latlon_noisy
+    local_struct['RESULTS']['transformed_paths']                = transformed_paths
+    local_struct['RESULTS']['reconstructed_latlon_paths']       = reconstructed_latlon_paths
+    local_struct['RESULTS']['reconstructed_WM_paths']           = reconstructed_WM_paths
     
     logger.info ('Generating results and plotting')
     process_data(local_struct)

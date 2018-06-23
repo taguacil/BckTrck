@@ -3,8 +3,8 @@
     "currentTime"               : 0,
     
     "gps_freq_Hz"               : 1,
-    "realization"               : 50,
-    "acquisition_time_sec"      : 100,
+    "realization"               : 10,
+    "acquisition_time_sec"      : 1000,
     "stepsize"                  : 1,
     
     "random_seed"               : 123,
@@ -41,17 +41,19 @@
         "bPlotLonLat_time_org"      : false,
         "bPlotWM_time_noisy"        : false,
         "bPlotLonLat_time_noisy"    : false,
+        "bPlotWM_time_reconst"      : false,
         "bPlotLonLat_time_reconst"  : false,
         "bPlotMSE"                  : false,
-        "bPlotDCTAnalysis"          : true
+        "bPlotDCTAnalysis"          : false
     }, 
     
     "RESULTS"                   : {
-        "paths_wm_org"              : [0,0,0],
-        "paths_latlon_org"          : [0,0,0],
-        "paths_wm_noisy"            : [0,0,0,0],
-        "paths_latlon_noisy"        : [0,0,0,0],
-        "transformed_paths"         : [0,0,0,0],
-        "reconstructed_paths"       : {}
+        "paths_wm_org"                       : [0,0,0],
+        "paths_latlon_org"                   : [0,0,0],
+        "paths_wm_noisy"                     : [0,0,0,0],
+        "paths_latlon_noisy"                 : [0,0,0,0],
+        "transformed_paths"                  : [0,0,0,0],
+        "reconstructed_latlon_paths"         : {},
+        "reconstructed_WM_paths"             : {}
     }
 }

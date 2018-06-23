@@ -57,12 +57,13 @@ class cProcessFile:
         self.m_bReconstruct         = struct['bReconstruct']
         self.m_lasso_sampling_ratio = struct['RCT_ALG_LASSO']['sampling_ratio']
     
-        self.m_paths_wm_org         = struct['RESULTS']['paths_wm_org']
-        self.m_paths_latlon_org     = struct['RESULTS']['paths_latlon_org']
-        self.m_paths_wm_noisy       = struct['RESULTS']['paths_wm_noisy']
-        self.m_paths_latlon_noisy   = struct['RESULTS']['paths_latlon_noisy']
-        self.transformed_paths      = struct['RESULTS']['transformed_paths']
-        self.reconstructed_paths    = struct['RESULTS']['reconstructed_paths']
+        self.m_paths_wm_org                 = struct['RESULTS']['paths_wm_org']
+        self.m_paths_latlon_org             = struct['RESULTS']['paths_latlon_org']
+        self.m_paths_wm_noisy               = struct['RESULTS']['paths_wm_noisy']
+        self.m_paths_latlon_noisy           = struct['RESULTS']['paths_latlon_noisy']
+        self.transformed_paths              = struct['RESULTS']['transformed_paths']
+        self.reconstructed_latlon_paths     = struct['RESULTS']['reconstructed_latlon_paths']
+        self.reconstructed_wm_paths         = struct['RESULTS']['reconstructed_WM_paths']
         
         
     ## Write dictionary into pickle format to txt file    
@@ -288,8 +289,8 @@ class cProcessFile:
                     if self.m_bReconstruct:
                         logger.info('Plotting MSE of reconstructed paths')
                 
-                        for key in self.reconstructed_paths.keys():
-                            r_path = self.reconstructed_paths[key]
+                        for key in self.reconstructed_latlon_paths.keys():
+                            r_path = self.reconstructed_latlon_paths[key]
                             plt.plot(x_axis,r_path[0,:,k,noise],'-*',label="Latitude for %s with %.1f %% sampling ratio"%(key, self.m_lasso_sampling_ratio*100  ))
                         
                 else:
@@ -299,8 +300,8 @@ class cProcessFile:
                     if self.m_bReconstruct:
                         logger.info('Plotting MSE of reconstructed paths')
                 
-                        for key in self.reconstructed_paths.keys():
-                            r_path = self.reconstructed_paths[key]
+                        for key in self.reconstructed_latlon_paths.keys():
+                            r_path = self.reconstructed_latlon_paths[key]
                             plt.plot(x_axis,r_path[0,:,0,noise],'-*',label="Latitude for %s with %.1f %% sampling ratio"%(key, self.m_lasso_sampling_ratio*100  ))
                       
                     
@@ -319,8 +320,8 @@ class cProcessFile:
                     if self.m_bReconstruct:
                         logger.info('Plotting MSE of reconstructed paths')
                 
-                        for key in self.reconstructed_paths.keys():
-                            r_path = self.reconstructed_paths[key]
+                        for key in self.reconstructed_latlon_paths.keys():
+                            r_path = self.reconstructed_latlon_paths[key]
                             plt.plot(x_axis,r_path[1,:,0,noise],'-*',label="Longitude for %s with %.1f %% sampling ratio"%(key, self.m_lasso_sampling_ratio*100  ))
                           
                 else:
@@ -328,8 +329,8 @@ class cProcessFile:
                     if self.m_bReconstruct:
                         logger.info('Plotting MSE of reconstructed paths')
                 
-                        for key in self.reconstructed_paths.keys():
-                            r_path = self.reconstructed_paths[key]
+                        for key in self.reconstructed_latlon_paths.keys():
+                            r_path = self.reconstructed_latlon_paths[key]
                             plt.plot(x_axis,r_path[1,:,0,noise],'-*',label="Longitude for %s with %.1f %% sampling ratio"%(key, self.m_lasso_sampling_ratio*100  ))
                       
             
@@ -342,28 +343,91 @@ class cProcessFile:
                 plt.ylabel('Longitude')
                 plt.show()
                 
+            ####################
+            if self.m_plotStruct['bPlotWM_time_reconst']:
+                logger.info ('Plotting reconstructed path in WM in comparison to original')
+                if self.m_plotStruct['bPlotAllrealizations']:
+                    for k in range (self.m_number_realization):
+                        plt.plot(x_axis, paths_wm_org[0,:,k],'-*',label="Original x for realization %.1f"%(k))
+                        
+                    if self.m_bReconstruct:
+                        logger.info('Plotting MSE of reconstructed paths')
+                
+                        for key in self.reconstructed_wm_paths.keys():
+                            r_path = self.reconstructed_wm_paths[key]
+                            plt.plot(x_axis,r_path[0,:,k,noise],'-*',label="x for %s with %.1f %% sampling ratio"%(key, self.m_lasso_sampling_ratio*100  ))
+                        
+                else:
+                    logger.warning ('Plotting only first realization for visibility')
+                    plt.plot(x_axis, paths_wm_org[0,:,0],'-*',label="Original x")
+                    
+                    if self.m_bReconstruct:
+                        logger.info('Plotting MSE of reconstructed paths')
+                
+                        for key in self.reconstructed_wm_paths.keys():
+                            r_path = self.reconstructed_wm_paths[key]
+                            plt.plot(x_axis,r_path[0,:,0,noise],'-*',label="x for %s with %.1f %% sampling ratio"%(key, self.m_lasso_sampling_ratio*100  ))
+                      
+                    
+                #Plotting Latitude
+                buf = "Noisy x for noise level %d (meters)" % (noise_level[noise])
+                plt.grid()
+                plt.title(buf)
+                plt.legend(loc="upper right")
+                plt.xlabel('Number of steps')
+                plt.ylabel('x')
+                plt.show() 
+                
+                if self.m_plotStruct['bPlotAllrealizations']:
+                    for k in range (self.m_number_realization):
+                        plt.plot(x_axis,paths_wm_org[1,:,k],'-*',label="Original y for realization %.1f"%(k))
+                    if self.m_bReconstruct:
+                        logger.info('Plotting MSE of reconstructed paths')
+                
+                        for key in self.reconstructed_wm_paths.keys():
+                            r_path = self.reconstructed_wm_paths[key]
+                            plt.plot(x_axis,r_path[1,:,0,noise],'-*',label="y for %s with %.1f %% sampling ratio"%(key, self.m_lasso_sampling_ratio*100  ))
+                          
+                else:
+                    plt.plot(x_axis,paths_wm_org[1,:,0],'-*',label="Original y")
+                    if self.m_bReconstruct:
+                        logger.info('Plotting MSE of reconstructed paths')
+                
+                        for key in self.reconstructed_wm_paths.keys():
+                            r_path = self.reconstructed_wm_paths[key]
+                            plt.plot(x_axis,r_path[1,:,0,noise],'-*',label="y for %s with %.1f %% sampling ratio"%(key, self.m_lasso_sampling_ratio*100  ))
+                      
             
+                #Plotting Longitude
+                buf = "Noisy y for noise level %d (meters)" % (noise_level[noise])
+                plt.grid()
+                plt.title(buf)
+                plt.legend(loc="upper right")
+                plt.xlabel('Number of steps')
+                plt.ylabel('y')
+                plt.show()
+                
     ## Plot MSE - mean error rate
     def plot_MSE(self) : 
         if self.m_plotStruct['bPlotMSE']: 
             logger.info ('Plotting MSE of WM and latlon values')
             #Set of params
             x_axis = self.m_noise_level_meter
-#           paths_wm_org_ext=np.transpose(np.array([self.m_paths_wm_org,]*len(x_axis)),(1,2,3,0))
+            paths_wm_org_ext=np.transpose(np.array([self.m_paths_wm_org,]*len(x_axis)),(1,2,3,0))
             paths_latlon_org_ext=np.transpose(np.array([self.m_paths_latlon_org,]*len(x_axis)),(1,2,3,0))
             
-#            l2_noise_wm=np.sqrt(np.mean((paths_wm_org_ext[0,:,:,:]-self.m_paths_wm_noisy[0,:,:,:])**2+(paths_wm_org_ext[1,:,:,:]-self.m_paths_wm_noisy[1,:,:,:])**2,axis=0))
+            l2_noise_wm=np.sqrt(np.mean((paths_wm_org_ext[0,:,:,:]-self.m_paths_wm_noisy[0,:,:,:])**2+(paths_wm_org_ext[1,:,:,:]-self.m_paths_wm_noisy[1,:,:,:])**2,axis=0))
             l2_noise_latlon=np.sqrt(np.mean((paths_latlon_org_ext[0,:,:,:]-self.m_paths_latlon_noisy[0,:,:,:])**2+(paths_latlon_org_ext[1,:,:,:]-self.m_paths_latlon_noisy[1,:,:,:])**2,axis=0))
             
-#            MSE_noise_WM = np.mean(l2_wm,axis=0)
+            MSE_noise_WM = np.mean(l2_noise_wm,axis=0)
             MSE_noise_latlon = np.mean(l2_noise_latlon,axis=0)
             
             
             if self.m_bReconstruct:
-                logger.info('Plotting MSE of reconstructed paths')
+                logger.info('Plotting MSE of reconstructed paths latlon')
                 
-                for key in self.reconstructed_paths.keys():
-                    r_path = self.reconstructed_paths[key]
+                for key in self.reconstructed_latlon_paths.keys():
+                    r_path = self.reconstructed_latlon_paths[key]
                     
                     l2_r_latlon=np.sqrt(np.mean((paths_latlon_org_ext[0,:,:,:]-r_path[0,:,:,:])**2+(paths_latlon_org_ext[1,:,:,:]-r_path[1,:,:,:])**2,axis=0))
                     MSE_r_latlon = np.mean(l2_r_latlon,axis=0)
@@ -372,7 +436,28 @@ class cProcessFile:
             
             # Plotting MSE
             plt.plot(x_axis,MSE_noise_latlon,'-*',label="MSE_latlon")
-#           plt.plot(x_axis,MSE_noise_WM,'-*',label="MSE_WM")
+            ax = plt.gca()
+            ax.invert_xaxis()
+            plt.yscale('log')
+            plt.xscale('log')
+            plt.grid()
+            plt.legend(loc="upper right")
+            plt.title('Mean square error for %d samples and %d iteratirons'%(self.m_acquisition_length, self.m_number_realization))
+            plt.xlabel('Noise level (meters)')
+            plt.ylabel('MSE')
+            plt.show()
+            
+            if self.m_bReconstruct:
+                logger.info('Plotting MSE of reconstructed paths WM')
+                
+                for key in self.reconstructed_wm_paths.keys():
+                    r2_path = self.reconstructed_wm_paths[key]
+                    
+                    l2_r_wm=np.sqrt(np.mean((paths_wm_org_ext[0,:,:,:]-r2_path[0,:,:,:])**2+(paths_wm_org_ext[1,:,:,:]-r2_path[1,:,:,:])**2,axis=0))
+                    MSE_r_wm = np.mean(l2_r_wm,axis=0)
+                    plt.plot(x_axis,MSE_r_wm,'-*',label="MSE_WM for %s with %.1f %% sampling ratio"%(key, self.m_lasso_sampling_ratio*100  ))
+       
+            plt.plot(x_axis,MSE_noise_WM,'-*',label="MSE_WM")
             ax = plt.gca()
             ax.invert_xaxis()
             plt.yscale('log')
