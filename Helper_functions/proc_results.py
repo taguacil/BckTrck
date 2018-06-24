@@ -431,7 +431,7 @@ class cProcessFile:
                     
                     l2_r_latlon=np.sqrt(np.mean((paths_latlon_org_ext[0,:,:,:]-r_path[0,:,:,:])**2+(paths_latlon_org_ext[1,:,:,:]-r_path[1,:,:,:])**2,axis=0))
                     MSE_r_latlon = np.mean(l2_r_latlon,axis=0)
-                    plt.plot(x_axis,MSE_r_latlon,'-*',label="MSE_latlon for %s with %.1f %% sampling ratio"%(key, self.m_lasso_sampling_ratio*100  ))
+                    plt.plot(x_axis,MSE_r_latlon,'-*',label="MSE_latlon for %s with %.1f %% SR"%(key, self.m_lasso_sampling_ratio*100  ))
                     
             
             # Plotting MSE
@@ -453,9 +453,11 @@ class cProcessFile:
                 for key in self.reconstructed_wm_paths.keys():
                     r2_path = self.reconstructed_wm_paths[key]
                     
-                    l2_r_wm=np.sqrt(np.mean((paths_wm_org_ext[0,:,:,:]-r2_path[0,:,:,:])**2+(paths_wm_org_ext[1,:,:,:]-r2_path[1,:,:,:])**2,axis=0))
-                    MSE_r_wm = np.mean(l2_r_wm,axis=0)
-                    plt.plot(x_axis,MSE_r_wm,'-*',label="MSE_WM for %s with %.1f %% sampling ratio"%(key, self.m_lasso_sampling_ratio*100  ))
+                    l2_r_wm   = np.sqrt(np.mean((paths_wm_org_ext[0,:,:,:]-r2_path[0,:,:,:])**2+(paths_wm_org_ext[1,:,:,:]-r2_path[1,:,:,:])**2,axis=0))
+                    MSE_r_wm  = np.mean(l2_r_wm,axis=0)
+                    max_error = np.mean(np.sqrt(np.max((paths_wm_org_ext[0,:,:,:]-r2_path[0,:,:,:])**2+(paths_wm_org_ext[1,:,:,:]-r2_path[1,:,:,:])**2,axis=0)),axis=0)
+                    plt.plot(x_axis,MSE_r_wm,'-*',label="MSE_WM for %s with %.1f %% SR"%(key, self.m_lasso_sampling_ratio*100))
+                    plt.plot(x_axis,max_error,'-x',label="Average Max Error for %s with %.1f %% SR"%(key, self.m_lasso_sampling_ratio*100))
        
             plt.plot(x_axis,MSE_noise_WM,'-*',label="MSE_WM")
             ax = plt.gca()
