@@ -5,7 +5,7 @@
     "use_random_seed"           : true,
     
     "noise_level_meter"         : [0.0005],
-    "noise_std_meter"           : 20,
+    "noise_std_meter"           : 0,
     
     "bUse_static_init"          : true,
     "staticLat"                 : 0,
@@ -22,7 +22,8 @@
     
     "PLOT"                      : {
         "bPlotAllrealizations"      : false,
-        "bPlotLonLat_time_reconst"  : true
+        "bPlotLonLat_time_reconst"  : true,
+        "bPlotWM_time_reconst"      : true
     }
     
 }
