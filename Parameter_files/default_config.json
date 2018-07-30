@@ -30,6 +30,16 @@
         "sampling_ratio"            : 0.25    
     },
     
+    "RCT_ALG_BFGS"             : {
+        "bReconstruct_from_dct"     : false,
+        "bReconstruct_bfgs"         : false,
+        "bUse_gaussian_matrix"      : false,
+        "lambda"                    : 0.01,
+        "u"                         : 10e-6,
+        "maxiter"                   : 500,
+        "sampling_ratio"            : 0.25    
+    },
+    
     "PLOT"                      : {
         "xlimits"                   : [-25,25],
         "ylimits"                   : [-25,25],

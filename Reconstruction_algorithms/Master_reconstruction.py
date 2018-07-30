@@ -28,12 +28,15 @@ logger = logging.getLogger('BckTrk')
 
 ## User-defined library import
 from .Lasso_reconstruction import lasso_algo
+from .BFGS_reconstruction import bfgs_algo
 
 ## Helper functions
 def identify_algorithms(params):
     temp = []
     if params['RCT_ALG_LASSO']["bReconstruct_lasso"] : 
         temp.append("Lasso")
+    if params['RCT_ALG_BFGS']["bReconstruct_bfgs"] :
+        temp.append("BFGS")
     return temp
 
 ## The main processing function
@@ -49,5 +52,10 @@ def reconstructor(params, path) :
         temp                         = np.array([lasso_algo(params, normalized_path[0]),lasso_algo(params, normalized_path[1])])
         rescaled_temp                = np.sqrt(var)*temp + mean
         reconstructed_paths["Lasso"] = rescaled_temp
+        
+    if params['RCT_ALG_BFGS']["bReconstruct_bfgs"] :
+        temp                         = np.array([bfgs_algo(params, normalized_path[0]),bfgs_algo(params, normalized_path[1])])
+        rescaled_temp                = np.sqrt(var)*temp + mean
+        reconstructed_paths["BFGS"]  = rescaled_temp
         
     return reconstructed_paths
