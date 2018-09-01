@@ -45,7 +45,7 @@ class cLasso:
         self.m_acquisition_length       = struct['acquisition_length']
         self.m_model                    = Lasso(alpha= struct['RCT_ALG_LASSO']['lasso_learning_rate'])
        
-        self.number_of_samples          = int(struct['RCT_ALG_LASSO']["sampling_ratio"]*struct["gps_freq_Hz"]*struct["acquisition_time_sec"])
+        self.number_of_samples          = int(struct['RCT_ALG_LASSO']["sampling_ratio"]*struct["acquisition_length"])
         self.reconstruct_from_dct       = struct['RCT_ALG_LASSO']['bReconstruct_from_dct']
         
     
