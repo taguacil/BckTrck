@@ -39,12 +39,27 @@ def process_data (params):
     if params["CSV_DATA"]["bUse_csv_data"] :
         data_obj.plot_real_path_recon()
     else :
-        _, _,_,_,_, reconstructed_db_latlon = data_obj.calculate_MSE()
+        _, _,_,_, MSE_r_latlon, reconstructed_db_latlon = data_obj.calculate_MSE()
         data_obj.plot_path_org_2d()
         data_obj.plot_path_noisy_2d()
         data_obj.plot_MSE()
         data_obj.analyze_DCT()
         params["RESULTS"]["reconstructed_db_latlon"] = reconstructed_db_latlon
+        params["RESULTS"]["MSE_latlon"] = MSE_r_latlon
+        if params["bSimplified_Results"] :
+            del params['RESULTS']['paths_wm_org']
+            del params['RESULTS']['paths_latlon_org']              
+            del params['RESULTS']['paths_wm_real']               
+            del params['RESULTS']['paths_latlon_real']           
+            del params['RESULTS']['paths_wm_noisy']                 
+            del params['RESULTS']['paths_latlon_noisy']             
+            del params['RESULTS']['transformed_paths']             
+            del params['RESULTS']['transformed_real_paths']          
+            del params['RESULTS']['reconstructed_latlon_paths']     
+            del params['RESULTS']['reconstructed_WM_paths']          
+            del params['RESULTS']['reconstructed_real_latlon_paths'] 
+            del params['RESULTS']['reconstructed_real_WM_paths']     
+            
     data_obj.set_pickle_file(params)
 
 class cProcessFile:
@@ -130,7 +145,7 @@ class cProcessFile:
         logger.info('Plotting real path and stitched reconstruction')
         latlon_real = self.m_paths_latlon_real.reshape((2, self.m_path_length*self.m_number_realization))
                 
-        plt.plot(latlon_real[0],latlon_real[1],'b-*')
+        plt.plot(latlon_real[1],latlon_real[0],'b-*')
         if self.m_bReconstruct:
                 logger.info('Plotting MSE of reconstructed paths latlon')
                 
@@ -139,7 +154,7 @@ class cProcessFile:
                     
                     l2_r_latlon=np.sqrt(np.mean((latlon_real[0]-r_path[0])**2+(latlon_real[1]-r_path[1])**2))
 
-                    plt.plot(r_path[0],r_path[1],'r-.')
+                    plt.plot(r_path[1],r_path[0],'r-.')
                     print('L2 for %s is %.6f'%(key, l2_r_latlon))
         
         plt.grid()

@@ -36,8 +36,9 @@ flag = 'PStest2'
 parameter_scan_files  = [file for file in result_files if flag in file]
 number_of_points      = len(parameter_scan_files)
 sampling_ratios       = np.zeros(number_of_points)
-path_lengths           = np.zeros(number_of_points)
+path_lengths          = np.zeros(number_of_points)
 SNR                   = np.zeros(number_of_points)
+MSE                   = np.zeros(number_of_points)
 
 for i in range(number_of_points) :
     file = parameter_scan_files[i]
@@ -45,9 +46,12 @@ for i in range(number_of_points) :
         temp               = pickle.load(txt_file_read)
         sampling_ratios[i] = temp['RCT_ALG_LASSO']['sampling_ratio']
         path_lengths[i]    = temp['acquisition_length']
-        SNR[i]             = np.mean(temp["RESULTS"]['reconstructed_db_latlon']['Lasso'])
-
+        SNR[i]             = np.mean(temp["RESULTS"]['reconstructed_db_latlon']['Lasso']) #mean can be dangerous if more than 1 noise level
+        MSE[i]             = np.mean(temp["RESULTS"]['MSE_latlon']['Lasso'])
 
 plt.scatter(sampling_ratios, path_lengths, c=SNR,cmap='rainbow_r')
+plt.colorbar()
+plt.show()        
+plt.scatter(sampling_ratios, path_lengths, c=MSE,cmap='rainbow_r')
 plt.colorbar()
 plt.show()        

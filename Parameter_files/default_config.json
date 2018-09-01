@@ -4,6 +4,7 @@
     
     "bUse_filename"             : false,
     "filename"                  : "blabla",
+    "bSimplified_Results"       : false,
     
     "gps_freq_Hz"               : 1,
     "realization"               : 10,
@@ -80,6 +81,7 @@
         "reconstructed_WM_paths"             : {},
         "reconstructed_real_latlon_paths"    : {},
         "reconstructed_real_WM_paths"        : {},
-        "reconstructed_db_latlon"            : {}  
+        "reconstructed_db_latlon"            : {},
+        "MSE_latlon"                         : {}
     }
 }

@@ -22,7 +22,6 @@
  
 """
 ## Import python libraries
-import numpy as np 
 import pandas as pd 
 import json
 import sys
@@ -33,8 +32,9 @@ logger = logging.getLogger('BckTrk')
 
 def munge_csv(path, path_length) :
     sheet = pd.read_csv(path)
-    sheet.Date = sheet.Date.astype('datetime64[ns]')
-    sheet['Sampling_interval_seconds'] = sheet.Date.map(pd.datetime.timestamp).diff()
+    #sheet.Date = sheet.Date.astype('datetime64[ns]')
+    #sheet['Sampling_interval_seconds'] = sheet.Date.map(pd.datetime.timestamp).diff()
+    sheet['Sampling_interval_seconds']=1
     latlon = sheet[['Latitude','Longitude']].values.T
     acc = sheet[' horizontal accuracy'].values
     interval = sheet['Sampling_interval_seconds'].values
