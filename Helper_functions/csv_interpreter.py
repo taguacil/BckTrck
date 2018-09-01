@@ -21,12 +21,17 @@
  =============================================================================
  
 """
+## Import python libraries
 import numpy as np 
 import pandas as pd 
 import json
 import sys
 
-def munge_csv(path) :
+## Logging
+import logging
+logger = logging.getLogger('BckTrk')
+
+def munge_csv(path, path_length) :
     sheet = pd.read_csv(path)
     sheet.Date = sheet.Date.astype('datetime64[ns]')
     sheet['Sampling_interval_seconds'] = sheet.Date.map(pd.datetime.timestamp).diff()
@@ -34,7 +39,16 @@ def munge_csv(path) :
     acc = sheet[' horizontal accuracy'].values
     interval = sheet['Sampling_interval_seconds'].values
     
-    return latlon, acc, interval 
+    number_of_realizations = int(acc.shape[0]/path_length)
+    
+    if number_of_realizations != 0 :
+        latlon = latlon[:,:(number_of_realizations*path_length)].reshape((2,path_length,number_of_realizations))
+        acc = acc[:(number_of_realizations*path_length)].reshape((path_length,number_of_realizations))
+        interval = interval[:(number_of_realizations*path_length)].reshape((path_length,number_of_realizations))
+        return latlon, acc, interval
+    else :
+        logger.error("Paths provided smaller than requested path length")
+        sys.exit("Paths provided smaller than requested path length")
 
 if __name__ == "__main__" :
     numberOfArgument =  len(sys.argv)  

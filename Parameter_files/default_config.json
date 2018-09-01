@@ -19,6 +19,13 @@
     
     "bReconstruct"              : false,
     
+    "CSV_DATA"                  : {
+        "bUse_csv_data"             : false,
+        "csv_path"                  : ".",
+        "path_length"               : 512
+    
+    },  
+    
     "TRANSFORM"                 : {
         "bDctTransform"             : false
     },
@@ -63,7 +70,12 @@
         "paths_wm_noisy"                     : [0,0,0,0],
         "paths_latlon_noisy"                 : [0,0,0,0],
         "transformed_paths"                  : [0,0,0,0],
+        "paths_latlon_real"                  : [0,0,0,0],
+        "paths_wm_real"                      : [0,0,0,0],
+        "transformed_real_paths"             : [0,0,0,0],
         "reconstructed_latlon_paths"         : {},
-        "reconstructed_WM_paths"             : {}
+        "reconstructed_WM_paths"             : {},
+        "reconstructed_real_latlon_paths"    : {},
+        "reconstructed_real_WM_paths"        : {}  
     }
 }

@@ -37,7 +37,7 @@ from Navigation.Random_walker import random_2d_path_generator
 import Navigation.Coordinates as cord
 from Navigation.AWGN import noise_generator
 from Reconstruction_algorithms.Master_reconstruction import reconstructor, identify_algorithms
-
+from Helper_functions.csv_interpreter import munge_csv
 
 ## Parameters / Config files handling
 workingDir      = os.getcwd()
@@ -124,48 +124,90 @@ def main() :
     noise_level                         = local_struct['noise_level_meter']
     noise_level_len                     = len(noise_level)
     
-    acquisition_length                  = local_struct['gps_freq_Hz']*local_struct['acquisition_time_sec']
-    local_struct['acquisition_length']  = acquisition_length
-    paths_wm_org                        = np.zeros((2,acquisition_length,numberOfRealizations))
-    paths_latlon_org                    = np.zeros((2,acquisition_length,numberOfRealizations))
-    paths_wm_noisy                      = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
-    paths_latlon_noisy                  = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
-    noise_vals                          = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
-    transformed_paths                   = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
-    reconstructed_latlon_paths          = {}
-    reconstructed_WM_paths              = {}
-    
-    reconstruction_algorithms           = identify_algorithms(local_struct)
-    for algorithm in reconstruction_algorithms:
-        reconstructed_latlon_paths[algorithm]  = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
-        reconstructed_WM_paths[algorithm]      = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
+    use_csv_data                        = local_struct['CSV_DATA']['bUse_csv_data']
+    csv_path                            = local_struct['CSV_DATA']['csv_path']
+    path_length                         = local_struct['CSV_DATA']['path_length']
     
     ##Set seed
     if use_random_seed :
         np.random.seed(random_seed)
+    
+    if use_csv_data :
         
-    ##Iterate over the total number of realizations        
-    for realization in range(numberOfRealizations):
-        ##Generate random data
-        logger.info ('Generating random data for realization <%d>',realization)
+        local_struct['acquisition_length'] = path_length
+        paths_latlon_real, latlon_accuracy, latlon_interval = munge_csv(csv_path, path_length)
+        local_struct['realization'] = latlon_accuracy.shape[-1]
+        numberOfRealizations = local_struct['realization']
         
-        (paths_wm_org[:,:,realization],paths_latlon_org[:,:,realization]) = random_2d_path_generator(local_struct)
-        for lvl in range(noise_level_len):
-            (paths_wm_noisy[:,:,realization,lvl],paths_latlon_noisy[:,:,realization,lvl],noise_vals[:,:,realization,lvl]) = noise_generator(local_struct,paths_wm_org[:,:,realization],noise_level[lvl])
-            transformed_paths[:,:,realization,lvl]=transforms(local_struct,paths_latlon_noisy[:,:,realization,lvl])
+        paths_wm_real = np.zeros((2,path_length,numberOfRealizations))
+        transformed_real_paths = np.zeros((2,path_length,numberOfRealizations))
+        
+        reconstructed_real_latlon_paths          = {}
+        reconstructed_real_WM_paths              = {}
+        
+        reconstruction_algorithms           = identify_algorithms(local_struct)
+        for algorithm in reconstruction_algorithms:
+            reconstructed_real_latlon_paths[algorithm]  = np.zeros((2,path_length,numberOfRealizations))
+            reconstructed_real_WM_paths[algorithm]      = np.zeros((2,path_length,numberOfRealizations)) 
+            
+        for realization in range(numberOfRealizations):
+            transformed_real_paths[:,:,realization] = transforms(local_struct,paths_latlon_real[:,:,realization])
+            paths_wm_real[:,:,realization] = cord.generate_WM_array(paths_latlon_real[:,:,realization])
             if local_struct['bReconstruct'] :
-                temp = reconstructor(local_struct, paths_latlon_noisy[:,:,realization,lvl])
+                temp = reconstructor(local_struct, paths_latlon_real[:,:,realization])
                 for algorithm in reconstruction_algorithms :
-                    reconstructed_latlon_paths[algorithm][:,:,realization,lvl] = temp[algorithm][:,:]
-                    reconstructed_WM_paths[algorithm][:,:,realization,lvl] = cord.generate_WM_array(temp[algorithm][:,:])
-    #Store data in local struct
-    local_struct['RESULTS']['paths_wm_org']                     = paths_wm_org
-    local_struct['RESULTS']['paths_latlon_org']                 = paths_latlon_org
-    local_struct['RESULTS']['paths_wm_noisy']                   = paths_wm_noisy
-    local_struct['RESULTS']['paths_latlon_noisy']               = paths_latlon_noisy
-    local_struct['RESULTS']['transformed_paths']                = transformed_paths
-    local_struct['RESULTS']['reconstructed_latlon_paths']       = reconstructed_latlon_paths
-    local_struct['RESULTS']['reconstructed_WM_paths']           = reconstructed_WM_paths
+                    reconstructed_real_latlon_paths[algorithm][:,:,realization] = temp[algorithm][:,:]
+                    reconstructed_real_WM_paths[algorithm][:,:,realization] = cord.generate_WM_array(temp[algorithm][:,:])
+        
+        local_struct['RESULTS']['paths_wm_real']                     = paths_wm_real
+        local_struct['RESULTS']['paths_latlon_real']                 = paths_latlon_real
+        local_struct['RESULTS']['transformed_real_paths']            = transformed_real_paths
+        local_struct['RESULTS']['reconstructed_real_latlon_paths']       = reconstructed_real_latlon_paths
+        local_struct['RESULTS']['reconstructed_real_WM_paths']           = reconstructed_real_WM_paths    
+        
+        print(paths_latlon_real.shape)
+        
+    else : 
+    ##Iterate over the total number of realizations
+        acquisition_length                  = local_struct['gps_freq_Hz']*local_struct['acquisition_time_sec']
+        local_struct['acquisition_length']  = acquisition_length
+        paths_wm_org                        = np.zeros((2,acquisition_length,numberOfRealizations))
+        paths_latlon_org                    = np.zeros((2,acquisition_length,numberOfRealizations))
+        paths_wm_noisy                      = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
+        paths_latlon_noisy                  = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
+        noise_vals                          = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
+        transformed_paths                   = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
+        
+        reconstructed_latlon_paths          = {}
+        reconstructed_WM_paths              = {}
+        
+        reconstruction_algorithms           = identify_algorithms(local_struct)
+        for algorithm in reconstruction_algorithms:
+            reconstructed_latlon_paths[algorithm]  = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
+            reconstructed_WM_paths[algorithm]      = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))  
+        
+        for realization in range(numberOfRealizations):
+            ##Generate random data
+            logger.info ('Generating random data for realization <%d>',realization)
+            acquisition_length                  = local_struct['gps_freq_Hz']*local_struct['acquisition_time_sec']
+        
+            (paths_wm_org[:,:,realization],paths_latlon_org[:,:,realization]) = random_2d_path_generator(local_struct)
+            for lvl in range(noise_level_len):
+                (paths_wm_noisy[:,:,realization,lvl],paths_latlon_noisy[:,:,realization,lvl],noise_vals[:,:,realization,lvl]) = noise_generator(local_struct,paths_wm_org[:,:,realization],noise_level[lvl])
+                transformed_paths[:,:,realization,lvl]=transforms(local_struct,paths_latlon_noisy[:,:,realization,lvl])
+                if local_struct['bReconstruct'] :
+                    temp = reconstructor(local_struct, paths_latlon_noisy[:,:,realization,lvl])
+                    for algorithm in reconstruction_algorithms :
+                        reconstructed_latlon_paths[algorithm][:,:,realization,lvl] = temp[algorithm][:,:]
+                        reconstructed_WM_paths[algorithm][:,:,realization,lvl] = cord.generate_WM_array(temp[algorithm][:,:])
+        #Store data in local struct
+        local_struct['RESULTS']['paths_wm_org']                     = paths_wm_org
+        local_struct['RESULTS']['paths_latlon_org']                 = paths_latlon_org
+        local_struct['RESULTS']['paths_wm_noisy']                   = paths_wm_noisy
+        local_struct['RESULTS']['paths_latlon_noisy']               = paths_latlon_noisy
+        local_struct['RESULTS']['transformed_paths']                = transformed_paths
+        local_struct['RESULTS']['reconstructed_latlon_paths']       = reconstructed_latlon_paths
+        local_struct['RESULTS']['reconstructed_WM_paths']           = reconstructed_WM_paths
     
     logger.info ('Generating results and plotting')
     process_data(local_struct)

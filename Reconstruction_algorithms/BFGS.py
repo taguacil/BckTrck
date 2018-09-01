@@ -178,4 +178,3 @@ class cBFGS:
         
         return reconstructed_path
     
-bfgs_algo() 

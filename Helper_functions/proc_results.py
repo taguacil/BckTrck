@@ -37,11 +37,14 @@ logger = logging.getLogger('BckTrk')
 def process_data (params):
     data_obj = cProcessFile (params)
     data_obj.set_pickle_file(params)
-    data_obj.plot_path_org_2d()
-    data_obj.plot_path_noisy_2d()
-    data_obj.plot_MSE()
-    data_obj.analyze_DCT()
-    
+    if params["CSV_DATA"]["bUse_csv_data"] :
+        data_obj.plot_real_path_recon()
+    else :
+        data_obj.plot_path_org_2d()
+        data_obj.plot_path_noisy_2d()
+        data_obj.plot_MSE()
+        data_obj.analyze_DCT()
+        
 class cProcessFile:
     ## Constructor
     def __init__(self,struct):
@@ -52,6 +55,8 @@ class cProcessFile:
         self.m_acquisition_length   = struct['gps_freq_Hz']*struct['acquisition_time_sec']
         self.m_number_realization   = struct ['realization']
         
+        self.m_path_length          = struct['CSV_DATA']['path_length']
+        
         self.m_noise_level_meter    = struct['noise_level_meter']
         
         self.m_bReconstruct         = struct['bReconstruct']
@@ -59,11 +64,16 @@ class cProcessFile:
     
         self.m_paths_wm_org                 = struct['RESULTS']['paths_wm_org']
         self.m_paths_latlon_org             = struct['RESULTS']['paths_latlon_org']
+        self.m_paths_wm_real                = struct['RESULTS']['paths_wm_real']
+        self.m_paths_latlon_real            = struct['RESULTS']['paths_latlon_real']
         self.m_paths_wm_noisy               = struct['RESULTS']['paths_wm_noisy']
         self.m_paths_latlon_noisy           = struct['RESULTS']['paths_latlon_noisy']
         self.transformed_paths              = struct['RESULTS']['transformed_paths']
+        self.transformed_real_paths         = struct['RESULTS']['transformed_real_paths']
         self.reconstructed_latlon_paths     = struct['RESULTS']['reconstructed_latlon_paths']
         self.reconstructed_wm_paths         = struct['RESULTS']['reconstructed_WM_paths']
+        self.reconstructed_real_latlon_paths     = struct['RESULTS']['reconstructed_real_latlon_paths']
+        self.reconstructed_real_wm_paths         = struct['RESULTS']['reconstructed_real_WM_paths']
         
         
     ## Write dictionary into pickle format to txt file    
@@ -75,6 +85,31 @@ class cProcessFile:
     def get_pickle_file(self):
         with open (self.m_filename, 'rb' ) as txt_file_read :
             return pickle.load (txt_file_read)
+    
+    ## Plot real path and reconstruction 
+    def plot_real_path_recon(self):
+        logger.info('Plotting real path and stitched reconstruction')
+        latlon_real = self.m_paths_latlon_real.reshape((2, self.m_path_length*self.m_number_realization))
+                
+        plt.plot(latlon_real[0],latlon_real[1],'b-*')
+        if self.m_bReconstruct:
+                logger.info('Plotting MSE of reconstructed paths latlon')
+                
+                for key in self.reconstructed_real_latlon_paths.keys():
+                    r_path = self.reconstructed_real_latlon_paths[key].reshape((2, self.m_path_length*self.m_number_realization))
+                    
+                    l2_r_latlon=np.sqrt(np.mean((latlon_real[0]-r_path[0])**2+(latlon_real[1]-r_path[1])**2))
+
+                    plt.plot(r_path[0],r_path[1],'r-.')
+                    print('L2 for %s is %.6f'%(key, l2_r_latlon))
+        
+        plt.grid()
+        
+        plt.title('Real path from CSV data broken into %d segments'%(self.m_number_realization))
+        plt.xlabel('Latitude')
+        plt.ylabel('Longitude')
+        plt.legend(['Real path', 'Reconstruction'])
+        plt.show()
     
     ## Original path in 2D plotting
     def plot_path_org_2d(self) : 
