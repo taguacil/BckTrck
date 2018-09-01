@@ -165,7 +165,7 @@ def main() :
         local_struct['RESULTS']['reconstructed_real_latlon_paths']       = reconstructed_real_latlon_paths
         local_struct['RESULTS']['reconstructed_real_WM_paths']           = reconstructed_real_WM_paths    
         
-        print(paths_latlon_real.shape)
+        
         
     else : 
     ##Iterate over the total number of realizations
@@ -184,8 +184,8 @@ def main() :
         reconstruction_algorithms           = identify_algorithms(local_struct)
         for algorithm in reconstruction_algorithms:
             reconstructed_latlon_paths[algorithm]  = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
-            reconstructed_WM_paths[algorithm]      = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))  
-        
+            reconstructed_WM_paths[algorithm]      = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
+            
         for realization in range(numberOfRealizations):
             ##Generate random data
             logger.info ('Generating random data for realization <%d>',realization)
@@ -200,6 +200,7 @@ def main() :
                     for algorithm in reconstruction_algorithms :
                         reconstructed_latlon_paths[algorithm][:,:,realization,lvl] = temp[algorithm][:,:]
                         reconstructed_WM_paths[algorithm][:,:,realization,lvl] = cord.generate_WM_array(temp[algorithm][:,:])
+                                      
         #Store data in local struct
         local_struct['RESULTS']['paths_wm_org']                     = paths_wm_org
         local_struct['RESULTS']['paths_latlon_org']                 = paths_latlon_org

@@ -36,22 +36,27 @@ logger = logging.getLogger('BckTrk')
 ## the main processing function 
 def process_data (params):
     data_obj = cProcessFile (params)
-    data_obj.set_pickle_file(params)
     if params["CSV_DATA"]["bUse_csv_data"] :
         data_obj.plot_real_path_recon()
     else :
+        _, _,_,_,_, reconstructed_db_latlon = data_obj.calculate_MSE()
         data_obj.plot_path_org_2d()
         data_obj.plot_path_noisy_2d()
         data_obj.plot_MSE()
         data_obj.analyze_DCT()
-        
+        params["RESULTS"]["reconstructed_db_latlon"] = reconstructed_db_latlon
+    data_obj.set_pickle_file(params)
+
 class cProcessFile:
     ## Constructor
     def __init__(self,struct):
         self.m_plotStruct           = struct['PLOT']
-    
-        self.m_filename             = struct['workingDir'] + '\\Results\\' + 'BckTrk_Res_' + struct['currentTime'].strftime("%Y-%m-%d")+'.txt' 
         
+        if struct['bUse_filename'] :
+            self.m_filename         = struct['workingDir'] + '\\Results\\' + 'BckTrk_Res_' + struct['currentTime'].strftime("%Y%m%d_%H-%M-%S") + '_' + struct['filename'] +'.txt'
+        else :
+            self.m_filename         = struct['workingDir'] + '\\Results\\' + 'BckTrk_Res_' + struct['currentTime'].strftime("%Y%m%d_%H-%M-%S")+'.txt' 
+            
         self.m_acquisition_length   = struct['gps_freq_Hz']*struct['acquisition_time_sec']
         self.m_number_realization   = struct ['realization']
         
@@ -86,6 +91,40 @@ class cProcessFile:
         with open (self.m_filename, 'rb' ) as txt_file_read :
             return pickle.load (txt_file_read)
     
+    def calculate_MSE(self):
+        x_axis = self.m_noise_level_meter
+        paths_wm_org_ext=np.transpose(np.array([self.m_paths_wm_org,]*len(x_axis)),(1,2,3,0))
+        paths_latlon_org_ext=np.transpose(np.array([self.m_paths_latlon_org,]*len(x_axis)),(1,2,3,0))
+            
+        l2_noise_wm=np.sqrt(np.mean((paths_wm_org_ext[0,:,:,:]-self.m_paths_wm_noisy[0,:,:,:])**2+(paths_wm_org_ext[1,:,:,:]-self.m_paths_wm_noisy[1,:,:,:])**2,axis=0))
+        l2_noise_latlon=np.sqrt(np.mean((paths_latlon_org_ext[0,:,:,:]-self.m_paths_latlon_noisy[0,:,:,:])**2+(paths_latlon_org_ext[1,:,:,:]-self.m_paths_latlon_noisy[1,:,:,:])**2,axis=0))
+            
+        MSE_noise_WM = np.mean(l2_noise_wm,axis=0)
+        MSE_noise_latlon = np.mean(l2_noise_latlon,axis=0)
+        MSE_r_latlon = {}    
+        MSE_r_wm = {}
+        max_error = {}
+        reconstructed_db_latlon = {}
+            
+        if self.m_bReconstruct:
+            logger.info('Calculating MSE of reconstructed paths latlon')
+                
+            for key in self.reconstructed_latlon_paths.keys():
+                r_path = self.reconstructed_latlon_paths[key]
+                    
+                l2_r_latlon=np.sqrt(np.mean((paths_latlon_org_ext[0,:,:,:]-r_path[0,:,:,:])**2+(paths_latlon_org_ext[1,:,:,:]-r_path[1,:,:,:])**2,axis=0))
+                MSE_r_latlon[key] = np.mean(l2_r_latlon,axis=0)
+                reconstructed_db_latlon[key] = 20*np.log10(MSE_r_latlon[key]/MSE_noise_latlon) # Ratio of reconstruction error to error from noisy data in decibels
+                
+                r2_path = self.reconstructed_wm_paths[key]
+                    
+                l2_r_wm   = np.sqrt(np.mean((paths_wm_org_ext[0,:,:,:]-r2_path[0,:,:,:])**2+(paths_wm_org_ext[1,:,:,:]-r2_path[1,:,:,:])**2,axis=0))
+                MSE_r_wm[key]  = np.mean(l2_r_wm,axis=0)
+                max_error[key] = np.mean(np.sqrt(np.max((paths_wm_org_ext[0,:,:,:]-r2_path[0,:,:,:])**2+(paths_wm_org_ext[1,:,:,:]-r2_path[1,:,:,:])**2,axis=0)),axis=0)
+            
+        return MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon, reconstructed_db_latlon
+        
+            
     ## Plot real path and reconstruction 
     def plot_real_path_recon(self):
         logger.info('Plotting real path and stitched reconstruction')
@@ -448,25 +487,12 @@ class cProcessFile:
             logger.info ('Plotting MSE of WM and latlon values')
             #Set of params
             x_axis = self.m_noise_level_meter
-            paths_wm_org_ext=np.transpose(np.array([self.m_paths_wm_org,]*len(x_axis)),(1,2,3,0))
-            paths_latlon_org_ext=np.transpose(np.array([self.m_paths_latlon_org,]*len(x_axis)),(1,2,3,0))
-            
-            l2_noise_wm=np.sqrt(np.mean((paths_wm_org_ext[0,:,:,:]-self.m_paths_wm_noisy[0,:,:,:])**2+(paths_wm_org_ext[1,:,:,:]-self.m_paths_wm_noisy[1,:,:,:])**2,axis=0))
-            l2_noise_latlon=np.sqrt(np.mean((paths_latlon_org_ext[0,:,:,:]-self.m_paths_latlon_noisy[0,:,:,:])**2+(paths_latlon_org_ext[1,:,:,:]-self.m_paths_latlon_noisy[1,:,:,:])**2,axis=0))
-            
-            MSE_noise_WM = np.mean(l2_noise_wm,axis=0)
-            MSE_noise_latlon = np.mean(l2_noise_latlon,axis=0)
-            
+            MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon,_ = self.calculate_MSE()
             
             if self.m_bReconstruct:
                 logger.info('Plotting MSE of reconstructed paths latlon')
-                
                 for key in self.reconstructed_latlon_paths.keys():
-                    r_path = self.reconstructed_latlon_paths[key]
-                    
-                    l2_r_latlon=np.sqrt(np.mean((paths_latlon_org_ext[0,:,:,:]-r_path[0,:,:,:])**2+(paths_latlon_org_ext[1,:,:,:]-r_path[1,:,:,:])**2,axis=0))
-                    MSE_r_latlon = np.mean(l2_r_latlon,axis=0)
-                    plt.plot(x_axis,MSE_r_latlon,'-*',label="MSE_latlon for %s with %.1f %% SR"%(key, self.m_lasso_sampling_ratio*100  ))
+                    plt.plot(x_axis,MSE_r_latlon[key],'-*',label="MSE_latlon for %s with %.1f %% SR"%(key, self.m_lasso_sampling_ratio*100  ))
                     
             
             # Plotting MSE
@@ -486,13 +512,8 @@ class cProcessFile:
                 logger.info('Plotting MSE of reconstructed paths WM')
                 
                 for key in self.reconstructed_wm_paths.keys():
-                    r2_path = self.reconstructed_wm_paths[key]
-                    
-                    l2_r_wm   = np.sqrt(np.mean((paths_wm_org_ext[0,:,:,:]-r2_path[0,:,:,:])**2+(paths_wm_org_ext[1,:,:,:]-r2_path[1,:,:,:])**2,axis=0))
-                    MSE_r_wm  = np.mean(l2_r_wm,axis=0)
-                    max_error = np.mean(np.sqrt(np.max((paths_wm_org_ext[0,:,:,:]-r2_path[0,:,:,:])**2+(paths_wm_org_ext[1,:,:,:]-r2_path[1,:,:,:])**2,axis=0)),axis=0)
-                    plt.plot(x_axis,MSE_r_wm,'-*',label="MSE_WM for %s with %.1f %% SR"%(key, self.m_lasso_sampling_ratio*100))
-                    plt.plot(x_axis,max_error,'-x',label="Average Max Error for %s with %.1f %% SR"%(key, self.m_lasso_sampling_ratio*100))
+                    plt.plot(x_axis,MSE_r_wm[key],'-*',label="MSE_WM for %s with %.1f %% SR"%(key, self.m_lasso_sampling_ratio*100))
+                    plt.plot(x_axis,max_error[key],'-x',label="Average Max Error for %s with %.1f %% SR"%(key, self.m_lasso_sampling_ratio*100))
        
             plt.plot(x_axis,MSE_noise_WM,'-*',label="MSE_WM")
             ax = plt.gca()
