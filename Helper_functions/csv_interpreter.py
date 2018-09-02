@@ -22,19 +22,32 @@
  
 """
 ## Import python libraries
-import numpy as np 
 import pandas as pd 
 import json
 import sys
+import re
 
 ## Logging
 import logging
 logger = logging.getLogger('BckTrk')
 
+def cmp(a, b):
+    return (a > b) - (a < b) 
+
+def version_cmp(version1, version2):
+    def normalize(v):
+        return [int(x) for x in re.sub(r'(\.0+)*$','', v).split(".")]
+    return cmp(normalize(version1), normalize(version2))
+
 def munge_csv(path, path_length) :
     sheet = pd.read_csv(path)
-    sheet.Date = sheet.Date.astype('datetime64[ns]')
-    sheet['Sampling_interval_seconds'] = sheet.Date.map(pd.datetime.timestamp).diff()
+    if version_cmp(pd.__version__,"0.22.0") > 0 :
+        sheet.Date = sheet.Date.astype('datetime64[ns]')
+        sheet['Sampling_interval_seconds'] = sheet.Date.map(pd.datetime.timestamp).diff()
+    else :
+        sheet['Sampling_interval_seconds']=1
+        logger.warning("CSV date not used due to old pandas version")
+    
     latlon = sheet[['Latitude','Longitude']].values.T
     acc = sheet[' horizontal accuracy'].values
     interval = sheet['Sampling_interval_seconds'].values

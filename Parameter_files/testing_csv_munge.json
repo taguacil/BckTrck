@@ -1,6 +1,6 @@
 {
     "random_seed"               : 8941,
-    "bUse_random_seed"          : true,
+    "bUse_random_seed"          : false,
     "CSV_DATA"                  : {
         "bUse_csv_data"             : true,
         "csv_path"                  : "CSV_data/gpsLocations_Taimir_1.csv",
@@ -11,7 +11,7 @@
         "bReconstruct_from_dct"     : true,
         "bReconstruct_lasso"        : true,
         "lasso_learning_rate"       : 0.01,
-        "sampling_ratio"            : 0.08   
+        "sampling_ratio"            : 0.375   
     },
     "PLOT"                      : {
         "xlimits"                   : [-25,25],
