@@ -24,6 +24,7 @@
 ## Python library import
 import numpy as np
 import os
+import sys
 import _pickle as pickle
 import matplotlib.pyplot as plt
 
@@ -31,10 +32,21 @@ import matplotlib.pyplot as plt
 workingDir      = os.getcwd()
 resultsPath     = workingDir + '\\Results\\'
 result_files    = os.listdir(resultsPath)
-flag = 'PStest2'
 
+## Business logic for input arguments to main function 
+numberOfArgument =  len(sys.argv)  
+if numberOfArgument == 2 :
+    flag = sys.argv[1] #first argument should be the filenames identifier
+else :
+    print ('Filenames identifier must be given')
+    sys.exit(0)
+    
 parameter_scan_files  = [file for file in result_files if flag in file]
 number_of_points      = len(parameter_scan_files)
+if number_of_points == 0:
+    print ('Wrong filenames identifier, no files found')
+    sys.exit(0)
+    
 sampling_ratios       = np.zeros(number_of_points)
 path_lengths          = np.zeros(number_of_points)
 SNR                   = np.zeros(number_of_points)
@@ -51,7 +63,14 @@ for i in range(number_of_points) :
 
 plt.scatter(sampling_ratios, path_lengths, c=SNR,cmap='rainbow_r')
 plt.colorbar()
-plt.show()        
+plt.title('SNR [dB] of MSE ratios')
+plt.xlabel('Sampling ratio')
+plt.ylabel('Total number of samples')
+plt.show()    
+    
 plt.scatter(sampling_ratios, path_lengths, c=MSE,cmap='rainbow_r')
 plt.colorbar()
+plt.title('MSE of reconstructed coordinates')
+plt.xlabel('Sampling ratio')
+plt.ylabel('Total number of samples')
 plt.show()        
