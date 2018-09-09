@@ -49,7 +49,7 @@ def bfgs_algo():
     print(algo_model.cost_fun(np.dot(D_inv,path)))
     
     #Reconstruct with scipyBFGS
-    reconst=algo_model.scipy_func()
+    reconst=algo_model.reconstructor()
      
     #Reconstruct with homemade
     #reconst= algo_model.reconstructor()
@@ -110,17 +110,17 @@ class cBFGS:
         return norm_sq+regul
     
     ## shitty Gradient function
-    def gradient(self,x):
-        A=self.A
-        y=self.y
-        u=self.u
-        
-        A_her=A.conj().T
-        linear_OP=np.dot(A,x)-y
-        delta=np.dot(np.conj(x),x)+u
-        regul=self.lambda_param*(x/np.sqrt(delta))
-        
-        return 2*np.dot(A_her,linear_OP)+regul
+    def gradient(self,xk, epsilon=1e-8):
+        f0 = self.cost_fun(*((xk,)))
+        grad = np.zeros((len(xk),), float)
+        ei = np.zeros((len(xk),), float)
+        for k in range(len(xk)):
+            ei[k] = 1.0
+            d = epsilon * ei
+            grad[k] = (self.cost_fun(*((xk + d,))) - f0) / d[k]
+            ei[k] = 0.0
+    
+        return grad
     
     ## Reconstruction function
     def reconstructor(self):
