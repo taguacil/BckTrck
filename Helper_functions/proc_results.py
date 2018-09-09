@@ -154,7 +154,7 @@ class cProcessFile:
                     
                     l2_r_latlon=np.sqrt(np.mean((latlon_real[0]-r_path[0])**2+(latlon_real[1]-r_path[1])**2))
 
-                    plt.plot(r_path[1],r_path[0],'r-.')
+                    plt.plot(r_path[1],r_path[0],'r-*')
                     print('L2 for %s is %.6f'%(key, l2_r_latlon))
         
         plt.grid()
