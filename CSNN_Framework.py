@@ -132,6 +132,7 @@ class cFramework:
         csv_path                            = local_struct['CSV_DATA']['csv_path']
         path_length                         = local_struct['CSV_DATA']['path_length']
         
+		
         ##Set seed
         if use_random_seed :
             np.random.seed(random_seed)
@@ -190,9 +191,10 @@ class cFramework:
                 reconstructed_latlon_paths[algorithm]  = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
                 reconstructed_WM_paths[algorithm]      = np.zeros((2,acquisition_length,numberOfRealizations,noise_level_len))
                 
+            self.logger.info ('Starting simulation with <%d> realizations and <%d> path length',numberOfRealizations,acquisition_length)
             for realization in range(numberOfRealizations):
                 ##Generate random data
-                self.logger.info ('Generating random data for realization <%d>',realization)
+                self.logger.debug ('Generating random data for realization <%d>',realization)
                 acquisition_length                  = local_struct['gps_freq_Hz']*local_struct['acquisition_time_sec']
             
                 (paths_wm_org[:,:,realization],paths_latlon_org[:,:,realization]) = random_2d_path_generator(local_struct)
