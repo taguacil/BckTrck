@@ -27,10 +27,15 @@ import os
 import sys
 import _pickle as pickle
 import matplotlib.pyplot as plt
+import platform 
 
-
+if platform.system() == "Windows" :
+    direc_ident = "\\"
+else :
+    direc_ident = "/"
+    
 workingDir      = os.getcwd()
-resultsPath     = workingDir + '\\Results\\'
+resultsPath     = workingDir + direc_ident + 'Results' + direc_ident
 result_files    = os.listdir(resultsPath)
 
 ## Business logic for input arguments to main function 
