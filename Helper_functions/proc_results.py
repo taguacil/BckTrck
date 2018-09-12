@@ -28,10 +28,16 @@ import numpy as np
 from matplotlib.colors import LogNorm
 import matplotlib.pyplot as plt
 import _pickle  as pickle
+import platform 
 
 ## Bring the logger
 import logging
 logger = logging.getLogger('BckTrk')
+    
+if platform.system() == "Windows" :
+    direc_ident = "\\"
+else :
+    direc_ident = "/"
     
 ## the main processing function 
 def process_data (params):
@@ -68,9 +74,9 @@ class cProcessFile:
         self.m_plotStruct           = struct['PLOT']
         
         if struct['bUse_filename'] :
-            self.m_filename         = struct['workingDir'] + '\\Results\\' + 'BckTrk_Res_' + struct['currentTime'].strftime("%Y%m%d_%H-%M-%S") + '_' + struct['filename'] +'.txt'
+            self.m_filename         = struct['workingDir'] + direc_ident + 'Results' + direc_ident + 'BckTrk_Res_' + struct['currentTime'].strftime("%Y%m%d_%H-%M-%S") + '_' + struct['filename'] +'.txt'
         else :
-            self.m_filename         = struct['workingDir'] + '\\Results\\' + 'BckTrk_Res_' + struct['currentTime'].strftime("%Y%m%d_%H-%M-%S")+'.txt' 
+            self.m_filename         = struct['workingDir'] + direc_ident + 'Results' + direc_ident + 'BckTrk_Res_' + struct['currentTime'].strftime("%Y%m%d_%H-%M-%S")+'.txt' 
             
         self.m_acquisition_length   = struct['gps_freq_Hz']*struct['acquisition_time_sec']
         self.m_number_realization   = struct ['realization']
@@ -154,7 +160,7 @@ class cProcessFile:
                     
                     l2_r_latlon=np.sqrt(np.mean((latlon_real[0]-r_path[0])**2+(latlon_real[1]-r_path[1])**2))
 
-                    plt.plot(r_path[1],r_path[0],'r-.')
+                    plt.plot(r_path[1],r_path[0],'r-*')
                     print('L2 for %s is %.6f'%(key, l2_r_latlon))
         
         plt.grid()

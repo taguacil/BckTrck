@@ -43,7 +43,7 @@ class cLasso:
             sys.exit("Sampling_ratio larger than 1")
             
         self.m_acquisition_length       = struct['acquisition_length']
-        self.m_model                    = Lasso(alpha= struct['RCT_ALG_LASSO']['lasso_learning_rate'])
+        self.m_model                    = Lasso(alpha= struct['RCT_ALG_LASSO']['lasso_learning_rate'], tol=0.0001, fit_intercept=False, normalize=True)
        
         self.number_of_samples          = int(struct['RCT_ALG_LASSO']["sampling_ratio"]*struct["acquisition_length"])
         self.reconstruct_from_dct       = struct['RCT_ALG_LASSO']['bReconstruct_from_dct']
