@@ -65,7 +65,8 @@
         "bPlotWM_time_reconst"      : false,
         "bPlotLonLat_time_reconst"  : false,
         "bPlotMSE"                  : false,
-        "bPlotDCTAnalysis"          : false
+        "bPlotDCTAnalysis"          : false,
+        "bPlotPSD"                  : false
     }, 
     
     "RESULTS"                   : {
@@ -74,13 +75,8 @@
         "paths_wm_noisy"                     : [0,0,0,0],
         "paths_latlon_noisy"                 : [0,0,0,0],
         "transformed_paths"                  : [0,0,0,0],
-        "paths_latlon_real"                  : [0,0,0,0],
-        "paths_wm_real"                      : [0,0,0,0],
-        "transformed_real_paths"             : [0,0,0,0],
         "reconstructed_latlon_paths"         : {},
         "reconstructed_WM_paths"             : {},
-        "reconstructed_real_latlon_paths"    : {},
-        "reconstructed_real_WM_paths"        : {},
         "reconstructed_db_latlon"            : {},
         "MSE_latlon"                         : {}
     }

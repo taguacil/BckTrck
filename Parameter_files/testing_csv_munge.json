@@ -10,8 +10,8 @@
     "RCT_ALG_LASSO"             : {
         "bReconstruct_from_dct"     : true,
         "bReconstruct_lasso"        : true,
-        "lasso_learning_rate"       : 0.01,
-        "sampling_ratio"            : 0.375   
+        "lasso_learning_rate"       : 0.001,
+        "sampling_ratio"            : 1  
     },
     "PLOT"                      : {
         "xlimits"                   : [-25,25],

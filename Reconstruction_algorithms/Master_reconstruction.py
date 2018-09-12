@@ -19,43 +19,45 @@
  =============================================================================
  
 """
-## Python library import
+# Python library import
 import numpy as np
 
-## Logging
-import logging
-logger = logging.getLogger('BckTrk')
-
-## User-defined library import
+# User-defined library import
 from .Lasso_reconstruction import lasso_algo
 from .BFGS_reconstruction import bfgs_algo
 
-## Helper functions
+# Logging
+import logging
+
+logger = logging.getLogger('BckTrk')
+
+# Helper functions
 def identify_algorithms(params):
     temp = []
-    if params['RCT_ALG_LASSO']["bReconstruct_lasso"] : 
+    if params['RCT_ALG_LASSO']["bReconstruct_lasso"]:
         temp.append("Lasso")
-    if params['RCT_ALG_BFGS']["bReconstruct_bfgs"] :
+    if params['RCT_ALG_BFGS']["bReconstruct_bfgs"]:
         temp.append("BFGS")
     return temp
 
-## The main processing function
-def reconstructor(params, path) :
+
+# The main processing function
+def reconstructor(params, path):
     logger.debug('Returns dictionary of different path reconstructions using different algorithms')
-    
+
     reconstructed_paths = {}
-    mean                = np.repeat(np.expand_dims(np.mean(path, axis=1),axis=1),params['acquisition_length'],axis=1)
-    var                 = np.repeat(np.expand_dims(np.var(path, axis=1),axis=1),params['acquisition_length'],axis=1)
-    normalized_path     = (path-mean)/np.sqrt(var)
-    
-    if params['RCT_ALG_LASSO']["bReconstruct_lasso"] :
-        temp                         = np.array([lasso_algo(params, normalized_path[0]),lasso_algo(params, normalized_path[1])])
-        rescaled_temp                = np.sqrt(var)*temp + mean
+    mean = np.repeat(np.expand_dims(np.mean(path, axis=1), axis=1), params['acquisition_length'], axis=1)
+    var = np.repeat(np.expand_dims(np.var(path, axis=1), axis=1), params['acquisition_length'], axis=1)
+    normalized_path = (path - mean) / np.sqrt(var)
+
+    if params['RCT_ALG_LASSO']["bReconstruct_lasso"]:
+        temp = np.array([lasso_algo(params, normalized_path[0]), lasso_algo(params, normalized_path[1])])
+        rescaled_temp = np.sqrt(var) * temp + mean
         reconstructed_paths["Lasso"] = rescaled_temp
-        
-    if params['RCT_ALG_BFGS']["bReconstruct_bfgs"] :
-        temp                         = np.array([bfgs_algo(params, normalized_path[0]),bfgs_algo(params, normalized_path[1])])
-        rescaled_temp                = np.sqrt(var)*temp + mean
-        reconstructed_paths["BFGS"]  = rescaled_temp
-        
+
+    if params['RCT_ALG_BFGS']["bReconstruct_bfgs"]:
+        temp = np.array([bfgs_algo(params, normalized_path[0]), bfgs_algo(params, normalized_path[1])])
+        rescaled_temp = np.sqrt(var) * temp + mean
+        reconstructed_paths["BFGS"] = rescaled_temp
+
     return reconstructed_paths

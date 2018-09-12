@@ -1,1 +1,0 @@
-{"realization": 10, "bUse_filename": true, "filename": "PSrun1_5000_0.900", "bSimplified_Results": true, "acquisition_time_sec": 5000, "noise_level_meter": [10], "noise_std_meter": 3, "bReconstruct": true, "RCT_ALG_LASSO": {"bReconstruct_from_dct": true, "bReconstruct_lasso": true, "lasso_learning_rate": 0.01, "sampling_ratio": 0.9}}
