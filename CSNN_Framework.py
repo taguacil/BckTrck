@@ -29,6 +29,7 @@ import json
 import datetime
 import collections
 import logging
+import platform
 
 ## User-defined library import
 from Helper_functions.proc_results import process_data 
@@ -38,6 +39,12 @@ import Navigation.Coordinates as cord
 from Navigation.AWGN import noise_generator
 from Reconstruction_algorithms.Master_reconstruction import reconstructor, identify_algorithms
 from Helper_functions.csv_interpreter import munge_csv
+
+if platform.system() == "Windows" :
+    direc_ident = "\\"
+else :
+    direc_ident = "/"
+        
 
 def update(dictionary, updateDict):
     for k, v in updateDict.items():
@@ -53,18 +60,18 @@ class cFramework:
          
         ## Parameters / Config files handling
         workingDir      = os.getcwd()
-        self.paramPath       = workingDir + '\\'
-        self.local_struct    = json.load(open(self.paramPath + 'Parameter_files\\default_config.json', 'r'))
+        self.paramPath       = workingDir + direc_ident
+        self.local_struct    = json.load(open(self.paramPath + 'Parameter_files'+ direc_ident + 'default_config.json', 'r'))
         
         try :
-            os.stat (workingDir+'\\Logs\\')
+            os.stat (self.paramPath+'Logs'+ direc_ident)
         except : 
-            os.mkdir(workingDir+'\\Logs\\')
+            os.mkdir(self.paramPath+'Logs'+ direc_ident)
                 
         try :
-            os.stat (workingDir+'\\Results\\')
+            os.stat (self.paramPath+'Results'+ direc_ident)
         except :
-            os.mkdir(workingDir+'\\Results\\')
+            os.mkdir(self.paramPath+'Results'+ direc_ident)
              
         # create logger with 'spam_application'
         self.logger = logging.getLogger('BckTrk')
@@ -72,7 +79,7 @@ class cFramework:
         
         # create file handler which logs even debug messages
         now = datetime.datetime.now()
-        self.fh = logging.FileHandler(workingDir + '\\Logs\\' + 'BckTrk_Log_' + now.strftime("%Y-%m-%d")+'.log')
+        self.fh = logging.FileHandler(self.paramPath+'Logs'+ direc_ident + 'BckTrk_Log_' + now.strftime("%Y-%m-%d")+'.log')
         self.fh.setLevel(logging.INFO)
         
         self.local_struct['currentTime'] = now
