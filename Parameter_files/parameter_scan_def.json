@@ -1,5 +1,5 @@
 {
-    "realization"               : 10,
+    "realization"               : 500,
     
     "bUse_filename"             : true,
     "filename"                  : "",
@@ -8,8 +8,8 @@
      
     "acquisition_time_sec"      : 200, 
     
-    "noise_level_meter"         : [10], 
-    "noise_std_meter"           : 3, 
+    "noise_level_meter"         : [0.0005], 
+    "noise_std_meter"           : 0, 
     
     "bReconstruct"              : true,
      
@@ -17,6 +17,6 @@
                         "bReconstruct_from_dct" : true, 
                         "bReconstruct_lasso"    : true, 
                         "lasso_learning_rate"   : 0.01, 
-                        "sampling_ratio"        : 0.10000000000000002
+                        "sampling_ratio"        : 0.1
                         }
 }
