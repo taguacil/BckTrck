@@ -30,7 +30,7 @@ import matplotlib.pyplot as plt
 import _pickle  as pickle
 import platform
 from scipy import signal
-import scipy.fftpack as ft 
+import scipy.fftpack as ft
 
 ## Bring the logger
 import logging
@@ -62,9 +62,10 @@ def process_data(params):
             del params['RESULTS']['paths_latlon_org']
             del params['RESULTS']['paths_wm_noisy']
             del params['RESULTS']['paths_latlon_noisy']
-            del params['RESULTS']['transformed_paths']
             del params['RESULTS']['reconstructed_latlon_paths']
             del params['RESULTS']['reconstructed_WM_paths']
+            if not params['TRANSFORM']['bDctTransform']:
+                del params['RESULTS']['transformed_paths']
 
     data_obj.set_pickle_file(params)
 
@@ -136,8 +137,9 @@ class cProcessFile:
                 l2_r_latlon = np.sqrt(np.mean((paths_latlon_org_ext[0, :, :, :] - r_path[0, :, :, :]) ** 2 + (
                         paths_latlon_org_ext[1, :, :, :] - r_path[1, :, :, :]) ** 2, axis=0))
                 MSE_r_latlon[key] = np.mean(l2_r_latlon, axis=0)
+                # Ratio of reconstruction error to error from noisy data in decibels
                 reconstructed_db_latlon[key] = 20 * np.log10(MSE_r_latlon[
-                                                                 key] / MSE_noise_latlon)  # Ratio of reconstruction error to error from noisy data in decibels
+                                                                 key] / MSE_noise_latlon)
 
                 r2_path = self.reconstructed_wm_paths[key]
 
@@ -584,9 +586,9 @@ class cProcessFile:
 
             average_lat = np.zeros((percent_len, noise_level_len))
             average_lon = np.zeros((percent_len, noise_level_len))
-            
-            l1_norm_lat = np.mean(np.linalg.norm(transformed_paths[0],ord=1,axis=0), axis=0)
-            l1_norm_lon = np.mean(np.linalg.norm(transformed_paths[1],ord=1,axis=0), axis=0)
+
+            l1_norm_lat = np.mean(np.linalg.norm(transformed_paths[0], ord=1, axis=0), axis=0)
+            l1_norm_lon = np.mean(np.linalg.norm(transformed_paths[1], ord=1, axis=0), axis=0)
             for per in range(percent_len):
                 value = (np.abs(transformed_paths[0, :, :, :]) / np.abs(transformed_paths[0, 0, :, :]) < percentiles[
                     per])
@@ -623,26 +625,22 @@ class cProcessFile:
             plt.xlabel('Noise level (meters)')
             plt.ylabel('Percentage of values below given percentile [%%]')
             plt.show()
-            
-            plt.plot(x_axis, (1./path_length)*l1_norm_lat)
+
+            plt.plot(x_axis, (1. / path_length) * l1_norm_lat)
             plt.grid()
             plt.legend(loc="upper right")
-            plt.title('L1 norm for latitude') 
+            plt.title('L1 norm for latitude')
             plt.xlabel('Noise level (meters)')
             plt.ylabel('L1 norm (A.U.)')
             plt.show()
-            
-            
-            plt.plot(x_axis, (1./path_length)*l1_norm_lon)
+
+            plt.plot(x_axis, (1. / path_length) * l1_norm_lon)
             plt.grid()
             plt.legend(loc="upper right")
-            plt.title('L1 norm for longitude') 
+            plt.title('L1 norm for longitude')
             plt.xlabel('Noise level (meters)')
             plt.ylabel('L1 norm (A.U.)')
             plt.show()
-            
-        
-            
 
     # Power spectral density
     def power_spectral_density(self):
@@ -656,31 +654,31 @@ class cProcessFile:
             f_lat, Plat_den = signal.periodogram(self.m_paths_latlon_org[0, :, 0], fs, return_onesided=False)
             f_lon, Plon_den = signal.periodogram(self.m_paths_latlon_org[1, :, 0], fs, return_onesided=False)
 
-            plt.semilogy( ft.fftshift(f_lat),ft.fftshift(Plat_den))
-            #plt.xlim([-(fs/2-1), fs/2-1])
+            plt.semilogy(ft.fftshift(f_lat), ft.fftshift(Plat_den))
+            # plt.xlim([-(fs/2-1), fs/2-1])
             plt.title('Original latitude signal PSD')
             plt.xlabel('frequency [Hz]')
             plt.ylabel('PSD [V**2/Hz]')
-            plt.ylim(10e-18,np.max(Plat_den))
+            plt.ylim(10e-18, np.max(Plat_den))
             plt.show()
 
-            plt.semilogy(ft.fftshift(f_lon),ft.fftshift(Plon_den))
-            #plt.xlim([-(fs-1), fs-1])
+            plt.semilogy(ft.fftshift(f_lon), ft.fftshift(Plon_den))
+            # plt.xlim([-(fs-1), fs-1])
             plt.title('Original longitude signal PSD')
             plt.xlabel('frequency [Hz]')
             plt.ylabel('PSD [V**2/Hz]')
-            plt.ylim(10e-18,np.max(Plat_den))
+            plt.ylim(10e-18, np.max(Plat_den))
             plt.show()
 
-            #for noise in range(len(noise_level)):
+            # for noise in range(len(noise_level)):
             paths_latlon_noisy = self.m_paths_latlon_noisy[:, :, :, -2]
             f_lat, Plat_den = signal.periodogram(paths_latlon_noisy[0, :, 0], fs, return_onesided=False)
             f_lon, Plon_den = signal.periodogram(paths_latlon_noisy[1, :, 0], fs, return_onesided=False)
 
             plt.semilogy(ft.fftshift(f_lat), ft.fftshift(Plat_den))
-            #plt.xlim([-(fs-1), fs-1])
+            # plt.xlim([-(fs-1), fs-1])
             plt.title('Noisy latitude signal PSD')
             plt.xlabel('frequency [Hz]')
             plt.ylabel('PSD [V**2/Hz]')
-            plt.ylim(10e-13,np.max(Plat_den))
+            plt.ylim(10e-13, np.max(Plat_den))
             plt.show()
