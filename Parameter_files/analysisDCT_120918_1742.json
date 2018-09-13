@@ -18,7 +18,7 @@
     },
     
     "PLOT"                      : {
-        "bPlotDCTAnalysis"              : false,
-        "bPlotPSD"                      : true
+        "bPlotDCTAnalysis"              : true,
+        "bPlotPSD"                      : false
     }
 }

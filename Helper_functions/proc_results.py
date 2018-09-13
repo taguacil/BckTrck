@@ -30,6 +30,7 @@ import matplotlib.pyplot as plt
 import _pickle  as pickle
 import platform
 from scipy import signal
+import scipy.fftpack as ft 
 
 ## Bring the logger
 import logging
@@ -579,10 +580,13 @@ class cProcessFile:
 
             percent_len = len(percentiles)
             noise_level_len = len(x_axis)
+            path_length = transformed_paths.shape[1]
 
             average_lat = np.zeros((percent_len, noise_level_len))
             average_lon = np.zeros((percent_len, noise_level_len))
-
+            
+            l1_norm_lat = np.mean(np.linalg.norm(transformed_paths[0],ord=1,axis=0), axis=0)
+            l1_norm_lon = np.mean(np.linalg.norm(transformed_paths[1],ord=1,axis=0), axis=0)
             for per in range(percent_len):
                 value = (np.abs(transformed_paths[0, :, :, :]) / np.abs(transformed_paths[0, 0, :, :]) < percentiles[
                     per])
@@ -619,41 +623,64 @@ class cProcessFile:
             plt.xlabel('Noise level (meters)')
             plt.ylabel('Percentage of values below given percentile [%%]')
             plt.show()
+            
+            plt.plot(x_axis, (1./path_length)*l1_norm_lat)
+            plt.grid()
+            plt.legend(loc="upper right")
+            plt.title('L1 norm for latitude') 
+            plt.xlabel('Noise level (meters)')
+            plt.ylabel('L1 norm (A.U.)')
+            plt.show()
+            
+            
+            plt.plot(x_axis, (1./path_length)*l1_norm_lon)
+            plt.grid()
+            plt.legend(loc="upper right")
+            plt.title('L1 norm for longitude') 
+            plt.xlabel('Noise level (meters)')
+            plt.ylabel('L1 norm (A.U.)')
+            plt.show()
+            
+        
+            
 
     # Power spectral density
     def power_spectral_density(self):
         if self.m_plotStruct['bPlotPSD']:
             logger.info('Triggering PSD for latlon coordinates')
 
-            fs = 10e3
+            fs = 1e3
             noise_level = self.m_noise_level_meter
 
             logger.warning('Plotting only first realization for visibility')
-            f_lat, Plat_den = signal.periodogram(self.m_paths_latlon_org[0, :, 0], fs)
-            f_lon, Plon_den = signal.periodogram(self.m_paths_latlon_org[1, :, 0], fs)
+            f_lat, Plat_den = signal.periodogram(self.m_paths_latlon_org[0, :, 0], fs, return_onesided=False)
+            f_lon, Plon_den = signal.periodogram(self.m_paths_latlon_org[1, :, 0], fs, return_onesided=False)
 
-            plt.semilogy(f_lat, Plat_den)
-            #plt.xlim([-(fs-1), fs-1])
+            plt.semilogy( ft.fftshift(f_lat),ft.fftshift(Plat_den))
+            #plt.xlim([-(fs/2-1), fs/2-1])
             plt.title('Original latitude signal PSD')
             plt.xlabel('frequency [Hz]')
             plt.ylabel('PSD [V**2/Hz]')
+            plt.ylim(10e-18,np.max(Plat_den))
             plt.show()
 
-            plt.semilogy(f_lon, Plon_den)
+            plt.semilogy(ft.fftshift(f_lon),ft.fftshift(Plon_den))
             #plt.xlim([-(fs-1), fs-1])
             plt.title('Original longitude signal PSD')
             plt.xlabel('frequency [Hz]')
             plt.ylabel('PSD [V**2/Hz]')
+            plt.ylim(10e-18,np.max(Plat_den))
             plt.show()
 
             #for noise in range(len(noise_level)):
-            paths_latlon_noisy = self.m_paths_latlon_noisy[:, :, :, 0]
-            f_lat, Plat_den = signal.periodogram(paths_latlon_noisy[0, :, 0], fs)
-            f_lon, Plon_den = signal.periodogram(paths_latlon_noisy[1, :, 0], fs)
+            paths_latlon_noisy = self.m_paths_latlon_noisy[:, :, :, -2]
+            f_lat, Plat_den = signal.periodogram(paths_latlon_noisy[0, :, 0], fs, return_onesided=False)
+            f_lon, Plon_den = signal.periodogram(paths_latlon_noisy[1, :, 0], fs, return_onesided=False)
 
-            plt.semilogy(f_lat, Plat_den)
+            plt.semilogy(ft.fftshift(f_lat), ft.fftshift(Plat_den))
             #plt.xlim([-(fs-1), fs-1])
             plt.title('Noisy latitude signal PSD')
             plt.xlabel('frequency [Hz]')
             plt.ylabel('PSD [V**2/Hz]')
+            plt.ylim(10e-13,np.max(Plat_den))
             plt.show()
