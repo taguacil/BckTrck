@@ -21,7 +21,7 @@
  =============================================================================
  
 """
-## Python library import
+# Python library import
 import numpy as np
 import os
 import sys
@@ -38,7 +38,7 @@ workingDir = os.getcwd()
 resultsPath = workingDir + direc_ident + 'Results' + direc_ident
 result_files = os.listdir(resultsPath)
 
-## Business logic for input arguments to main function 
+# Business logic for input arguments to main function
 numberOfArgument = len(sys.argv)
 if numberOfArgument == 2:
     flag = sys.argv[1]  # first argument should be the filenames identifier

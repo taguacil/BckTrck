@@ -47,7 +47,7 @@ class cTransforms:
         logger.debug("DCT transform")
 
         transformed_path = np.zeros((2, self.m_acquisition_length))
-        transformed_path[0, :] = ft.dct(self.m_latlonpath[0, :])
-        transformed_path[1, :] = ft.dct(self.m_latlonpath[1, :])
+        transformed_path[0, :] = ft.dct(self.m_latlonpath[0, :], norm='ortho')
+        transformed_path[1, :] = ft.dct(self.m_latlonpath[1, :], norm='ortho')
 
         return transformed_path
