@@ -126,7 +126,6 @@ class cFramework:
         self.ch.close()
         self.logger.removeHandler(self.fh)
         self.logger.removeHandler(self.ch)
-        sys.exit(0)
 
     # Main function definition
     def mainComputation(self, local_struct):
@@ -235,9 +234,10 @@ class cFramework:
             local_struct['RESULTS']['reconstructed_latlon_paths'] = reconstructed_latlon_paths
             local_struct['RESULTS']['reconstructed_WM_paths'] = reconstructed_WM_paths
 
-        self.logger.info('Generating results and plotting')
-        process_data(local_struct)
+        self.logger.debug('Generating results and plotting')
+        bRet = process_data(local_struct)
         self.exit_framework()
+        return bRet
 
 
 # Main function definition  MUST BE at the END OF FILE
@@ -245,4 +245,4 @@ if __name__ == "__main__":
     # Business logic for input arguments to main function
     framework_model = cFramework()
     framework_model.update_framework(sys.argv)
-    framework_model.mainComputation(framework_model.local_struct)
+    framework_model.mainComputation(framework_model.local_struct) # return value ignored

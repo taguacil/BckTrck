@@ -27,8 +27,6 @@ from concurrent import futures
 import sys
 import platform
 import math
-import os
-import _pickle as pickle
 
 # User-defined library import
 
@@ -41,15 +39,20 @@ else:
 
 WORKERS = 16
 NUMBER_POINTS = 50e3
+
+iterable_params = []
+noise_levels = [0.0005, 5, 20, 100, 500]
 lasso_learning_rates = [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1]
 sampling_ratios = [0.05, 0.07, 0.1, 0.125, 0.15, 0.175, 0.2, 0.25, 0.3, 0.35, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 path_lengths = [10, 20, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400,
                 2600, 2800, 3000, 3200, 3400, 3600, 3800, 4000, 4200, 4400, 4600, 4800, 5000]
-noise_levels = [0.0005, 5, 20, 100, 500]
 
-param_dictionary = {'lr': lasso_learning_rates, 'sr': sampling_ratios, 'pl': path_lengths, 'nl': noise_levels}
+NUMBER_POINTS = 10e3
+noise_levels = [0.0005, 5]
+lasso_learning_rates = [0.001, 0.005]
+sampling_ratios = [0.05, 0.07]
+path_lengths = [10, 20]
 
-iterable_params = []
 for lasso_learning_rate in lasso_learning_rates:
     for sampling_ratio in sampling_ratios:
         for path_length in path_lengths:
@@ -62,14 +65,9 @@ iterable_length = range(0, len(iterable_params), 1)
 numberOfArgument = len(sys.argv)
 if numberOfArgument == 2:
     flag = sys.argv[1]  # first argument should be the filenames identifier
-    workingDir = os.getcwd()
-    filename = workingDir + direc_ident + 'Results' + direc_ident + flag + '.txt'
-    with open(filename, 'wb') as txt_file:
-        pickle.dump(param_dictionary, txt_file)
 else:
     print('Filenames identifier must be given')
     sys.exit(0)
-
 
 # The main processing function
 def CSNN_proc(index):
@@ -94,6 +92,6 @@ def CSNN_proc(index):
 
 # The main loop
 if __name__ == '__main__':
-    Executor = futures.ProcessPoolExecutor(max_workers=WORKERS)
-    Executor.map(CSNN_proc, iterable_length)
-    print("Map done, closing pool and terminating...")
+    with futures.ProcessPoolExecutor(max_workers=WORKERS) as executor:
+        print(executor.map(CSNN_proc, iterable_length))
+        print("Map done, closing pool and terminating...")
