@@ -59,12 +59,12 @@ class cLasso:
 
             k = self.number_of_samples
             samples = np.sort(np.random.choice(self.m_acquisition_length, k, replace=False))
-            D = ft.dct(np.eye(self.m_acquisition_length))
+            D = ft.dct(np.eye(self.m_acquisition_length), norm='ortho')
             A = D[samples]
 
             self.m_model.fit(A, path[samples])
 
-            reconstructed_path = ft.idct(self.m_model.coef_)
+            reconstructed_path = ft.idct(self.m_model.coef_, norm='ortho')
             reconstructed_path = reconstructed_path + np.mean(path[samples] - reconstructed_path[samples])
 
             return reconstructed_path
