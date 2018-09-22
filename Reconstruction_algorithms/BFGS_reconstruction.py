@@ -25,9 +25,9 @@ import numpy as np
 import scipy.fftpack as ft
 import scipy.optimize as opt
 
-import matplotlib.pyplot as plt
+from Helper_functions.framework_error import CErrorTypes
 
-## Logging
+# Logging
 import logging
 
 logger = logging.getLogger('BckTrk')
@@ -44,14 +44,21 @@ class cBFGS:
     def __init__(self, struct, path):
 
         if struct['RCT_ALG_BFGS']["sampling_ratio"] > 1:
-            logger.error("Sampling_ratio larger than 1")
-            sys.exit("Sampling_ratio larger than 1")
+            logger.debug("Sampling_ratio larger than 1")
+            errdict = {"file": __file__, "message": "Sampling_ratio larger than 1", "errorType": CErrorTypes.value}
+            raise ValueError(errdict)
 
         self.m_acquisition_length = struct['acquisition_length']
         self.m_lambda_param = struct['RCT_ALG_BFGS']['lambda']
         self.m_u = struct['RCT_ALG_BFGS']['u']
         self.m_number_of_samples = int(
             struct['RCT_ALG_BFGS']["sampling_ratio"] * struct["gps_freq_Hz"] * struct["acquisition_time_sec"])
+
+        if self.number_of_samples <= 0:
+            logger.debug("Number of samples cannot be 0 or negative")
+            errdict = {"file": __file__, "message": "Sampling_ratio larger than 1", "errorType": CErrorTypes.value}
+            raise ValueError(errdict)
+
         self.m_reconstruct_from_dct = struct['RCT_ALG_BFGS']['bReconstruct_from_dct']
         self.m_maxiter = struct['RCT_ALG_BFGS']['maxiter']
 

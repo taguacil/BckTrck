@@ -39,6 +39,7 @@ import Navigation.Coordinates as cord
 from Navigation.AWGN import noise_generator
 from Reconstruction_algorithms.Master_reconstruction import reconstructor, identify_algorithms
 from Helper_functions.csv_interpreter import munge_csv
+from Helper_functions.framework_error import CFrameworkError
 
 if platform.system() == "Windows":
     direc_ident = "\\"
@@ -100,6 +101,8 @@ class cFramework:
         # add the handlers to the logger
         self.logger.addHandler(self.fh)
         self.logger.addHandler(self.ch)
+
+        self.frameworkError_list = {"bNoErrors": True}
 
     def update_framework(self, arguments):
         numberOfArgument = len(arguments)
@@ -205,25 +208,33 @@ class cFramework:
 
             self.logger.info('Starting simulation with <%d> realizations and <%d> path length', numberOfRealizations,
                              acquisition_length)
-            for realization in range(numberOfRealizations):
-                #Generate random data
-                self.logger.debug('Generating random data for realization <%d>', realization)
+            for lvl in range(noise_level_len):
+                for realization in range(numberOfRealizations):
+                    # Generate random data
+                    self.logger.debug('Generating random data for realization <%d>', realization)
 
-                (paths_wm_org[:, :, realization], paths_latlon_org[:, :, realization]) = random_2d_path_generator(
-                    local_struct)
-                for lvl in range(noise_level_len):
+                    (paths_wm_org[:, :, realization], paths_latlon_org[:, :, realization]) = \
+                        random_2d_path_generator(local_struct)
+
+                    # Generate noise for each realization
                     (paths_wm_noisy[:, :, realization, lvl], paths_latlon_noisy[:, :, realization, lvl],
-                     noise_vals[:, :, realization, lvl]) = noise_generator(local_struct,
-                                                                           paths_wm_org[:, :, realization],
-                                                                           noise_level[lvl])
-                    transformed_paths[:, :, realization, lvl] = transforms(local_struct,
-                                                                           paths_latlon_noisy[:, :, realization, lvl])
+                     noise_vals[:, :, realization, lvl]) = \
+                        noise_generator(local_struct, paths_wm_org[:, :, realization], noise_level[lvl])
+
+                    # Apply transforms
+                    transformed_paths[:, :, realization, lvl] = \
+                        transforms(local_struct, paths_latlon_noisy[:, :, realization, lvl])
+
+                    # Apply reconstruction algorithms
                     if local_struct['bReconstruct']:
-                        temp = reconstructor(local_struct, paths_latlon_noisy[:, :, realization, lvl])
                         for algorithm in reconstruction_algorithms:
-                            reconstructed_latlon_paths[algorithm][:, :, realization, lvl] = temp[algorithm][:, :]
-                            reconstructed_WM_paths[algorithm][:, :, realization, lvl] = cord.generate_WM_array(
-                                temp[algorithm][:, :])
+                            try:
+                                temp = reconstructor(local_struct, paths_latlon_noisy[:, :, realization, lvl])
+                                reconstructed_latlon_paths[algorithm][:, :, realization, lvl] = temp
+                                reconstructed_WM_paths[algorithm][:, :, realization, lvl] = \
+                                    cord.generate_WM_array(temp)
+                            except CFrameworkError as frameErr:
+                                self.errorAnalyzer(frameErr, str((algorithm, lvl)))
 
             # Store data in local struct
             local_struct['RESULTS']['paths_wm_org'] = paths_wm_org
@@ -235,9 +246,25 @@ class cFramework:
             local_struct['RESULTS']['reconstructed_WM_paths'] = reconstructed_WM_paths
 
         self.logger.debug('Generating results and plotting')
-        bRet = process_data(local_struct)
+        try:
+            process_data(local_struct)
+        except CFrameworkError as frameErr:
+            self.errorAnalyzer(frameErr, "process_data")
+
         self.exit_framework()
-        return bRet
+        return self.frameworkError_list
+
+    def errorAnalyzer (self, frameErr, master_key):
+        if self.frameworkError_list["bNoErrors"]:
+            self.frameworkError_list["bNoErrors"] = False
+
+        if master_key in self.frameworkError_list.keys():
+            if frameErr.callermessage in self.frameworkError_list[master_key].keys():
+                self.frameworkError_list[master_key][frameErr.callermessage] += 1
+            else:
+                self.frameworkError_list[master_key][frameErr.callermessage] = 1
+        else:
+            self.frameworkError_list[master_key] = {frameErr.callermessage: 1}
 
 
 # Main function definition  MUST BE at the END OF FILE
@@ -245,4 +272,10 @@ if __name__ == "__main__":
     # Business logic for input arguments to main function
     framework_model = cFramework()
     framework_model.update_framework(sys.argv)
-    framework_model.mainComputation(framework_model.local_struct) # return value ignored
+    frameworkError_list = framework_model.mainComputation(framework_model.local_struct)  # return value ignored
+    filename = framework_model.paramPath + 'Logs' + direc_ident + 'BckTrk_exception_' + \
+               framework_model.local_struct["currentTime"].strftime("%Y-%m-%d") + '.json'
+
+    with open(filename, "w") as data_file:
+        json.dump(frameworkError_list, data_file, indent=4, sort_keys=True)
+
