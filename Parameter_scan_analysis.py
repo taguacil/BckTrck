@@ -79,21 +79,23 @@ for i in range(number_of_points):
         except IOError:
             print("Error loading file <%s>, skipping...") % txt_file_read
         else:
-            sampling_ratios[i:(i+len_noise_levels)] = temp['RCT_ALG_LASSO']['sampling_ratio'] * np.ones(len_noise_levels)
-            path_lengths[i:(i+len_noise_levels)]    = temp['acquisition_length'] * np.ones(len_noise_levels)
-            learning_rates[i:(i+len_noise_levels)]  = temp['RCT_ALG_LASSO']['lasso_learning_rate'] * np.ones(len_noise_levels)
-            noise_levels[i:(i+len_noise_levels)]    = np.array(temp['noise_level_meter'])
+            start = i*len_noise_levels
+            end = (i+1)*len_noise_levels
+            sampling_ratios[start:end] = temp['RCT_ALG_LASSO']['sampling_ratio'] * np.ones(len_noise_levels)
+            path_lengths[start:end]    = temp['acquisition_length'] * np.ones(len_noise_levels)
+            learning_rates[start:end]  = temp['RCT_ALG_LASSO']['lasso_learning_rate'] * np.ones(len_noise_levels)
+            noise_levels[start:end]    = np.array(temp['noise_level_meter'])
 
             # prepare the l1 norm
             if temp['TRANSFORM']['bDctTransform']:
-                l1_norm_lat[i:(i+len_noise_levels)] = \
+                l1_norm_lat[start:end] = \
                     np.mean(np.linalg.norm(temp["RESULTS"]['transformed_paths'][0], ord=1, axis=0), axis=0)
-                l1_norm_lon[i:(i+len_noise_levels)] = \
+                l1_norm_lon[start:end] = \
                     np.mean(np.linalg.norm(temp["RESULTS"]['transformed_paths'][1], ord=1, axis=0), axis=0)
 
-            SNR[i:(i+len_noise_levels)] = temp["RESULTS"]['reconstructed_db_latlon']['Lasso']
-            MSE[i:(i+len_noise_levels)] = temp["RESULTS"]['MSE_latlon']['Lasso']
-            #print("File <%d> processed out of <%d>") % (i+1, number_of_points)
+            SNR[start:end] = temp["RESULTS"]['reconstructed_db_latlon']['Lasso']
+            MSE[start:end] = temp["RESULTS"]['MSE_latlon']['Lasso']
+            print("File <%d> processed out of <%d>" % (i+1, number_of_points))
 
 sampling_ratios_values = np.unique(sampling_ratios)
 path_lengths_values = np.unique(path_lengths)
