@@ -27,6 +27,8 @@ from concurrent import futures
 import sys
 import platform
 import math
+import json
+import os
 
 # User-defined library import
 
@@ -36,6 +38,9 @@ if platform.system() == "Windows":
     direc_ident = "\\"
 else:
     direc_ident = "/"
+
+workingDir = os.getcwd()
+resultsPath = workingDir + direc_ident + 'Logs' + direc_ident
 
 WORKERS = 16
 NUMBER_POINTS = 50e3
@@ -56,7 +61,7 @@ path_lengths = [10, 20]
 for lasso_learning_rate in lasso_learning_rates:
     for sampling_ratio in sampling_ratios:
         for path_length in path_lengths:
-            realization = math.ceil(NUMBER_POINTS/path_length)
+            realization = math.ceil(NUMBER_POINTS / path_length)
             iterable_params.append((sampling_ratio, path_length, lasso_learning_rate, realization))
 
 iterable_length = range(0, len(iterable_params), 1)
@@ -68,6 +73,7 @@ if numberOfArgument == 2:
 else:
     print('Filenames identifier must be given')
     sys.exit(0)
+
 
 # The main processing function
 def CSNN_proc(index):
@@ -87,11 +93,29 @@ def CSNN_proc(index):
     framework_model.local_struct["noise_level_meter"] = noise_levels
     framework_model.local_struct["filename"] = \
         "%s_%.f_%.3f_%.3f" % (flag, path_length_in, sampling_ratio_in, lasso_learning_rate_in)
-    framework_model.mainComputation(framework_model.local_struct)
+    reterrorDict = framework_model.mainComputation(framework_model.local_struct)
+    return reterrorDict, sampling_ratio_in, path_length_in, lasso_learning_rate_in, realization_in
 
 
 # The main loop
 if __name__ == '__main__':
     with futures.ProcessPoolExecutor(max_workers=WORKERS) as executor:
-        print(executor.map(CSNN_proc, iterable_length))
-        print("Map done, closing pool and terminating...")
+        returnVals = executor.map(CSNN_proc, iterable_length)
+        logfile = {}
+        passednumber = 0
+        for retVal in returnVals:
+            if retVal[0]["bNoErrors"]:
+                passednumber += 1
+            else:
+                print("Generation failed for tuple (%.3f, %d, %.3f, %.3f)"
+                      % (retVal[1], retVal[2], retVal[3], retVal[4]))
+                logfile[str((retVal[1], retVal[2], retVal[3], retVal[4]))] = retVal[0]
+
+
+        print("Map done, closing pool and terminating with <%d> out of <%d> passed generations"
+              % (passednumber, len(iterable_params)))  # if there is a crash, it will not appear in the stats
+
+        filename = resultsPath + 'BckTrk_scan_exception_' + flag + '.txt'
+
+        with open(filename, "w") as data_file:
+            json.dump(logfile, data_file, indent=4, sort_keys=True)

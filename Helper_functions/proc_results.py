@@ -32,7 +32,10 @@ import platform
 from scipy import signal
 import scipy.fftpack as ft
 
-## Bring the logger
+from Helper_functions.framework_error import CFrameworkError
+from Helper_functions.framework_error import CErrorTypes
+
+# Bring the logger
 import logging
 
 logger = logging.getLogger('BckTrk')
@@ -105,10 +108,10 @@ class cProcessFile:
         with open(self.m_filename, 'wb') as txt_file:
             try:
                 pickle.dump(struct, txt_file)
-            except IOError:
-                return False
-            else:
-                return True
+            except IOError as io_error:
+                errdict = {"file": __file__,
+                           "message": "Could not dump in pickle file", "errorType": CErrorTypes.ioerror}
+                raise CFrameworkError(errdict) from io_error
 
 
     # Read from txt file pickle format into dictionary
