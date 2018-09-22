@@ -110,54 +110,54 @@ table.to_csv(resultsPath + "debugTable" + '.csv', encoding='utf-8', index=False)
 
 fig, axes = plt.subplots(nrows=2, ncols=3, constrained_layout=True)
 
-table[(table.Lr == learning_rates_values[0]) & (table.N == noise_levels_values[0])]. \
+table[(table.Lr == learning_rates_values[2]) & (table.N == noise_levels_values[1])]. \
     plot.scatter('Sr', 'Pl', c='MSE', colormap='rainbow_r', ax=axes[0, 0])
 
-table[(table.Pl == path_lengths_values[0]) & (table.N == noise_levels_values[0])]. \
+table[(table.Pl == path_lengths_values[10]) & (table.N == noise_levels_values[1])]. \
     plot.scatter('Sr', 'Lr', c='MSE', colormap='rainbow_r', ax=axes[0, 1])
 
-table[(table.Lr == learning_rates_values[0]) & (table.Pl == path_lengths_values[0])]. \
+table[(table.Lr == learning_rates_values[2]) & (table.Pl == path_lengths_values[10])]. \
     plot.scatter('Sr', 'N', c='MSE', colormap='rainbow_r', ax=axes[0, 2])
 
-table[(table.Sr == sampling_ratios_values[0]) & (table.N == noise_levels_values[0])]. \
+table[(table.Sr == sampling_ratios_values[2]) & (table.N == noise_levels_values[1])]. \
     plot.scatter('Pl', 'Lr', c='MSE', colormap='rainbow_r', ax=axes[1, 0])
 
-table[(table.Lr == learning_rates_values[0]) & (table.Sr == sampling_ratios_values[0])]. \
+table[(table.Lr == learning_rates_values[2]) & (table.Sr == sampling_ratios_values[2])]. \
     plot.scatter('Pl', 'N', c='MSE', colormap='rainbow_r', ax=axes[1, 1])
 
-table[(table.Sr == sampling_ratios_values[0]) & (table.Pl == path_lengths_values[0])]. \
+table[(table.Sr == sampling_ratios_values[2]) & (table.Pl == path_lengths_values[10])]. \
     plot.scatter('Lr', 'N', c='MSE', colormap='rainbow_r', ax=axes[1, 2])
 
 plt.show()
 
 fig, axes = plt.subplots(nrows=2, ncols=3, constrained_layout=True)
 
-table[(table.Lr == learning_rates_values[0]) & (table.N == noise_levels_values[0])]. \
+table[(table.Lr == learning_rates_values[2]) & (table.N == noise_levels_values[1])]. \
     plot.scatter('Sr', 'Pl', c='SNR', colormap='rainbow_r', ax=axes[0, 0])
 
-table[(table.Pl == path_lengths_values[0]) & (table.N == noise_levels_values[0])]. \
+table[(table.Pl == path_lengths_values[10]) & (table.N == noise_levels_values[1])]. \
     plot.scatter('Sr', 'Lr', c='SNR', colormap='rainbow_r', ax=axes[0, 1])
 
-table[(table.Lr == learning_rates_values[0]) & (table.Pl == path_lengths_values[0])]. \
+table[(table.Lr == learning_rates_values[2]) & (table.Pl == path_lengths_values[10])]. \
     plot.scatter('Sr', 'N', c='SNR', colormap='rainbow_r', ax=axes[0, 2])
 
-table[(table.Sr == sampling_ratios_values[0]) & (table.N == noise_levels_values[0])]. \
+table[(table.Sr == sampling_ratios_values[2]) & (table.N == noise_levels_values[1])]. \
     plot.scatter('Pl', 'Lr', c='SNR', colormap='rainbow_r', ax=axes[1, 0])
 
-table[(table.Lr == learning_rates_values[0]) & (table.Sr == sampling_ratios_values[0])]. \
+table[(table.Lr == learning_rates_values[2]) & (table.Sr == sampling_ratios_values[2])]. \
     plot.scatter('Pl', 'N', c='SNR', colormap='rainbow_r', ax=axes[1, 1])
 
-table[(table.Sr == sampling_ratios_values[0]) & (table.Pl == path_lengths_values[0])]. \
+table[(table.Sr == sampling_ratios_values[2]) & (table.Pl == path_lengths_values[10])]. \
     plot.scatter('Lr', 'N', c='SNR', colormap='rainbow_r', ax=axes[1, 2])
 
 plt.show()
 
-table[(table.Lr == learning_rates_values[0]) & (table.Sr == sampling_ratios_values[0])]. \
+table[(table.Lr == learning_rates_values[2]) & (table.Sr == sampling_ratios_values[2])]. \
     plot.scatter('Pl', 'N', c='L1lat', colormap='rainbow_r')
 plt.title('L1 norm of lat')
 plt.show()
 
-table[(table.Lr == learning_rates_values[0]) & (table.Sr == sampling_ratios_values[0])]. \
+table[(table.Lr == learning_rates_values[2]) & (table.Sr == sampling_ratios_values[2])]. \
     plot.scatter('Pl', 'N', c='L1lon', colormap='rainbow_r')
 plt.title('L1 norm of lon')
 plt.show()
