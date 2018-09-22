@@ -8,8 +8,8 @@
 
    Description :
 
-   This file contains the main function which is the core of the simulation.
-   More details here  
+   This file contains the analysis of the generated scan files,
+   generic enough to handle missing files
    
    References :
 
@@ -28,6 +28,7 @@ import sys
 import _pickle as pickle
 import matplotlib.pyplot as plt
 import platform
+import pandas as pd
 
 if platform.system() == "Windows":
     direc_ident = "\\"
@@ -54,19 +55,20 @@ if number_of_points == 0:
 
 with open(resultsPath + parameter_scan_files[0], 'rb') as txt_file_read:
     temp = pickle.load(txt_file_read)
-    noise_levels = np.array(temp['noise_level_meter'])
+    noise_levels_values = np.array(temp['noise_level_meter'])
 
-len_noise_levels = noise_levels.shape[0]
+len_noise_levels = noise_levels_values.shape[0]
 
-sampling_ratios = np.zeros((number_of_points, len_noise_levels))
-path_lengths = np.zeros((number_of_points, len_noise_levels))
-learning_rates = np.zeros((number_of_points, len_noise_levels))
+sampling_ratios = np.zeros((number_of_points * len_noise_levels))
+path_lengths = np.zeros((number_of_points * len_noise_levels))
+learning_rates = np.zeros((number_of_points * len_noise_levels))
+noise_levels = np.zeros((number_of_points * len_noise_levels))
 
-MSE = np.zeros((number_of_points, len_noise_levels))
-SNR = np.zeros((number_of_points, len_noise_levels))
+MSE = np.zeros((number_of_points * len_noise_levels))
+SNR = np.zeros((number_of_points * len_noise_levels))
 
-l1_norm_lat = np.zeros((number_of_points, len_noise_levels))
-l1_norm_lon = np.zeros((number_of_points, len_noise_levels))
+l1_norm_lat = np.zeros((number_of_points * len_noise_levels))
+l1_norm_lon = np.zeros((number_of_points * len_noise_levels))
 
 for i in range(number_of_points):
     file = parameter_scan_files[i]
@@ -77,168 +79,85 @@ for i in range(number_of_points):
         except IOError:
             print("Error loading file <%s>, skipping...") % txt_file_read
         else:
-            sampling_ratios[i, :] = temp['RCT_ALG_LASSO']['sampling_ratio'] * np.ones(len_noise_levels)
-            path_lengths[i, :] = temp['acquisition_length'] * np.ones(len_noise_levels)
-            learning_rates[i, :] = temp['RCT_ALG_LASSO']['lasso_learning_rate'] * np.ones(len_noise_levels)
+            start = i * len_noise_levels
+            end = (i + 1) * len_noise_levels
+            sampling_ratios[start:end] = temp['RCT_ALG_LASSO']['sampling_ratio'] * np.ones(len_noise_levels)
+            path_lengths[start:end] = temp['acquisition_length'] * np.ones(len_noise_levels)
+            learning_rates[start:end] = temp['RCT_ALG_LASSO']['lasso_learning_rate'] * np.ones(len_noise_levels)
+            noise_levels[start:end] = np.array(temp['noise_level_meter'])
 
             # prepare the l1 norm
             if temp['TRANSFORM']['bDctTransform']:
-                l1_norm_lat[i, :] = \
+                l1_norm_lat[start:end] = \
                     np.mean(np.linalg.norm(temp["RESULTS"]['transformed_paths'][0], ord=1, axis=0), axis=0)
-                l1_norm_lon[i, :] = \
+                l1_norm_lon[start:end] = \
                     np.mean(np.linalg.norm(temp["RESULTS"]['transformed_paths'][1], ord=1, axis=0), axis=0)
 
-            SNR[i, :] = temp["RESULTS"]['reconstructed_db_latlon']['Lasso']
-            MSE[i, :] = temp["RESULTS"]['MSE_latlon']['Lasso']
-            print("File <%d> processed out of <%d>") % (i+1, number_of_points)
+            SNR[start:end] = temp["RESULTS"]['reconstructed_db_latlon']['Lasso']
+            MSE[start:end] = temp["RESULTS"]['MSE_latlon']['Lasso']
+            print("File <%d> processed out of <%d>" % (i + 1, number_of_points))
 
-sampling_ratios = np.unique(sampling_ratios)
-path_lengths = np.unique(path_lengths)
-learning_rates = np.unique(learning_rates)
+sampling_ratios_values = np.unique(sampling_ratios)
+path_lengths_values = np.unique(path_lengths)
+learning_rates_values = np.unique(learning_rates)
 
-len_sampling_ratios = sampling_ratios.shape[0]
-len_path_lengths = path_lengths.shape[0]
-len_learning_rates = learning_rates.shape[0]
+arr = np.array(
+    [sampling_ratios, path_lengths, learning_rates, noise_levels, l1_norm_lat, l1_norm_lon, SNR, MSE * 1e5]).transpose()
+table = pd.DataFrame(arr, columns=['Sr', 'Pl', 'Lr', 'N', 'L1lat', 'L1lon', 'SNR', 'MSE'])
 
-MSE = MSE.reshape((len_path_lengths, len_sampling_ratios, len_learning_rates, len_noise_levels))
-SNR = SNR.reshape((len_path_lengths, len_sampling_ratios, len_learning_rates, len_noise_levels))
-l1_norm_lat = l1_norm_lat.reshape((len_path_lengths, len_sampling_ratios, len_learning_rates, len_noise_levels))
-l1_norm_lon = l1_norm_lon.reshape((len_path_lengths, len_sampling_ratios, len_learning_rates, len_noise_levels))
+print("Dataframe creation complete, dumping and starting plotting")
+table.to_csv(resultsPath + "debugTable" + '.csv', encoding='utf-8', index=False)
 
-print("Reshape complete, plotting")
+fig, axes = plt.subplots(nrows=2, ncols=3, constrained_layout=True)
 
-plt.figure()
+table[(table.Lr == learning_rates_values[2]) & (table.N == noise_levels_values[1])]. \
+    plot.scatter('Sr', 'Pl', c='MSE', colormap='rainbow_r', ax=axes[0, 0])
 
-plt.subplot(2, 3, 1)
-plt.pcolormesh(MSE[:, :, 0, 0] * 1e5, cmap='rainbow_r')
-plt.xticks(np.linspace(0.5, (len_sampling_ratios - 0.5), len_sampling_ratios), sampling_ratios)
-plt.yticks(np.linspace(0.5, (len_path_lengths - 0.5), len_path_lengths), path_lengths)
-plt.title('MSE of reconstructed (1e-5)')
-plt.xlabel('Sampling ratio')
-plt.ylabel('Path Length')
-plt.colorbar()
+table[(table.Pl == path_lengths_values[10]) & (table.N == noise_levels_values[1])]. \
+    plot.scatter('Sr', 'Lr', c='MSE', colormap='rainbow_r', ax=axes[0, 1])
 
-plt.subplot(2, 3, 2)
-plt.pcolormesh(MSE[:, 0, :, 0] * 1e5, cmap='rainbow_r')
-plt.xticks(np.linspace(0.5, (len_learning_rates - 0.5), len_learning_rates), learning_rates)
-plt.yticks(np.linspace(0.5, (len_path_lengths - 0.5), len_path_lengths), path_lengths)
-plt.title('MSE of reconstructed (1e-5)')
-plt.xlabel('Learning rate')
-plt.ylabel('Path Length')
-plt.colorbar()
+table[(table.Lr == learning_rates_values[2]) & (table.Pl == path_lengths_values[10])]. \
+    plot.scatter('Sr', 'N', c='MSE', colormap='rainbow_r', ax=axes[0, 2])
 
-plt.subplot(2, 3, 3)
-plt.pcolormesh(MSE[:, 0, 0, :] * 1e5, cmap='rainbow_r')
-plt.xticks(np.linspace(0.5, (len_noise_levels - 0.5), len_noise_levels), noise_levels)
-plt.yticks(np.linspace(0.5, (len_path_lengths - 0.5), len_path_lengths), path_lengths)
-plt.title('MSE of reconstructed (1e-5)')
-plt.xlabel('Noise level')
-plt.ylabel('Path Length')
-plt.colorbar()
+table[(table.Sr == sampling_ratios_values[2]) & (table.N == noise_levels_values[1])]. \
+    plot.scatter('Pl', 'Lr', c='MSE', colormap='rainbow_r', ax=axes[1, 0])
 
-plt.subplot(2, 3, 4)
-plt.pcolormesh(MSE[0, :, :, 0] * 1e5, cmap='rainbow_r')
-plt.xticks(np.linspace(0.5, (len_learning_rates - 0.5), len_learning_rates), learning_rates)
-plt.yticks(np.linspace(0.5, (len_sampling_ratios - 0.5), len_sampling_ratios), sampling_ratios)
-plt.title('MSE of reconstructed (1e-5)')
-plt.xlabel('Learning rate')
-plt.ylabel('Sampling ratio')
-plt.colorbar()
+table[(table.Lr == learning_rates_values[2]) & (table.Sr == sampling_ratios_values[2])]. \
+    plot.scatter('Pl', 'N', c='MSE', colormap='rainbow_r', ax=axes[1, 1])
 
-plt.subplot(2, 3, 5)
-plt.pcolormesh(MSE[0, :, 0, :] * 1e5, cmap='rainbow_r')
-plt.xticks(np.linspace(0.5, (len_noise_levels - 0.5), len_noise_levels), noise_levels)
-plt.yticks(np.linspace(0.5, (len_sampling_ratios - 0.5), len_sampling_ratios), sampling_ratios)
-plt.title('MSE of reconstructed (1e-5)')
-plt.xlabel('Noise level')
-plt.ylabel('Sampling ratio')
-plt.colorbar()
+table[(table.Sr == sampling_ratios_values[2]) & (table.Pl == path_lengths_values[10])]. \
+    plot.scatter('Lr', 'N', c='MSE', colormap='rainbow_r', ax=axes[1, 2])
 
-plt.subplot(2, 3, 6)
-plt.pcolormesh(MSE[0, 0, :, :] * 1e5, cmap='rainbow_r')
-plt.xticks(np.linspace(0.5, (len_noise_levels - 0.5), len_noise_levels), noise_levels)
-plt.yticks(np.linspace(0.5, (len_learning_rates - 0.5), len_learning_rates), learning_rates)
-plt.title('MSE of reconstructed (1e-5)')
-plt.xlabel('Noise level')
-plt.ylabel('Learning rate')
-plt.colorbar()
-
-plt.tight_layout()
 plt.show()
 
-fig = plt.figure()
+fig, axes = plt.subplots(nrows=2, ncols=3, constrained_layout=True)
 
-plt.subplot(2, 3, 1)
-plt.pcolormesh(SNR[:, :, 0, 0], cmap='rainbow_r')
-plt.xticks(np.linspace(0.5, (len_sampling_ratios - 0.5), len_sampling_ratios), sampling_ratios)
-plt.yticks(np.linspace(0.5, (len_path_lengths - 0.5), len_path_lengths), path_lengths)
-plt.xlabel('Sampling ratio')
-plt.ylabel('Path Length')
-plt.title('SNR [dB] of MSE ratios')
-plt.colorbar()
+table[(table.Lr == learning_rates_values[2]) & (table.N == noise_levels_values[1])]. \
+    plot.scatter('Sr', 'Pl', c='SNR', colormap='rainbow_r', ax=axes[0, 0])
 
-plt.subplot(2, 3, 2)
-plt.pcolormesh(SNR[:, 0, :, 0], cmap='rainbow_r')
-plt.xticks(np.linspace(0.5, (len_learning_rates - 0.5), len_learning_rates), learning_rates)
-plt.yticks(np.linspace(0.5, (len_path_lengths - 0.5), len_path_lengths), path_lengths)
-plt.xlabel('Learning rate')
-plt.ylabel('Path Length')
-plt.title('SNR [dB] of MSE ratios')
-plt.colorbar()
+table[(table.Pl == path_lengths_values[10]) & (table.N == noise_levels_values[1])]. \
+    plot.scatter('Sr', 'Lr', c='SNR', colormap='rainbow_r', ax=axes[0, 1])
 
-plt.subplot(2, 3, 3)
-plt.pcolormesh(SNR[:, 0, 0, :], cmap='rainbow_r')
-plt.xticks(np.linspace(0.5, (len_noise_levels - 0.5), len_noise_levels), noise_levels)
-plt.yticks(np.linspace(0.5, (len_path_lengths - 0.5), len_path_lengths), path_lengths)
-plt.xlabel('Noise level')
-plt.ylabel('Path Length')
-plt.title('SNR [dB] of MSE ratios')
-plt.colorbar()
+table[(table.Lr == learning_rates_values[2]) & (table.Pl == path_lengths_values[10])]. \
+    plot.scatter('Sr', 'N', c='SNR', colormap='rainbow_r', ax=axes[0, 2])
 
-plt.subplot(2, 3, 4)
-plt.pcolormesh(SNR[0, :, :, 0], cmap='rainbow_r')
-plt.xticks(np.linspace(0.5, (len_learning_rates - 0.5), len_learning_rates), learning_rates)
-plt.yticks(np.linspace(0.5, (len_sampling_ratios - 0.5), len_sampling_ratios), sampling_ratios)
-plt.xlabel('Learning rate')
-plt.ylabel('Sampling ratio')
-plt.title('SNR [dB] of MSE ratios')
-plt.colorbar()
+table[(table.Sr == sampling_ratios_values[2]) & (table.N == noise_levels_values[1])]. \
+    plot.scatter('Pl', 'Lr', c='SNR', colormap='rainbow_r', ax=axes[1, 0])
 
-plt.subplot(2, 3, 5)
-plt.pcolormesh(SNR[0, :, 0, :], cmap='rainbow_r')
-plt.xticks(np.linspace(0.5, (len_noise_levels - 0.5), len_noise_levels), noise_levels)
-plt.yticks(np.linspace(0.5, (len_sampling_ratios - 0.5), len_sampling_ratios), sampling_ratios)
-plt.xlabel('Noise level')
-plt.ylabel('Sampling ratio')
-plt.title('SNR [dB] of MSE ratios')
-plt.colorbar()
+table[(table.Lr == learning_rates_values[2]) & (table.Sr == sampling_ratios_values[2])]. \
+    plot.scatter('Pl', 'N', c='SNR', colormap='rainbow_r', ax=axes[1, 1])
 
-plt.subplot(2, 3, 6)
-plt.pcolormesh(SNR[0, 0, :, :], cmap='rainbow_r')
-plt.xticks(np.linspace(0.5, (len_noise_levels - 0.5), len_noise_levels), noise_levels)
-plt.yticks(np.linspace(0.5, (len_learning_rates - 0.5), len_learning_rates), learning_rates)
-plt.xlabel('Noise level')
-plt.ylabel('Learning rate')
-plt.title('SNR [dB] of MSE ratios')
-plt.colorbar()
+table[(table.Sr == sampling_ratios_values[2]) & (table.Pl == path_lengths_values[10])]. \
+    plot.scatter('Lr', 'N', c='SNR', colormap='rainbow_r', ax=axes[1, 2])
 
-plt.tight_layout()
 plt.show()
 
-plt.pcolormesh(l1_norm_lat[:, 0, 0, :], cmap='rainbow_r')
-plt.xticks(np.linspace(0.5, (len_noise_levels - 0.5), len_noise_levels), noise_levels)
-plt.yticks(np.linspace(0.5, (len_path_lengths - 0.5), len_path_lengths), path_lengths)
-plt.xlabel('Noise level')
-plt.ylabel('Path Length')
+table[(table.Lr == learning_rates_values[2]) & (table.Sr == sampling_ratios_values[2])]. \
+    plot.scatter('Pl', 'N', c='L1lat', colormap='rainbow_r')
 plt.title('L1 norm of lat')
-plt.colorbar()
 plt.show()
 
-plt.pcolormesh(l1_norm_lon[:, 0, 0, :], cmap='rainbow_r')
-plt.xticks(np.linspace(0.5, (len_noise_levels - 0.5), len_noise_levels), noise_levels)
-plt.yticks(np.linspace(0.5, (len_path_lengths - 0.5), len_path_lengths), path_lengths)
-plt.xlabel('Noise level')
-plt.ylabel('Path Length')
+table[(table.Lr == learning_rates_values[2]) & (table.Sr == sampling_ratios_values[2])]. \
+    plot.scatter('Pl', 'N', c='L1lon', colormap='rainbow_r')
 plt.title('L1 norm of lon')
-plt.colorbar()
 plt.show()
