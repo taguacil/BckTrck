@@ -52,12 +52,6 @@ sampling_ratios = [0.05, 0.07, 0.1, 0.125, 0.15, 0.175, 0.2, 0.25, 0.3, 0.35, 0.
 path_lengths = [10, 20, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2400,
                 2600, 2800, 3000, 3200, 3400, 3600, 3800, 4000, 4200, 4400, 4600, 4800, 5000]
 
-NUMBER_POINTS = 10e3
-noise_levels = [0.0005, 5]
-lasso_learning_rates = [0.001, 0.005]
-sampling_ratios = [0.05, 0.07]
-path_lengths = [10, 20]
-
 for lasso_learning_rate in lasso_learning_rates:
     for sampling_ratio in sampling_ratios:
         for path_length in path_lengths:
@@ -71,7 +65,7 @@ numberOfArgument = len(sys.argv)
 if numberOfArgument == 2:
     flag = sys.argv[1]  # first argument should be the filenames identifier
 else:
-    print('Filenames identifier must be given')
+    print('Filenames identifier must be given or too many arguments given')
     sys.exit(0)
 
 
