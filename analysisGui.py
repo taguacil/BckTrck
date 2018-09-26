@@ -62,7 +62,7 @@ def create_main_frame(self):
     self.grid_cb = QtWidgets.QCheckBox("Show &Grid")
     self.grid_cb.setChecked(False)
     self.grid_cb.stateChanged.connect(self.on_draw)
-    
+
     self.log_option = QtWidgets.QCheckBox("Log colormap")
     self.log_option.setChecked(False)
     self.log_option.stateChanged.connect(self.on_draw)
@@ -203,58 +203,54 @@ class AppForm(QtWidgets.QMainWindow):
         self.fig.clear()
         self.axes = self.fig.subplots(nrows=3, ncols=3)
         bgrid = self.grid_cb.isChecked()
-        if  self.log_option.isChecked() :
-            self.table = self.table_log
-            print('log')
-            print(self.table.head())
-        else :
-            print('lin')
-            self.table = self.table_lin
-            print(self.table.head())
-        
-        self.table[(self.table.LearningRate == learning_rates_slice) &
-                   (self.table.Noise == noise_levels_slice)]. \
+        if self.log_option.isChecked():
+            table = self.table_log
+        else:
+            table = self.table_lin
+
+        table[(table.LearningRate == learning_rates_slice) &
+              (table.Noise == noise_levels_slice)]. \
             plot.scatter('SamplingRatio', 'PathLengths', c='MSE', colormap='rainbow_r', ax=self.axes[0, 0],
                          title='Lr <%.3f>, Noise <%.3f>' % (learning_rates_slice, noise_levels_slice),
                          logy=True, grid=bgrid)
 
-        self.table[(self.table.PathLengths == path_lengths_slice) &
-                   (self.table.Noise == noise_levels_slice)]. \
+        table[(table.PathLengths == path_lengths_slice) &
+              (table.Noise == noise_levels_slice)]. \
             plot.scatter('SamplingRatio', 'LearningRate', c='MSE', colormap='rainbow_r', ax=self.axes[0, 1],
                          title='Pl <%d>, Noise <%.3f>' % (path_lengths_slice, noise_levels_slice),
                          logy=True, grid=bgrid)
 
-        self.table[(self.table.LearningRate == learning_rates_slice) &
-                   (self.table.PathLengths == path_lengths_slice)]. \
+        table[(table.LearningRate == learning_rates_slice) &
+              (table.PathLengths == path_lengths_slice)]. \
             plot.scatter('SamplingRatio', 'Noise', c='MSE', colormap='rainbow_r', ax=self.axes[0, 2],
                          title='Pl <%d>, Lr <%.3f>' % (path_lengths_slice, learning_rates_slice),
                          logy=True, grid=bgrid)
 
-        self.table[(self.table.SamplingRatio == sampling_ratios_slice) &
-                   (self.table.Noise == noise_levels_slice)]. \
+        table[(table.SamplingRatio == sampling_ratios_slice) &
+              (table.Noise == noise_levels_slice)]. \
             plot.scatter('PathLengths', 'LearningRate', c='MSE', colormap='rainbow_r', ax=self.axes[1, 0],
                          title='Sr <%.3f>, Noise <%.3f>' % (sampling_ratios_slice, noise_levels_slice),
                          logy=True, grid=bgrid)
 
-        self.table[(self.table.LearningRate == learning_rates_slice) &
-                   (self.table.SamplingRatio == sampling_ratios_slice)]. \
+        table[(table.LearningRate == learning_rates_slice) &
+              (table.SamplingRatio == sampling_ratios_slice)]. \
             plot.scatter('PathLengths', 'Noise', c='MSE', colormap='rainbow_r', ax=self.axes[1, 1],
                          title='Sr <%.3f>, Lr <%.3f>' % (sampling_ratios_slice, learning_rates_slice),
                          logy=True, grid=bgrid)
 
-        self.table[(self.table.SamplingRatio == sampling_ratios_slice) &
-                   (self.table.PathLengths == path_lengths_slice)]. \
+        table[(table.SamplingRatio == sampling_ratios_slice) &
+              (table.PathLengths == path_lengths_slice)]. \
             plot.scatter('LearningRate', 'Noise', c='MSE', colormap='rainbow_r', ax=self.axes[1, 2],
                          title='Lr <%.3f>, Noise <%.3f>' % (learning_rates_slice, noise_levels_slice),
                          logy=True, grid=bgrid)
 
-        self.table[(self.table.LearningRate == learning_rates_slice) &
-                   (self.table.SamplingRatio == sampling_ratios_slice)]. \
+        table[(table.LearningRate == learning_rates_slice) &
+              (table.SamplingRatio == sampling_ratios_slice)]. \
             plot.scatter('PathLengths', 'Noise', c='L1Lat', colormap='rainbow_r', ax=self.axes[2, 0],
                          title='L1 norm for latitude', logy=True, grid=bgrid)
 
-        self.table[(self.table.LearningRate == learning_rates_slice) &
-                   (self.table.SamplingRatio == sampling_ratios_slice)]. \
+        table[(table.LearningRate == learning_rates_slice) &
+              (table.SamplingRatio == sampling_ratios_slice)]. \
             plot.scatter('PathLengths', 'Noise', c='L1Lon', colormap='rainbow_r', ax=self.axes[2, 1],
                          title='L1 norm for longitude', logy=True, grid=bgrid)
 

@@ -31,7 +31,7 @@ import collections
 import logging
 import platform
 
-## User-defined library import
+# User-defined library import
 from Helper_functions.proc_results import process_data
 from Helper_functions.transforms import transforms
 from Navigation.Random_walker import random_2d_path_generator

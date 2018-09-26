@@ -105,7 +105,6 @@ if __name__ == '__main__':
                       % (retVal[1], retVal[2], retVal[3], retVal[4]))
                 logfile[str((retVal[1], retVal[2], retVal[3], retVal[4]))] = retVal[0]
 
-
         print("Map done, closing pool and terminating with <%d> out of <%d> passed generations"
               % (passednumber, len(iterable_params)))  # if there is a crash, it will not appear in the stats
 
