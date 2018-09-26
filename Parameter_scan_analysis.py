@@ -129,6 +129,7 @@ else:
     sampling_ratios_values = np.unique(sampling_ratios)
     path_lengths_values = np.unique(path_lengths)
     learning_rates_values = np.unique(learning_rates)
+    noise_levels_values = np.unique(noise_levels)
 
     arr = np.array(
         [sampling_ratios, path_lengths, learning_rates, noise_levels, l1_norm_lat, l1_norm_lon, SNR,
