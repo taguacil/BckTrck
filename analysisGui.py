@@ -26,6 +26,7 @@ from PyQt5 import QtWidgets
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
+import numpy as np
 
 import Helper_functions.analysisCompute
 
@@ -61,13 +62,17 @@ def create_main_frame(self):
     self.grid_cb = QtWidgets.QCheckBox("Show &Grid")
     self.grid_cb.setChecked(False)
     self.grid_cb.stateChanged.connect(self.on_draw)
+    
+    self.log_option = QtWidgets.QCheckBox("Log colormap")
+    self.log_option.setChecked(False)
+    self.log_option.stateChanged.connect(self.on_draw)
 
     #
     # Layout with box sizers
     #
     hbox = QtWidgets.QHBoxLayout()
 
-    for w in [self.textbox, self.draw_button, self.grid_cb]:
+    for w in [self.textbox, self.draw_button, self.grid_cb, self.log_option]:
         hbox.addWidget(w)
         hbox.setAlignment(w, QtCore.Qt.AlignVCenter)
 
@@ -116,7 +121,9 @@ class AppForm(QtWidgets.QMainWindow):
         create_main_frame(self)
         create_status_bar(self)
 
-        self.table = CScanAnalysis.get_panda_table()
+        self.table_lin = CScanAnalysis.get_panda_table()
+        self.table_log = self.table_lin.copy()
+        self.table_log.MSE = np.log10(self.table_log.MSE)
         self.sampling_ratios_values, self.path_lengths_values, \
         self.learning_rates_values, self.noise_levels_values = \
             CScanAnalysis.get_slices_values()
@@ -196,7 +203,15 @@ class AppForm(QtWidgets.QMainWindow):
         self.fig.clear()
         self.axes = self.fig.subplots(nrows=3, ncols=3)
         bgrid = self.grid_cb.isChecked()
-
+        if  self.log_option.isChecked() :
+            self.table = self.table_log
+            print('log')
+            print(self.table.head())
+        else :
+            print('lin')
+            self.table = self.table_lin
+            print(self.table.head())
+        
         self.table[(self.table.LearningRate == learning_rates_slice) &
                    (self.table.Noise == noise_levels_slice)]. \
             plot.scatter('SamplingRatio', 'PathLengths', c='MSE', colormap='rainbow_r', ax=self.axes[0, 0],
