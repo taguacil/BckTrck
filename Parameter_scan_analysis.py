@@ -29,6 +29,7 @@ import _pickle as pickle
 import matplotlib.pyplot as plt
 import platform
 import pandas as pd
+from ast import literal_eval
 
 if platform.system() == "Windows":
     direc_ident = "\\"
@@ -61,19 +62,19 @@ for file in result_files:
                 sys.exit(0)
             else:
                 bcsv_generated = True
-                sampling_ratios_values = table.Sr.unique()
-                path_lengths_values = table.Pl.unique()
-                learning_rates_values = table.Lr.unique()
-                noise_levels_values = table.N.unique()
+                sampling_ratios_values = table.SamplingRatio.unique()
+                path_lengths_values = table.PathLengths.unique()
+                learning_rates_values = table.LearningRate.unique()
+                noise_levels_values = table.Noise.unique()
                 break
 
 if bcsv_generated:
     if numberOfArgument == 3:
-        sliceTuple = sys.argv[2]  # second argument should be a slice tuple
-        # TODO convert string to tuple or other format, hardcoded for now
-        sliceTuple = (0, 0, 0, 0)  # sampling ratio, path lenghts, learning rate, noise levels
+        sliceTuple_string = sys.argv[2]  # second argument should be a slice tuple
+        sliceTuple = literal_eval(sliceTuple_string)
     else:
         print('Default slice to be plotted (0,0,0,0)')
+        sliceTuple = (0, 0, 0, 0)  # sampling ratio, path lenghts, learning rate, noise levels
 
 else:
     number_of_points = len(parameter_scan_files)
@@ -132,7 +133,8 @@ else:
     arr = np.array(
         [sampling_ratios, path_lengths, learning_rates, noise_levels, l1_norm_lat, l1_norm_lon, SNR,
          MSE * 1e5]).transpose()
-    table = pd.DataFrame(arr, columns=['Sr', 'Pl', 'Lr', 'N', 'L1lat', 'L1lon', 'SNR', 'MSE'])
+    table = pd.DataFrame(arr, columns=['SamplingRatio', 'PathLengths', 'LearningRate', 'Noise', 'L1Lat', 'L1Lon', 'SNR',
+                                       'MSE'])
 
     print("Dataframe creation complete, dumping and starting plotting")
     table.to_csv(resultsPath + flag + "_debugTable" + '.csv', encoding='utf-8', index=False)
@@ -145,54 +147,62 @@ noise_levels_slice = noise_levels_values[sliceTuple[3]]
 
 fig, axes = plt.subplots(nrows=2, ncols=3, constrained_layout=True)
 
-table[(table.Lr == learning_rates_slice) & (table.N == noise_levels_slice)]. \
-    plot.scatter('Sr', 'Pl', c='MSE', colormap='rainbow_r', ax=axes[0, 0])
+table[(table.LearningRate == learning_rates_slice) & (table.Noise == noise_levels_slice)]. \
+    plot.scatter('SamplingRatio', 'PathLengths', c='MSE', colormap='rainbow_r', ax=axes[0, 0],
+                 title='Lr <%.3f>, Noise <%.3f>' % (learning_rates_slice, noise_levels_slice), logy=True)
 
-table[(table.Pl == path_lengths_slice) & (table.N == noise_levels_slice)]. \
-    plot.scatter('Sr', 'Lr', c='MSE', colormap='rainbow_r', ax=axes[0, 1])
+table[(table.PathLengths == path_lengths_slice) & (table.Noise == noise_levels_slice)]. \
+    plot.scatter('SamplingRatio', 'LearningRate', c='MSE', colormap='rainbow_r', ax=axes[0, 1],
+                 title='Pl <%d>, Noise <%.3f>' % (path_lengths_slice, noise_levels_slice), logy=True)
 
-table[(table.Lr == learning_rates_slice) & (table.Pl == path_lengths_slice)]. \
-    plot.scatter('Sr', 'N', c='MSE', colormap='rainbow_r', ax=axes[0, 2])
+table[(table.LearningRate == learning_rates_slice) & (table.PathLengths == path_lengths_slice)]. \
+    plot.scatter('SamplingRatio', 'Noise', c='MSE', colormap='rainbow_r', ax=axes[0, 2],
+                 title='Pl <%d>, Lr <%.3f>' % (path_lengths_slice, learning_rates_slice), logy=True)
 
-table[(table.Sr == sampling_ratios_slice) & (table.N == noise_levels_slice)]. \
-    plot.scatter('Pl', 'Lr', c='MSE', colormap='rainbow_r', ax=axes[1, 0])
+table[(table.SamplingRatio == sampling_ratios_slice) & (table.Noise == noise_levels_slice)]. \
+    plot.scatter('PathLengths', 'LearningRate', c='MSE', colormap='rainbow_r', ax=axes[1, 0],
+                 title='Sr <%.3f>, Noise <%.3f>' % (sampling_ratios_slice, noise_levels_slice), logy=True)
 
-table[(table.Lr == learning_rates_slice) & (table.Sr == sampling_ratios_slice)]. \
-    plot.scatter('Pl', 'N', c='MSE', colormap='rainbow_r', ax=axes[1, 1])
+table[(table.LearningRate == learning_rates_slice) & (table.SamplingRatio == sampling_ratios_slice)]. \
+    plot.scatter('PathLengths', 'Noise', c='MSE', colormap='rainbow_r', ax=axes[1, 1],
+                 title='Sr <%.3f>, Lr <%.3f>' % (sampling_ratios_slice, learning_rates_slice), logy=True)
 
-table[(table.Sr == sampling_ratios_slice) & (table.Pl == path_lengths_slice)]. \
-    plot.scatter('Lr', 'N', c='MSE', colormap='rainbow_r', ax=axes[1, 2])
+table[(table.SamplingRatio == sampling_ratios_slice) & (table.PathLengths == path_lengths_slice)]. \
+    plot.scatter('LearningRate', 'Noise', c='MSE', colormap='rainbow_r', ax=axes[1, 2],
+                 title='Lr <%.3f>, Noise <%.3f>' % (learning_rates_slice, noise_levels_slice), logy=True)
 
 plt.show()
 
+"""
 fig, axes = plt.subplots(nrows=2, ncols=3, constrained_layout=True)
 
-table[(table.Lr == learning_rates_slice) & (table.N == noise_levels_slice)]. \
-    plot.scatter('Sr', 'Pl', c='SNR', colormap='rainbow_r', ax=axes[0, 0])
+table[(table.LearningRate == learning_rates_slice) & (table.Noise == noise_levels_slice)]. \
+    plot.scatter('SamplingRatio', 'PathLengths', c='SNR', colormap='rainbow_r', ax=axes[0, 0])
 
-table[(table.Pl == path_lengths_slice) & (table.N == noise_levels_slice)]. \
-    plot.scatter('Sr', 'Lr', c='SNR', colormap='rainbow_r', ax=axes[0, 1])
+table[(table.PathLengths == path_lengths_slice) & (table.Noise == noise_levels_slice)]. \
+    plot.scatter('SamplingRatio', 'LearningRate', c='SNR', colormap='rainbow_r', ax=axes[0, 1])
 
-table[(table.Lr == learning_rates_slice) & (table.Pl == path_lengths_slice)]. \
-    plot.scatter('Sr', 'N', c='SNR', colormap='rainbow_r', ax=axes[0, 2])
+table[(table.LearningRate == learning_rates_slice) & (table.PathLengths == path_lengths_slice)]. \
+    plot.scatter('SamplingRatio', 'Noise', c='SNR', colormap='rainbow_r', ax=axes[0, 2])
 
-table[(table.Sr == sampling_ratios_slice) & (table.N == noise_levels_slice)]. \
-    plot.scatter('Pl', 'Lr', c='SNR', colormap='rainbow_r', ax=axes[1, 0])
+table[(table.SamplingRatio == sampling_ratios_slice) & (table.Noise == noise_levels_slice)]. \
+    plot.scatter('PathLengths', 'LearningRate', c='SNR', colormap='rainbow_r', ax=axes[1, 0])
 
-table[(table.Lr == learning_rates_slice) & (table.Sr == sampling_ratios_slice)]. \
-    plot.scatter('Pl', 'N', c='SNR', colormap='rainbow_r', ax=axes[1, 1])
+table[(table.LearningRate == learning_rates_slice) & (table.SamplingRatio == sampling_ratios_slice)]. \
+    plot.scatter('PathLengths', 'Noise', c='SNR', colormap='rainbow_r', ax=axes[1, 1])
 
-table[(table.Sr == sampling_ratios_slice) & (table.Pl == path_lengths_slice)]. \
-    plot.scatter('Lr', 'N', c='SNR', colormap='rainbow_r', ax=axes[1, 2])
+table[(table.SamplingRatio == sampling_ratios_slice) & (table.PathLengths == path_lengths_slice)]. \
+    plot.scatter('LearningRate', 'Noise', c='SNR', colormap='rainbow_r', ax=axes[1, 2])
 
 plt.show()
+"""
 
-table[(table.Lr == learning_rates_slice) & (table.Sr == sampling_ratios_slice)]. \
-    plot.scatter('Pl', 'N', c='L1lat', colormap='rainbow_r')
-plt.title('L1 norm of lat')
+table[(table.LearningRate == learning_rates_slice) & (table.SamplingRatio == sampling_ratios_slice)]. \
+    plot.scatter('PathLengths', 'Noise', c='L1Lat', colormap='rainbow_r',
+                 title='L1 norm for latitude', logy=True)
 plt.show()
 
-table[(table.Lr == learning_rates_slice) & (table.Sr == sampling_ratios_slice)]. \
-    plot.scatter('Pl', 'N', c='L1lon', colormap='rainbow_r')
-plt.title('L1 norm of lon')
+table[(table.LearningRate == learning_rates_slice) & (table.SamplingRatio == sampling_ratios_slice)]. \
+    plot.scatter('PathLengths', 'Noise', c='L1Lon', colormap='rainbow_r',
+                 title='L1 norm for longitude', logy=True)
 plt.show()
