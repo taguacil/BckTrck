@@ -1,7 +1,7 @@
 {
     "gps_freq_Hz"               : 1,
     "realization"               : 100,
-    "acquisition_time_sec"      : 1000,
+    "acquisition_time_sec"      : 100,
     
     "random_seed"               : 55,
     "bUse_random_seed"          : true,

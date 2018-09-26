@@ -25,66 +25,73 @@ import pygeodesy as geo
 
 ## Bring the logger
 import logging
+
 logger = logging.getLogger('BckTrk')
 
-def convert_wm_to_elatlon(arr) :
+
+def convert_wm_to_elatlon(arr):
     logger.debug("Converts an array of webmercator points to ellipsoid Latitude and longitude coordinate")
-    n       = arr.shape[0]
-    temp    = np.empty(n, dtype=object)
-    
+    n = arr.shape[0]
+    temp = np.empty(n, dtype=object)
+
     for i in range(n):
         temp[i] = arr[i].toLatLon(geo.ellipsoidalVincenty.LatLon, datum=geo.Datums.WGS84)
     return temp
 
-def convert_elatlon_to_wm(arr) :
+
+def convert_elatlon_to_wm(arr):
     logger.debug("Converts an array of ellipsoid Latitude and longitude coordinates to webmercator points")
-    n       = arr.shape[0]
-    temp    = np.empty(n, dtype=object)
-    
+    n = arr.shape[0]
+    temp = np.empty(n, dtype=object)
+
     for i in range(n):
         temp[i] = geo.toWm(arr[i])
     return temp
 
-def convert_xy_to_wm(arr_float) :
+
+def convert_xy_to_wm(arr_float):
     logger.debug("Converts an array of x-y datapoints (2,n) array into webmercator points")
-    n       = arr_float.shape[1]
-    temp    = np.empty(n, dtype=object)
-    
+    n = arr_float.shape[1]
+    temp = np.empty(n, dtype=object)
+
     for i in range(n):
-        temp[i] = geo.Wm(arr_float[0,i],arr_float[1,i])
+        temp[i] = geo.Wm(arr_float[0, i], arr_float[1, i])
     return temp
 
-def convert_latlonvec_to_latlon(arr_float) :
+
+def convert_latlonvec_to_latlon(arr_float):
     logger.debug("Converts an array of latlon datapoints (2,n) array into latlon objects")
-    n       = arr_float.shape[1]
-    temp    = np.empty(n, dtype=object)
-    
+    n = arr_float.shape[1]
+    temp = np.empty(n, dtype=object)
+
     for i in range(n):
-        temp[i] = geo.ellipsoidalVincenty.LatLon(arr_float[0,i],arr_float[1,i])
+        temp[i] = geo.ellipsoidalVincenty.LatLon(arr_float[0, i], arr_float[1, i])
     return temp
 
-   ## Generate longitute and lattitude equivalent data
+
+# Generate longitute and lattitude equivalent data
 def generate_latlon_array(arr_wm):
     logger.debug("Generating a path of LatLon coordinates")
-    n               = arr_wm.shape[1]
-    temp            = np.empty((2,n), dtype=object)
-    positions_wm    = convert_xy_to_wm(arr_wm)
-    latlon          = convert_wm_to_elatlon(positions_wm)
+    n = arr_wm.shape[1]
+    temp = np.empty((2, n), dtype=object)
+    positions_wm = convert_xy_to_wm(arr_wm)
+    latlon = convert_wm_to_elatlon(positions_wm)
 
     for i in range(n):
-        temp[0,i] = latlon[i].lat
-        temp[1,i] = latlon[i].lon
+        temp[0, i] = latlon[i].lat
+        temp[1, i] = latlon[i].lon
     return temp
 
-   ## Generate webmercator equivalent data
+
+# Generate webmercator equivalent data
 def generate_WM_array(arr_latlon):
     logger.debug("Generating a path of WM points")
-    n                   = arr_latlon.shape[1]
-    temp                = np.empty((2,n), dtype=object)
-    positions_latlon    = convert_latlonvec_to_latlon(arr_latlon)
-    wm                  = convert_elatlon_to_wm(positions_latlon)
+    n = arr_latlon.shape[1]
+    temp = np.empty((2, n), dtype=object)
+    positions_latlon = convert_latlonvec_to_latlon(arr_latlon)
+    wm = convert_elatlon_to_wm(positions_latlon)
 
     for i in range(n):
-        temp[0,i] = wm[i].x
-        temp[1,i] = wm[i].y
+        temp[0, i] = wm[i].x
+        temp[1, i] = wm[i].y
     return temp
