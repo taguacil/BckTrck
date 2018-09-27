@@ -77,7 +77,7 @@ class CNeuralNetwork:
             metrics=["mse"]
         )
 
-    def train_nn(self):
+    def train_nn(self, paths_latlon_org, paths_latlon_noisy):
         results = self.model.fit(
             train_X, train_y,
             epochs=1000,
@@ -88,7 +88,7 @@ class CNeuralNetwork:
     def dump_nn_summary(self):
         self.model.summary()
 
-    def nn_inference(self):
+    def nn_inference(self, path_latlon_noisy):
         self.model.predict(test_X[0].reshape((1, 100)))
 
     def save_model(self, modelname):

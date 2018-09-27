@@ -40,6 +40,7 @@ from Navigation.AWGN import noise_generator
 from Reconstruction_algorithms.Master_reconstruction import reconstructor, identify_algorithms
 from Helper_functions.csv_interpreter import munge_csv
 from Helper_functions.framework_error import CFrameworkError
+from NeuralNetworks.NN import CNeuralNetwork
 
 if platform.system() == "Windows":
     direc_ident = "\\"
@@ -193,8 +194,8 @@ class cFramework:
             reconstructed_latlon_paths = []  # empty not used
             reconstructed_WM_paths = []  # empty not used
 
-            paths_wm_org = np.zeros((2, acquisition_length, numberOfRealizations))
-            paths_latlon_org = np.zeros((2, acquisition_length, numberOfRealizations))
+            paths_wm_org = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
+            paths_latlon_org = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
             paths_wm_noisy = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
             paths_latlon_noisy = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
             noise_vals = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
@@ -206,13 +207,16 @@ class cFramework:
                     # Generate random data
                     self.logger.debug('Generating random data for realization <%d>', realization)
 
-                    (paths_wm_org[:, :, realization], paths_latlon_org[:, :, realization]) = \
+                    (paths_wm_org[:, :, realization, lvl], paths_latlon_org[:, :, realization, lvl]) = \
                         random_2d_path_generator(local_struct)
 
                     # Generate noise for each realization
                     (paths_wm_noisy[:, :, realization, lvl], paths_latlon_noisy[:, :, realization, lvl],
                      noise_vals[:, :, realization, lvl]) = \
-                        noise_generator(local_struct, paths_wm_org[:, :, realization], noise_level[lvl])
+                        noise_generator(local_struct, paths_wm_org[:, :, realization, lvl], noise_level[lvl])
+
+            nnObj = CNeuralNetwork(local_struct)
+            nnObj.train_nn(paths_latlon_org, paths_latlon_noisy)
 
         else:
             # Iterate over the total number of realizations
