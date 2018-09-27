@@ -133,7 +133,7 @@ class cFramework:
     # Main function definition
     def mainComputation(self, local_struct):
 
-        #Variables initialization
+        # Variables initialization
         use_random_seed = local_struct['bUse_random_seed']
         random_seed = local_struct['random_seed']
         numberOfRealizations = local_struct['realization']
@@ -144,7 +144,7 @@ class cFramework:
         csv_path = local_struct['CSV_DATA']['csv_path']
         path_length = local_struct['CSV_DATA']['path_length']
 
-        #Set seed
+        # Set seed
         if use_random_seed:
             np.random.seed(random_seed)
 
@@ -183,7 +183,36 @@ class cFramework:
             local_struct['RESULTS']['reconstructed_latlon_paths'] = reconstructed_real_latlon_paths
             local_struct['RESULTS']['reconstructed_WM_paths'] = reconstructed_real_WM_paths
 
+        elif local_struct['bTrainNetwork']:
+            # Iterate over the total number of realizations to generate training set
 
+            acquisition_length = local_struct['gps_freq_Hz'] * local_struct['acquisition_time_sec']
+            local_struct['acquisition_length'] = acquisition_length
+
+            transformed_paths = []  # empty not used
+            reconstructed_latlon_paths = []  # empty not used
+            reconstructed_WM_paths = []  # empty not used
+
+            paths_wm_org = np.zeros((2, acquisition_length, numberOfRealizations))
+            paths_latlon_org = np.zeros((2, acquisition_length, numberOfRealizations))
+            paths_wm_noisy = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
+            paths_latlon_noisy = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
+            noise_vals = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
+
+            self.logger.info('Starting generation for training with <%d> realizations and <%d> path length',
+                             numberOfRealizations, acquisition_length)
+            for lvl in range(noise_level_len):
+                for realization in range(numberOfRealizations):
+                    # Generate random data
+                    self.logger.debug('Generating random data for realization <%d>', realization)
+
+                    (paths_wm_org[:, :, realization], paths_latlon_org[:, :, realization]) = \
+                        random_2d_path_generator(local_struct)
+
+                    # Generate noise for each realization
+                    (paths_wm_noisy[:, :, realization, lvl], paths_latlon_noisy[:, :, realization, lvl],
+                     noise_vals[:, :, realization, lvl]) = \
+                        noise_generator(local_struct, paths_wm_org[:, :, realization], noise_level[lvl])
 
         else:
             # Iterate over the total number of realizations
@@ -236,14 +265,14 @@ class cFramework:
                             except CFrameworkError as frameErr:
                                 self.errorAnalyzer(frameErr, str((algorithm, lvl)))
 
-            # Store data in local struct
-            local_struct['RESULTS']['paths_wm_org'] = paths_wm_org
-            local_struct['RESULTS']['paths_latlon_org'] = paths_latlon_org
-            local_struct['RESULTS']['paths_wm_noisy'] = paths_wm_noisy
-            local_struct['RESULTS']['paths_latlon_noisy'] = paths_latlon_noisy
-            local_struct['RESULTS']['transformed_paths'] = transformed_paths
-            local_struct['RESULTS']['reconstructed_latlon_paths'] = reconstructed_latlon_paths
-            local_struct['RESULTS']['reconstructed_WM_paths'] = reconstructed_WM_paths
+        # Store data in local struct TODO Will not work until csv is removed properly
+        local_struct['RESULTS']['paths_wm_org'] = paths_wm_org
+        local_struct['RESULTS']['paths_latlon_org'] = paths_latlon_org
+        local_struct['RESULTS']['paths_wm_noisy'] = paths_wm_noisy
+        local_struct['RESULTS']['paths_latlon_noisy'] = paths_latlon_noisy
+        local_struct['RESULTS']['transformed_paths'] = transformed_paths
+        local_struct['RESULTS']['reconstructed_latlon_paths'] = reconstructed_latlon_paths
+        local_struct['RESULTS']['reconstructed_WM_paths'] = reconstructed_WM_paths
 
         self.logger.debug('Generating results and plotting')
         try:
@@ -254,7 +283,7 @@ class cFramework:
         self.exit_framework()
         return self.frameworkError_list
 
-    def errorAnalyzer (self, frameErr, master_key):
+    def errorAnalyzer(self, frameErr, master_key):
         if self.frameworkError_list["bNoErrors"]:
             self.frameworkError_list["bNoErrors"] = False
 
@@ -278,4 +307,3 @@ if __name__ == "__main__":
 
     with open(filename, "w") as data_file:
         json.dump(frameworkError_list, data_file, indent=4, sort_keys=True)
-
