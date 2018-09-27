@@ -71,8 +71,8 @@
     }, 
     
     "RESULTS"                   : {
-        "paths_wm_org"                       : [0,0,0],
-        "paths_latlon_org"                   : [0,0,0],
+        "paths_wm_org"                       : [0,0,0,0],
+        "paths_latlon_org"                   : [0,0,0,0],
         "paths_wm_noisy"                     : [0,0,0,0],
         "paths_latlon_noisy"                 : [0,0,0,0],
         "transformed_paths"                  : [0,0,0,0],
