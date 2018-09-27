@@ -52,10 +52,12 @@ def process_data(params):
     if params["CSV_DATA"]["bUse_csv_data"]:
         data_obj.plot_real_path_recon()
     else:
-        _, _, _, _, MSE_r_latlon, reconstructed_db_latlon = data_obj.calculate_MSE()
+        MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon, reconstructed_db_latlon =\
+            data_obj.calculate_MSE()
         data_obj.plot_path_org_2d()
         data_obj.plot_path_noisy_2d()
-        data_obj.plot_MSE()
+        data_obj.plot_MSE(MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon)
+        data_obj.plot_SNR(reconstructed_db_latlon)
         data_obj.analyze_DCT()
         data_obj.power_spectral_density()
         params["RESULTS"]["reconstructed_db_latlon"] = reconstructed_db_latlon
@@ -113,7 +115,6 @@ class cProcessFile:
                            "message": "Could not dump in pickle file", "errorType": CErrorTypes.ioerror}
                 raise CFrameworkError(errdict) from io_error
 
-
     # Read from txt file pickle format into dictionary
     def get_pickle_file(self):
         with open(self.m_filename, 'rb') as txt_file_read:
@@ -145,10 +146,15 @@ class cProcessFile:
 
                 l2_r_latlon = np.sqrt(np.mean((paths_latlon_org_ext[0, :, :, :] - r_path[0, :, :, :]) ** 2 + (
                         paths_latlon_org_ext[1, :, :, :] - r_path[1, :, :, :]) ** 2, axis=0))
+
+                l1_org_latlon = np.mean(abs(paths_latlon_org_ext[0, :, :, :]) + abs(
+                        paths_latlon_org_ext[1, :, :, :]), axis=0)
+                l1_r_latlon = np.mean(abs(paths_latlon_org_ext[0, :, :, :] - r_path[0, :, :, :]) + abs(
+                        paths_latlon_org_ext[1, :, :, :] - r_path[1, :, :, :]), axis=0)
+
                 MSE_r_latlon[key] = np.mean(l2_r_latlon, axis=0)
-                # Ratio of reconstruction error to error from noisy data in decibels
-                reconstructed_db_latlon[key] = 20 * np.log10(MSE_r_latlon[
-                                                                 key] / MSE_noise_latlon)
+                # Ratio of f/f-f'
+                reconstructed_db_latlon[key] = 20 * np.log10(np.mean(l1_org_latlon/l1_r_latlon, axis=0))
 
                 r2_path = self.reconstructed_wm_paths[key]
 
@@ -532,12 +538,11 @@ class cProcessFile:
                 plt.show()
 
     # Plot MSE - mean error rate
-    def plot_MSE(self):
+    def plot_MSE(self, MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon):
         if self.m_plotStruct['bPlotMSE']:
             logger.debug('Plotting MSE of WM and latlon values')
             # Set of params
             x_axis = self.m_noise_level_meter
-            MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon, _ = self.calculate_MSE()
 
             if self.m_bReconstruct:
                 logger.debug('Plotting MSE of reconstructed paths latlon')
@@ -579,6 +584,29 @@ class cProcessFile:
                 self.m_acquisition_length, self.m_number_realization))
             plt.xlabel('Noise level (meters)')
             plt.ylabel('MSE')
+            plt.show()
+
+    # Plot SNR - mean error rate
+    def plot_SNR(self, reconstructed_db_latlon):
+        if self.m_plotStruct['bPlotSNR']:
+            logger.debug('Plotting SNR values')
+            # Set of params
+            x_axis = self.m_noise_level_meter
+
+            if self.m_bReconstruct:
+                logger.debug('Plotting SNR of reconstructed paths latlon')
+                for key in self.reconstructed_latlon_paths.keys():
+                    plt.plot(x_axis, reconstructed_db_latlon[key], '-*',
+                             label="SNR_latlon for %s with %.1f %% SR" % (key, self.m_lasso_sampling_ratio * 100))
+
+            # Plotting SNR
+            plt.xscale('log')
+            plt.grid()
+            plt.legend(loc="upper right")
+            plt.title('SNR for %d samples and %d iteratirons' % (
+                self.m_acquisition_length, self.m_number_realization))
+            plt.xlabel('Noise level (meters)')
+            plt.ylabel('SNR [dB]')
             plt.show()
 
     # DCT analysis

@@ -67,12 +67,17 @@ def create_main_frame(self):
     self.log_option.setChecked(False)
     self.log_option.stateChanged.connect(self.on_draw)
 
+    self.SNR_plots = QtWidgets.QCheckBox("Plot SNR")
+    self.SNR_plots.setChecked(False)
+    self.SNR_plots.stateChanged.connect(self.on_draw)
+
+
     #
     # Layout with box sizers
     #
     hbox = QtWidgets.QHBoxLayout()
 
-    for w in [self.textbox, self.draw_button, self.grid_cb, self.log_option]:
+    for w in [self.textbox, self.draw_button, self.grid_cb, self.log_option, self.SNR_plots]:
         hbox.addWidget(w)
         hbox.setAlignment(w, QtCore.Qt.AlignVCenter)
 
@@ -203,44 +208,50 @@ class AppForm(QtWidgets.QMainWindow):
         self.fig.clear()
         self.axes = self.fig.subplots(nrows=3, ncols=3)
         bgrid = self.grid_cb.isChecked()
+
         if self.log_option.isChecked():
             table = self.table_log
         else:
             table = self.table_lin
 
+        if self.SNR_plots.isChecked():
+            column_iden = 'SNR'
+        else:
+            column_iden = 'MSE'
+
         table[(table.LearningRate == learning_rates_slice) &
               (table.Noise == noise_levels_slice)]. \
-            plot.scatter('SamplingRatio', 'PathLengths', c='MSE', colormap='rainbow_r', ax=self.axes[0, 0],
+            plot.scatter('SamplingRatio', 'PathLengths', c=column_iden, colormap='rainbow_r', ax=self.axes[0, 0],
                          title='Lr <%.3f>, Noise <%.3f>' % (learning_rates_slice, noise_levels_slice),
                          logy=True, grid=bgrid)
 
         table[(table.PathLengths == path_lengths_slice) &
               (table.Noise == noise_levels_slice)]. \
-            plot.scatter('SamplingRatio', 'LearningRate', c='MSE', colormap='rainbow_r', ax=self.axes[0, 1],
+            plot.scatter('SamplingRatio', 'LearningRate', c=column_iden, colormap='rainbow_r', ax=self.axes[0, 1],
                          title='Pl <%d>, Noise <%.3f>' % (path_lengths_slice, noise_levels_slice),
                          logy=True, grid=bgrid)
 
         table[(table.LearningRate == learning_rates_slice) &
               (table.PathLengths == path_lengths_slice)]. \
-            plot.scatter('SamplingRatio', 'Noise', c='MSE', colormap='rainbow_r', ax=self.axes[0, 2],
+            plot.scatter('SamplingRatio', 'Noise', c=column_iden, colormap='rainbow_r', ax=self.axes[0, 2],
                          title='Pl <%d>, Lr <%.3f>' % (path_lengths_slice, learning_rates_slice),
                          logy=True, grid=bgrid)
 
         table[(table.SamplingRatio == sampling_ratios_slice) &
               (table.Noise == noise_levels_slice)]. \
-            plot.scatter('PathLengths', 'LearningRate', c='MSE', colormap='rainbow_r', ax=self.axes[1, 0],
+            plot.scatter('PathLengths', 'LearningRate', c=column_iden, colormap='rainbow_r', ax=self.axes[1, 0],
                          title='Sr <%.3f>, Noise <%.3f>' % (sampling_ratios_slice, noise_levels_slice),
                          logy=True, grid=bgrid)
 
         table[(table.LearningRate == learning_rates_slice) &
               (table.SamplingRatio == sampling_ratios_slice)]. \
-            plot.scatter('PathLengths', 'Noise', c='MSE', colormap='rainbow_r', ax=self.axes[1, 1],
+            plot.scatter('PathLengths', 'Noise', c=column_iden, colormap='rainbow_r', ax=self.axes[1, 1],
                          title='Sr <%.3f>, Lr <%.3f>' % (sampling_ratios_slice, learning_rates_slice),
                          logy=True, grid=bgrid)
 
         table[(table.SamplingRatio == sampling_ratios_slice) &
               (table.PathLengths == path_lengths_slice)]. \
-            plot.scatter('LearningRate', 'Noise', c='MSE', colormap='rainbow_r', ax=self.axes[1, 2],
+            plot.scatter('LearningRate', 'Noise', c=column_iden, colormap='rainbow_r', ax=self.axes[1, 2],
                          title='Lr <%.3f>, Noise <%.3f>' % (learning_rates_slice, noise_levels_slice),
                          logy=True, grid=bgrid)
 

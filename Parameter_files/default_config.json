@@ -65,6 +65,7 @@
         "bPlotWM_time_reconst"      : false,
         "bPlotLonLat_time_reconst"  : false,
         "bPlotMSE"                  : false,
+        "bPlotSNR"                  : false,
         "bPlotDCTAnalysis"          : false,
         "bPlotPSD"                  : false
     }, 
