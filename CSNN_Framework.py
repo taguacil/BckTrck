@@ -40,6 +40,7 @@ from Navigation.AWGN import noise_generator
 from Reconstruction_algorithms.Master_reconstruction import reconstructor, identify_algorithms
 from Helper_functions.csv_interpreter import munge_csv
 from Helper_functions.framework_error import CFrameworkError
+from Helper_functions.framework_error import CErrorTypes
 
 if platform.system() == "Windows":
     direc_ident = "\\"
@@ -231,8 +232,13 @@ class cFramework:
                             try:
                                 temp = reconstructor(local_struct, paths_latlon_noisy[:, :, realization, lvl])
                                 reconstructed_latlon_paths[algorithm][:, :, realization, lvl] = temp
-                                reconstructed_WM_paths[algorithm][:, :, realization, lvl] = \
-                                    cord.generate_WM_array(temp)
+                                try:
+                                    reconstructed_WM_paths[algorithm][:, :, realization, lvl] = \
+                                        cord.generate_WM_array(temp)
+                                except ValueError as valerr:
+                                    self.logger.debug("Lat/Lon out of range in degrees")
+                                    errdict = {"file": __file__, "message": valerr.args[0], "errorType": CErrorTypes.range}
+                                    raise CFrameworkError(errdict)
                             except CFrameworkError as frameErr:
                                 self.errorAnalyzer(frameErr, str((algorithm, lvl)))
 
