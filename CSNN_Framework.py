@@ -187,6 +187,11 @@ class cFramework:
         elif local_struct['bTrainNetwork']:
             # Iterate over the total number of realizations to generate training set
 
+            modelname_lat = self.paramPath + 'NeuralNetworks' + direc_ident \
+                            + local_struct["RCT_ALG_NN"]["modelname"] + "_lat.h5"
+            modelname_lon = self.paramPath + 'NeuralNetworks' + direc_ident + 'Models' + direc_ident \
+                            + local_struct["RCT_ALG_NN"]["modelname"] + "_lon.h5"
+
             acquisition_length = local_struct['gps_freq_Hz'] * local_struct['acquisition_time_sec']
             local_struct['acquisition_length'] = acquisition_length
 
@@ -217,6 +222,8 @@ class cFramework:
 
             nnObj = CNeuralNetwork(local_struct)
             nnObj.train_nn(paths_latlon_org, paths_latlon_noisy)
+            nnObj.dump_nn_summary()
+            nnObj.save_models(modelname_lat, modelname_lon)
 
         else:
             # Iterate over the total number of realizations

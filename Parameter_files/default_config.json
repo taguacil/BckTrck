@@ -3,7 +3,7 @@
     "currentTime"               : 0,
     
     "bUse_filename"             : false,
-    "filename"                  : "blabla",
+    "filename"                  : "default",
     "bSimplified_Results"       : false,
     
     "gps_freq_Hz"               : 1,
@@ -55,7 +55,8 @@
     "RCT_ALG_NN"             : {
         "bReconstruct_NN"        : false,
         "sampling_ratio"         : 0.25,
-        "alpha"                  : 0.5
+        "alpha"                  : 0.5,
+        "modelname"              : "default"
     },
 
     "PLOT"                      : {
