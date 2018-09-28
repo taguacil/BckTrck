@@ -104,6 +104,7 @@ class cFramework:
         self.logger.addHandler(self.ch)
 
         self.frameworkError_list = {"bNoErrors": True}
+        self.frameworklog_list = {"bNologs": True}
 
     def update_framework(self, arguments):
         numberOfArgument = len(arguments)
@@ -186,11 +187,11 @@ class cFramework:
 
         elif local_struct['bTrainNetwork']:
             # Iterate over the total number of realizations to generate training set
-
+            modelname = local_struct["RCT_ALG_NN"]["modelname"]
             modelname_lat = self.paramPath + 'NeuralNetworks' + direc_ident \
-                            + local_struct["RCT_ALG_NN"]["modelname"] + "_lat.h5"
+                            + modelname + "_lat.h5"
             modelname_lon = self.paramPath + 'NeuralNetworks' + direc_ident + 'Models' + direc_ident \
-                            + local_struct["RCT_ALG_NN"]["modelname"] + "_lon.h5"
+                            + modelname + "_lon.h5"
 
             acquisition_length = local_struct['gps_freq_Hz'] * local_struct['acquisition_time_sec']
             local_struct['acquisition_length'] = acquisition_length
@@ -222,8 +223,10 @@ class cFramework:
 
             nnObj = CNeuralNetwork(local_struct)
             nnObj.train_nn(paths_latlon_org, paths_latlon_noisy)
-            nnObj.dump_nn_summary()
             nnObj.save_models(modelname_lat, modelname_lon)
+
+            if nnObj.dump_nn_summary():
+                self.logAnalyzer(nnObj.messageSummary_dict, modelname)
 
         else:
             # Iterate over the total number of realizations
@@ -306,15 +309,32 @@ class cFramework:
         else:
             self.frameworkError_list[master_key] = {frameErr.callermessage: 1}
 
+    def logAnalyzer(self, message, master_key):
+        # No need to append the message to the master key for now (message is a dict in this case)
+        if self.frameworklog_list["bNologs"]:
+            self.frameworklog_list["bNologs"] = False
+
+        if master_key in self.frameworklog_list.keys():
+            self.frameworklog_list[master_key] = message
+        else:
+            self.frameworklog_list = {master_key: message}
+
 
 # Main function definition  MUST BE at the END OF FILE
 if __name__ == "__main__":
     # Business logic for input arguments to main function
     framework_model = cFramework()
     framework_model.update_framework(sys.argv)
-    frameworkError_list = framework_model.mainComputation(framework_model.local_struct)  # return value ignored
+    frameworkError_list = framework_model.mainComputation(framework_model.local_struct)
     filename = framework_model.paramPath + 'Logs' + direc_ident + 'BckTrk_exception_' + \
                framework_model.local_struct["currentTime"].strftime("%Y-%m-%d") + '.json'
 
     with open(filename, "w") as data_file:
         json.dump(frameworkError_list, data_file, indent=4, sort_keys=True)
+
+    if not framework_model.frameworklog_list["bNologs"]:
+        filename = framework_model.paramPath + 'Logs' + direc_ident + 'BckTrk_logDump_' + \
+                   framework_model.local_struct["currentTime"].strftime("%Y-%m-%d") + '.json'
+
+        with open(filename, "w") as data_file:
+            json.dump(framework_model.frameworklog_list, data_file, indent=4, sort_keys=True)

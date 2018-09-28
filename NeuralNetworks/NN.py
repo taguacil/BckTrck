@@ -47,6 +47,9 @@ class CNeuralNetwork:
     # Constructor
     def __init__(self, struct):
 
+        self.messageSummary_dict = {}
+        self.identifier = ""  # To describe which model the message belongs to
+
         if struct['RCT_ALG_NN']["sampling_ratio"] > 1:
             logger.debug("Sampling_ratio larger than 1")
             errdict = {"file": __file__, "message": "Sampling_ratio larger than 1", "errorType": CErrorTypes.value}
@@ -155,21 +158,26 @@ class CNeuralNetwork:
         results_lat = self.m_model_lat.fit(
             lat_X[trainIndices, :], lat_y[trainIndices, :],
             epochs=1000,
-            batch_size=self.m_acquisition_length,
-            validation_data=(lat_X[validateIndices, :], lat_y[validateIndices, :])
+            batch_size=32,
+            validation_data=(lat_X[validateIndices, :], lat_y[validateIndices, :]),
+            verbose=2
         )
 
         results_lon = self.m_model_lon.fit(
             lon_X[trainIndices, :], lon_y[trainIndices, :],
             epochs=1000,
-            batch_size=self.m_acquisition_length,
-            validation_data=(lon_X[validateIndices, :], lon_y[validateIndices, :])
+            batch_size=32,
+            validation_data=(lon_X[validateIndices, :], lon_y[validateIndices, :]),
+            verbose=2
         )
 
     def dump_nn_summary(self):
         # Dumps summary to debugger output and to log file saved in logs
-        self.m_model_lat.summary()
-        self.m_model_lon.summary()
+        self.identifier = "latitude"
+        self.m_model_lat.summary(print_fn=self.custom_print)
+        self.identifier = "longitude"
+        self.m_model_lon.summary(print_fn=self.custom_print)
+        return True
 
     def nn_inference(self, path_latlon_noisy):
         # Perform inference on given path
@@ -197,3 +205,17 @@ class CNeuralNetwork:
         paths_latlon_noisy_norm = (paths_latlon_noisy - mean) / np.sqrt(var)
 
         return paths_latlon_org_norm, paths_latlon_noisy_norm
+
+    def custom_print(self, message):
+        # Will be called by model.summary() for every line in the summary
+        logger.info(message)
+        if not self.identifier:
+            logger.debug("No NN model was chosen")
+            errdict = {"file": __file__, "message": "No NN model was chosen", "errorType": CErrorTypes.value}
+            raise CFrameworkError(errdict)
+        else:
+            if self.identifier in self.messageSummary_dict.keys():
+                    self.identifier[self.identifier] += message
+            else:
+                self.messageSummary_dict = {self.identifier: message}
+
