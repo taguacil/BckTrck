@@ -26,6 +26,7 @@ import numpy as np
 from .Lasso_reconstruction import lasso_algo
 from .BFGS_reconstruction import bfgs_algo
 from Helper_functions.framework_error import CFrameworkError
+from NeuralNetworks.NN import CNeuralNetwork
 
 # Logging
 import logging
@@ -60,6 +61,14 @@ def reconstructor(params, path):
     elif params['RCT_ALG_BFGS']["bReconstruct_bfgs"]:
         try:
             temp = np.array([bfgs_algo(params, normalized_path[0]), bfgs_algo(params, normalized_path[1])])
+            reconstructed_paths = np.sqrt(var) * temp + mean
+        except ValueError as valerr:
+            raise CFrameworkError(valerr.args[0]) from valerr
+
+    elif params['RCT_ALG_NN']["bReconstruct_NN"]:
+        nnObj = CNeuralNetwork(params)
+        try:
+            temp = nnObj.nn_inference(normalized_path)
             reconstructed_paths = np.sqrt(var) * temp + mean
         except ValueError as valerr:
             raise CFrameworkError(valerr.args[0]) from valerr
