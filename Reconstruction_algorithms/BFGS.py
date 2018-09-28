@@ -27,20 +27,21 @@ import scipy.optimize as opt
 
 import matplotlib.pyplot as plt
 
-## Logging
+# Logging
 import logging
 
 logger = logging.getLogger('BckTrk')
+b_shitty_gradient = True
 
 
 # The main processing function
 def bfgs_algo():
     # Path generation
     xlim = 256
-    ratio = 0.1
+    ratio = 0.5
     x = np.arange(0, xlim, 1)
     path = (1 / np.sqrt(2)) * np.cos(x) + (1 / np.sqrt(2)) * 1j * np.cos(x)
-    path = np.cos(x) + 1j * np.cos(x)
+    # path=np.cos(x)+1j*np.cos(x)
     path = path.real
 
     # Class initialization
@@ -112,17 +113,30 @@ class cBFGS:
         return norm_sq + regul
 
     # shitty Gradient function
-    def gradient(self, xk, epsilon=1e-8):
-        f0 = self.cost_fun(*((xk,)))
-        grad = np.zeros((len(xk),), float)
-        ei = np.zeros((len(xk),), float)
-        for k in range(len(xk)):
-            ei[k] = 1.0
-            d = epsilon * ei
-            grad[k] = (self.cost_fun(*((xk + d,))) - f0) / d[k]
-            ei[k] = 0.0
+    if b_shitty_gradient:
+        def gradient(self, x):
+            A = self.A
+            y = self.y
+            u = self.u
 
-        return grad
+            A_her = A.conj().T
+            linear_OP = np.dot(A, x) - y
+            delta = np.dot(np.conj(x), x) + u
+            regul = self.lambda_param * (x / np.sqrt(delta))
+
+            return 2 * np.dot(A_her, linear_OP) + regul
+    else:
+        def gradient(self, xk, epsilon=1e-8):
+            f0 = self.cost_fun(*((xk,)))
+            grad = np.zeros((len(xk),), float)
+            ei = np.zeros((len(xk),), float)
+            for k in range(len(xk)):
+                ei[k] = 1.0
+                d = epsilon * ei
+                grad[k] = (self.cost_fun(*((xk + d,))) - f0) / d[k]
+                ei[k] = 0.0
+
+            return grad
 
     # Reconstruction function
     def reconstructor(self):
@@ -179,3 +193,6 @@ class cBFGS:
         print(self.cost_fun(x0))
 
         return reconstructed_path
+
+
+bfgs_algo()

@@ -25,8 +25,6 @@ import numpy as np
 import scipy.fftpack as ft
 import scipy.optimize as opt
 
-from Helper_functions.framework_error import CErrorTypes
-
 # Logging
 import logging
 
@@ -44,21 +42,14 @@ class cBFGS:
     def __init__(self, struct, path):
 
         if struct['RCT_ALG_BFGS']["sampling_ratio"] > 1:
-            logger.debug("Sampling_ratio larger than 1")
-            errdict = {"file": __file__, "message": "Sampling_ratio larger than 1", "errorType": CErrorTypes.value}
-            raise ValueError(errdict)
+            logger.error("Sampling_ratio larger than 1")
+            sys.exit("Sampling_ratio larger than 1")
 
         self.m_acquisition_length = struct['acquisition_length']
         self.m_lambda_param = struct['RCT_ALG_BFGS']['lambda']
         self.m_u = struct['RCT_ALG_BFGS']['u']
         self.m_number_of_samples = int(
             struct['RCT_ALG_BFGS']["sampling_ratio"] * struct["gps_freq_Hz"] * struct["acquisition_time_sec"])
-
-        if self.number_of_samples <= 0:
-            logger.debug("Number of samples cannot be 0 or negative")
-            errdict = {"file": __file__, "message": "Sampling_ratio larger than 1", "errorType": CErrorTypes.value}
-            raise ValueError(errdict)
-
         self.m_reconstruct_from_dct = struct['RCT_ALG_BFGS']['bReconstruct_from_dct']
         self.m_maxiter = struct['RCT_ALG_BFGS']['maxiter']
 
@@ -94,17 +85,31 @@ class cBFGS:
         return norm_sq + regul
 
     # shitty Gradient function
-    def gradient(self, x):
-        A = self.m_A
-        y = self.m_y
-        u = self.m_u
+    """
+    def gradient(self,x):
+        A=self.m_A
+        y=self.m_y
+        u=self.m_u
+        
+        A_her=A.conj().T
+        linear_OP=np.dot(A,x)-y
+        delta=np.dot(np.conj(x),x)+u
+        regul=self.m_lambda_param*(x/np.sqrt(delta))
+        
+        return 2*np.dot(A_her,linear_OP)+regul
+    """
 
-        A_her = A.conj().T
-        linear_OP = np.dot(A, x) - y
-        delta = np.dot(np.conj(x), x) + u
-        regul = self.m_lambda_param * (x / np.sqrt(delta))
+    def gradient(self, xk, epsilon=1e-8):
+        f0 = self.cost_fun(*((xk,)))
+        grad = np.zeros((len(xk),), float)
+        ei = np.zeros((len(xk),), float)
+        for k in range(len(xk)):
+            ei[k] = 1.0
+            d = epsilon * ei
+            grad[k] = (self.cost_fun(*((xk + d,))) - f0) / d[k]
+            ei[k] = 0.0
 
-        return 2 * np.dot(A_her, linear_OP) + regul
+        return grad
 
     # Reconstruction function
     def reconstructor(self):
