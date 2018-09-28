@@ -26,6 +26,7 @@ class CErrorTypes (Enum):
     value = 1
     type = 2
     ioerror = 3
+    range = 4
 
 class Error(Exception):
     """Base class for exceptions in this module."""

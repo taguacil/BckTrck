@@ -31,7 +31,7 @@ import collections
 import logging
 import platform
 
-## User-defined library import
+# User-defined library import
 from Helper_functions.proc_results import process_data
 from Helper_functions.transforms import transforms
 from Navigation.Random_walker import random_2d_path_generator
@@ -40,6 +40,7 @@ from Navigation.AWGN import noise_generator
 from Reconstruction_algorithms.Master_reconstruction import reconstructor, identify_algorithms
 from Helper_functions.csv_interpreter import munge_csv
 from Helper_functions.framework_error import CFrameworkError
+from Helper_functions.framework_error import CErrorTypes
 
 if platform.system() == "Windows":
     direc_ident = "\\"
@@ -189,8 +190,8 @@ class cFramework:
             # Iterate over the total number of realizations
             acquisition_length = local_struct['gps_freq_Hz'] * local_struct['acquisition_time_sec']
             local_struct['acquisition_length'] = acquisition_length
-            paths_wm_org = np.zeros((2, acquisition_length, numberOfRealizations))
-            paths_latlon_org = np.zeros((2, acquisition_length, numberOfRealizations))
+            paths_wm_org = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
+            paths_latlon_org = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
             paths_wm_noisy = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
             paths_latlon_noisy = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
             noise_vals = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
@@ -213,13 +214,13 @@ class cFramework:
                     # Generate random data
                     self.logger.debug('Generating random data for realization <%d>', realization)
 
-                    (paths_wm_org[:, :, realization], paths_latlon_org[:, :, realization]) = \
+                    (paths_wm_org[:, :, realization, lvl], paths_latlon_org[:, :, realization, lvl]) = \
                         random_2d_path_generator(local_struct)
 
                     # Generate noise for each realization
                     (paths_wm_noisy[:, :, realization, lvl], paths_latlon_noisy[:, :, realization, lvl],
                      noise_vals[:, :, realization, lvl]) = \
-                        noise_generator(local_struct, paths_wm_org[:, :, realization], noise_level[lvl])
+                        noise_generator(local_struct, paths_wm_org[:, :, realization, lvl], noise_level[lvl])
 
                     # Apply transforms
                     transformed_paths[:, :, realization, lvl] = \
@@ -231,8 +232,13 @@ class cFramework:
                             try:
                                 temp = reconstructor(local_struct, paths_latlon_noisy[:, :, realization, lvl])
                                 reconstructed_latlon_paths[algorithm][:, :, realization, lvl] = temp
-                                reconstructed_WM_paths[algorithm][:, :, realization, lvl] = \
-                                    cord.generate_WM_array(temp)
+                                try:
+                                    reconstructed_WM_paths[algorithm][:, :, realization, lvl] = \
+                                        cord.generate_WM_array(temp)
+                                except ValueError as valerr:
+                                    self.logger.debug("Lat/Lon out of range in degrees")
+                                    errdict = {"file": __file__, "message": valerr.args[0], "errorType": CErrorTypes.range}
+                                    raise CFrameworkError(errdict)
                             except CFrameworkError as frameErr:
                                 self.errorAnalyzer(frameErr, str((algorithm, lvl)))
 
