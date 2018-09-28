@@ -51,8 +51,9 @@ def process_data(params):
     data_obj = cProcessFile(params)
     if params["CSV_DATA"]["bUse_csv_data"]:
         data_obj.plot_real_path_recon()
-    else:
-        MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon, reconstructed_db_latlon =\
+
+    elif not params["bTrainNetwork"]:
+        MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon, reconstructed_db_latlon = \
             data_obj.calculate_MSE()
         data_obj.plot_path_org_2d()
         data_obj.plot_path_noisy_2d()
@@ -62,15 +63,16 @@ def process_data(params):
         data_obj.power_spectral_density()
         params["RESULTS"]["reconstructed_db_latlon"] = reconstructed_db_latlon
         params["RESULTS"]["MSE_latlon"] = MSE_r_latlon
-        if params["bSimplified_Results"]:
-            del params['RESULTS']['paths_wm_org']
-            del params['RESULTS']['paths_latlon_org']
-            del params['RESULTS']['paths_wm_noisy']
-            del params['RESULTS']['paths_latlon_noisy']
-            del params['RESULTS']['reconstructed_latlon_paths']
-            del params['RESULTS']['reconstructed_WM_paths']
-            if not params['TRANSFORM']['bDctTransform']:
-                del params['RESULTS']['transformed_paths']
+
+    if params["bSimplified_Results"]:  # TODO logic will only work after csv is integrated
+        del params['RESULTS']['paths_wm_org']
+        del params['RESULTS']['paths_latlon_org']
+        del params['RESULTS']['paths_wm_noisy']
+        del params['RESULTS']['paths_latlon_noisy']
+        del params['RESULTS']['reconstructed_latlon_paths']
+        del params['RESULTS']['reconstructed_W_paths']
+        if not params['TRANSFORM']['bDctTransform']:
+            del params['RESULTS']['transformed_paths']
 
     return data_obj.set_pickle_file(params)
 
