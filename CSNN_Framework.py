@@ -41,7 +41,6 @@ from Reconstruction_algorithms.Master_reconstruction import reconstructor, ident
 from Helper_functions.csv_interpreter import munge_csv
 from Helper_functions.framework_error import CFrameworkError
 from Helper_functions.framework_error import CErrorTypes
-from NeuralNetworks.NN import CNeuralNetwork
 
 if platform.system() == "Windows":
     direc_ident = "\\"
@@ -187,6 +186,7 @@ class cFramework:
             local_struct['RESULTS']['reconstructed_WM_paths'] = reconstructed_real_WM_paths
 
         elif local_struct['bTrainNetwork']:
+            from NeuralNetworks.NN import CNeuralNetwork
             # Iterate over the total number of realizations to generate training set
             modelname = local_struct["RCT_ALG_NN"]["modelname"]
             modelname_lat = self.paramPath + 'NeuralNetworks' + direc_ident \

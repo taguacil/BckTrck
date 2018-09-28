@@ -55,12 +55,18 @@ def process_data(params):
     elif not params["bTrainNetwork"]:
         MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon, reconstructed_db_latlon = \
             data_obj.calculate_MSE()
-        data_obj.plot_path_org_2d()
-        data_obj.plot_path_noisy_2d()
-        data_obj.plot_MSE(MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon)
-        data_obj.plot_SNR(reconstructed_db_latlon)
-        data_obj.analyze_DCT()
-        data_obj.power_spectral_density()
+        try:
+            data_obj.plot_path_org_2d()
+            data_obj.plot_path_noisy_2d()
+            data_obj.plot_MSE(MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon)
+            data_obj.plot_SNR(reconstructed_db_latlon)
+            data_obj.analyze_DCT()
+            data_obj.power_spectral_density()
+        except KeyError as key_error:
+                message = "Could not find key %s" %(key_error.args[0])
+                errdict = {"file": __file__, "message": message, "errorType": CErrorTypes.value}
+                raise CFrameworkError(errdict) from key_error
+        
         params["RESULTS"]["reconstructed_db_latlon"] = reconstructed_db_latlon
         params["RESULTS"]["MSE_latlon"] = MSE_r_latlon
 
@@ -70,7 +76,7 @@ def process_data(params):
         del params['RESULTS']['paths_wm_noisy']
         del params['RESULTS']['paths_latlon_noisy']
         del params['RESULTS']['reconstructed_latlon_paths']
-        del params['RESULTS']['reconstructed_W_paths']
+        del params['RESULTS']['reconstructed_WM_paths']
         if not params['TRANSFORM']['bDctTransform']:
             del params['RESULTS']['transformed_paths']
 
