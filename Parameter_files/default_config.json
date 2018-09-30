@@ -3,7 +3,7 @@
     "currentTime"               : 0,
     
     "bUse_filename"             : false,
-    "filename"                  : "blabla",
+    "filename"                  : "default",
     "bSimplified_Results"       : false,
     
     "gps_freq_Hz"               : 1,
@@ -20,7 +20,8 @@
     "bUse_static_init"          : false,
     "staticLat"                 : 0,
     "staticLon"                 : 0,
-    
+
+    "bTrainNetwork"             : false,
     "bReconstruct"              : false,
     
     "CSV_DATA"                  : {
@@ -50,7 +51,14 @@
         "maxiter"                   : 500,
         "sampling_ratio"            : 0.25    
     },
-    
+
+    "RCT_ALG_NN"             : {
+        "bReconstruct_NN"        : false,
+        "sampling_ratio"         : 0.25,
+        "alpha"                  : 0.5,
+        "modelname"              : "default"
+    },
+
     "PLOT"                      : {
         "xlimits"                   : [-25,25],
         "ylimits"                   : [-25,25],
@@ -65,13 +73,14 @@
         "bPlotWM_time_reconst"      : false,
         "bPlotLonLat_time_reconst"  : false,
         "bPlotMSE"                  : false,
+        "bPlotSNR"                  : false,
         "bPlotDCTAnalysis"          : false,
         "bPlotPSD"                  : false
     }, 
     
     "RESULTS"                   : {
-        "paths_wm_org"                       : [0,0,0],
-        "paths_latlon_org"                   : [0,0,0],
+        "paths_wm_org"                       : [0,0,0,0],
+        "paths_latlon_org"                   : [0,0,0,0],
         "paths_wm_noisy"                     : [0,0,0,0],
         "paths_latlon_noisy"                 : [0,0,0,0],
         "transformed_paths"                  : [0,0,0,0],

@@ -25,9 +25,7 @@ import numpy as np
 import scipy.fftpack as ft
 import scipy.optimize as opt
 
-import matplotlib.pyplot as plt
-
-## Logging
+# Logging
 import logging
 
 logger = logging.getLogger('BckTrk')
@@ -87,17 +85,31 @@ class cBFGS:
         return norm_sq + regul
 
     # shitty Gradient function
-    def gradient(self, x):
-        A = self.m_A
-        y = self.m_y
-        u = self.m_u
+    """
+    def gradient(self,x):
+        A=self.m_A
+        y=self.m_y
+        u=self.m_u
+        
+        A_her=A.conj().T
+        linear_OP=np.dot(A,x)-y
+        delta=np.dot(np.conj(x),x)+u
+        regul=self.m_lambda_param*(x/np.sqrt(delta))
+        
+        return 2*np.dot(A_her,linear_OP)+regul
+    """
 
-        A_her = A.conj().T
-        linear_OP = np.dot(A, x) - y
-        delta = np.dot(np.conj(x), x) + u
-        regul = self.m_lambda_param * (x / np.sqrt(delta))
+    def gradient(self, xk, epsilon=1e-8):
+        f0 = self.cost_fun(*((xk,)))
+        grad = np.zeros((len(xk),), float)
+        ei = np.zeros((len(xk),), float)
+        for k in range(len(xk)):
+            ei[k] = 1.0
+            d = epsilon * ei
+            grad[k] = (self.cost_fun(*((xk + d,))) - f0) / d[k]
+            ei[k] = 0.0
 
-        return 2 * np.dot(A_her, linear_OP) + regul
+        return grad
 
     # Reconstruction function
     def reconstructor(self):
