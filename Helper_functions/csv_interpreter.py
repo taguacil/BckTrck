@@ -60,9 +60,9 @@ def munge_csv(path, path_length):
     number_of_realizations = int(acc.shape[0] / path_length)
 
     if number_of_realizations != 0:
-        latlon = latlon[:, :(number_of_realizations * path_length)].reshape((2, path_length, number_of_realizations))
-        acc = acc[:(number_of_realizations * path_length)].reshape((path_length, number_of_realizations))
-        interval = interval[:(number_of_realizations * path_length)].reshape((path_length, number_of_realizations))
+        latlon = latlon[:, :(number_of_realizations * path_length)].reshape((2, number_of_realizations, path_length)).transpose((0,2,1))
+        acc = acc[:(number_of_realizations * path_length)].reshape((number_of_realizations, path_length)).transpose()
+        interval = interval[:(number_of_realizations * path_length)].reshape((number_of_realizations, path_length)).transpose()
         return latlon, acc, interval
     else:
         logger.error("Paths provided smaller than requested path length")
