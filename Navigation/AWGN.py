@@ -42,7 +42,7 @@ class cAWGN():
     # Constructor
     def __init__(self, struct, noise_level):
         logger.debug("Initializing cAWGN")
-        self.m_acquisition_length = struct['gps_freq_Hz'] * struct['acquisition_time_sec']
+        self.m_acquisition_length = struct['acquisition_length']
         self.m_noise_std = struct['noise_std_meter']
         self.m_noisy_positions_latlon = np.zeros((2, self.m_acquisition_length))
         self.m_noisy_positions_wm = np.zeros((2, self.m_acquisition_length))

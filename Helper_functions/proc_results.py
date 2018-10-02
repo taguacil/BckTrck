@@ -173,16 +173,16 @@ class cProcessFile:
     # Plot real path and reconstruction
     def plot_real_path_recon(self):
         logger.debug('Plotting real path and stitched reconstruction')
-        latlon_real = self.m_paths_latlon_org.reshape((2, self.m_path_length * self.m_number_realization))
+        latlon_real = self.m_paths_latlon_org[:,:,:,0].transpose(0,2,1).reshape((2, self.m_path_length * self.m_number_realization))
 
         plt.plot(latlon_real[1], latlon_real[0], 'b-*')
         if self.m_bReconstruct:
             logger.debug('Plotting MSE of reconstructed paths latlon')
 
             for key in self.reconstructed_latlon_paths.keys():
-                r_path = self.reconstructed_latlon_paths[key].reshape(
+                r_path = self.reconstructed_latlon_paths[key][:,:,:,0].transpose(0,2,1).reshape(
                     (2, self.m_path_length * self.m_number_realization))
-
+                
                 l2_r_latlon = np.sqrt(np.mean((latlon_real[0] - r_path[0]) ** 2 + (latlon_real[1] - r_path[1]) ** 2))
 
                 plt.plot(r_path[1], r_path[0], 'r-*')
