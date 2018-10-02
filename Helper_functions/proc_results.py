@@ -49,20 +49,27 @@ else:
 # the main processing function
 def process_data(params):
     data_obj = cProcessFile(params)
-    if params["CSV_DATA"]["bUse_csv_data"]:
-        data_obj.plot_real_path_recon()
 
-    elif not params["bTrainNetwork"]:
-        MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon, reconstructed_db_latlon = \
-            data_obj.calculate_MSE()
-        data_obj.plot_path_org_2d()
-        data_obj.plot_path_noisy_2d()
-        data_obj.plot_MSE(MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon)
-        data_obj.plot_SNR(reconstructed_db_latlon)
-        data_obj.analyze_DCT()
-        data_obj.power_spectral_density()
-        params["RESULTS"]["reconstructed_db_latlon"] = reconstructed_db_latlon
-        params["RESULTS"]["MSE_latlon"] = MSE_r_latlon
+    if not params["bTrainNetwork"]:
+        if params["CSV_DATA"]["bUse_csv_data"]&params["CSV_DATA"]["bPlot_real_path"]:
+            data_obj.plot_real_path_recon()
+        else :
+            MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon, reconstructed_db_latlon = \
+                data_obj.calculate_MSE()
+            try:
+                data_obj.plot_path_org_2d()
+                data_obj.plot_path_noisy_2d()
+                data_obj.plot_MSE(MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon)
+                data_obj.plot_SNR(reconstructed_db_latlon)
+                data_obj.analyze_DCT()
+                data_obj.power_spectral_density()
+            except KeyError as key_error:
+                    message = "Could not find key %s" %(key_error.args[0])
+                    errdict = {"file": __file__, "message": message, "errorType": CErrorTypes.value}
+                    raise CFrameworkError(errdict) from key_error
+
+            params["RESULTS"]["reconstructed_db_latlon"] = reconstructed_db_latlon
+            params["RESULTS"]["MSE_latlon"] = MSE_r_latlon
 
     if params["bSimplified_Results"]:  # TODO logic will only work after csv is integrated
         del params['RESULTS']['paths_wm_org']
@@ -70,7 +77,7 @@ def process_data(params):
         del params['RESULTS']['paths_wm_noisy']
         del params['RESULTS']['paths_latlon_noisy']
         del params['RESULTS']['reconstructed_latlon_paths']
-        del params['RESULTS']['reconstructed_W_paths']
+        del params['RESULTS']['reconstructed_WM_paths']
         if not params['TRANSFORM']['bDctTransform']:
             del params['RESULTS']['transformed_paths']
 
@@ -167,16 +174,16 @@ class cProcessFile:
     # Plot real path and reconstruction
     def plot_real_path_recon(self):
         logger.debug('Plotting real path and stitched reconstruction')
-        latlon_real = self.m_paths_latlon_org.reshape((2, self.m_path_length * self.m_number_realization))
+        latlon_real = self.m_paths_latlon_org[:,:,:,0].transpose(0,2,1).reshape((2, self.m_path_length * self.m_number_realization))
 
         plt.plot(latlon_real[1], latlon_real[0], 'b-*')
         if self.m_bReconstruct:
             logger.debug('Plotting MSE of reconstructed paths latlon')
 
             for key in self.reconstructed_latlon_paths.keys():
-                r_path = self.reconstructed_latlon_paths[key].reshape(
+                r_path = self.reconstructed_latlon_paths[key][:,:,:,0].transpose(0,2,1).reshape(
                     (2, self.m_path_length * self.m_number_realization))
-
+                
                 l2_r_latlon = np.sqrt(np.mean((latlon_real[0] - r_path[0]) ** 2 + (latlon_real[1] - r_path[1]) ** 2))
 
                 plt.plot(r_path[1], r_path[0], 'r-*')

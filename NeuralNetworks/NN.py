@@ -133,8 +133,11 @@ class CNeuralNetwork:
             metrics=["mse"]
         )
 
-    def train_nn(self, org_latlon, downsampled_latlon):
+    def train_nn(self, org_latlon, input_latlon_noisy):
         # First we normalize
+        samples = np.sort(np.random.choice(self.m_acquisition_length, self.number_of_samples, replace=False))
+        downsampled_latlon = input_latlon_noisy[:, samples, :, :]
+
         paths_latlon_org, paths_latlon_noisy = self.normalize_path_training(org_latlon, downsampled_latlon)
 
         # W reshape to have a matrix for lat and lon respectively
