@@ -41,7 +41,6 @@ from Reconstruction_algorithms.Master_reconstruction import reconstructor, ident
 from Helper_functions.csv_interpreter import munge_csv
 from Helper_functions.framework_error import CFrameworkError
 from Helper_functions.framework_error import CErrorTypes
-from NeuralNetworks.NN import CNeuralNetwork
 
 if platform.system() == "Windows":
     direc_ident = "\\"
@@ -150,8 +149,9 @@ class cFramework:
         # Set seed
         if use_random_seed:
             np.random.seed(random_seed)
-        
+
         if local_struct['bTrainNetwork']:
+            from NeuralNetworks.NN import CNeuralNetwork
             # Iterate over the total number of realizations to generate training set
             modelname = local_struct["RCT_ALG_NN"]["modelname"]
             modelname_lat = self.paramPath + 'NeuralNetworks' + direc_ident \
@@ -202,7 +202,7 @@ class cFramework:
                 local_struct['realization'] = latlon_accuracy.shape[-1]
                 numberOfRealizations = local_struct['realization']
                 paths_latlon_org = paths_latlon_org.reshape((2, path_length, numberOfRealizations, noise_level_len))
-            else :
+            else:
                 acquisition_length = local_struct['gps_freq_Hz'] * local_struct['acquisition_time_sec']
                 paths_latlon_org = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
             paths_wm_org = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
@@ -228,18 +228,18 @@ class cFramework:
                 for realization in range(numberOfRealizations):
                     # Generate random data
                     self.logger.debug('Generating random data for realization <%d>', realization)
-                    if not use_csv_data :
+                    if not use_csv_data:
                         (paths_wm_org[:, :, realization, lvl], paths_latlon_org[:, :, realization, lvl]) = \
                             random_2d_path_generator(local_struct)
                         (paths_wm_noisy[:, :, realization, lvl], paths_latlon_noisy[:, :, realization, lvl],
-                            noise_vals[:, :, realization, lvl]) = \
+                         noise_vals[:, :, realization, lvl]) = \
                             noise_generator(local_struct, paths_wm_org[:, :, realization, lvl], noise_level[lvl])
-                    else : 
-                        paths_wm_org[:, :, realization, lvl]      = cord.generate_WM_array(paths_latlon_org[:, :, realization,lvl])
-                        paths_latlon_noisy[:,:, realization, lvl] = paths_latlon_org[:,:, realization, lvl]
-                        paths_wm_noisy[:,:, realization, lvl]     = paths_wm_org[:,:, realization, lvl]
+                    else:
+                        paths_wm_org[:, :, realization, lvl] = cord.generate_WM_array(
+                            paths_latlon_org[:, :, realization, lvl])
+                        paths_latlon_noisy[:, :, realization, lvl] = paths_latlon_org[:, :, realization, lvl]
+                        paths_wm_noisy[:, :, realization, lvl] = paths_wm_org[:, :, realization, lvl]
                     # Generate noise for each realization
-                    
 
                     # Apply transforms
                     transformed_paths[:, :, realization, lvl] = \
@@ -256,13 +256,14 @@ class cFramework:
                                         cord.generate_WM_array(temp)
                                 except ValueError as valerr:
                                     self.logger.debug("Lat/Lon out of range in degrees")
-                                    errdict = {"file": __file__, "message": valerr.args[0], "errorType": CErrorTypes.range}
+                                    errdict = {"file": __file__, "message": valerr.args[0],
+                                               "errorType": CErrorTypes.range}
                                     raise CFrameworkError(errdict)
                             except CFrameworkError as frameErr:
                                 self.errorAnalyzer(frameErr, str((algorithm, lvl)))
 
         # Store data in local struct 
-        
+
         local_struct['RESULTS']['paths_wm_org'] = paths_wm_org
         local_struct['RESULTS']['paths_latlon_org'] = paths_latlon_org
         local_struct['RESULTS']['paths_wm_noisy'] = paths_wm_noisy
@@ -270,7 +271,7 @@ class cFramework:
         local_struct['RESULTS']['transformed_paths'] = transformed_paths
         local_struct['RESULTS']['reconstructed_latlon_paths'] = reconstructed_latlon_paths
         local_struct['RESULTS']['reconstructed_WM_paths'] = reconstructed_WM_paths
-        
+
         self.logger.debug('Generating results and plotting')
         try:
             process_data(local_struct)
