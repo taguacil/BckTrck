@@ -150,98 +150,57 @@ class cFramework:
         if use_random_seed:
             np.random.seed(random_seed)
 
-        if local_struct['bTrainNetwork']:
-            from NeuralNetworks.NN import CNeuralNetwork
-            # Iterate over the total number of realizations to generate training set
-            modelname = local_struct["RCT_ALG_NN"]["modelname"]
-            modelname_lat = self.paramPath + 'NeuralNetworks' + direc_ident \
-                            + modelname + "_lat.h5"
-            modelname_lon = self.paramPath + 'NeuralNetworks' + direc_ident + 'Models' + direc_ident \
-                            + modelname + "_lon.h5"
-
+        # Iterate over the total number of realizations
+        if use_csv_data:
+            acquisition_length = path_length
+            paths_latlon_org, latlon_accuracy, latlon_interval = munge_csv(csv_path, path_length)
+            local_struct['realization'] = latlon_accuracy.shape[-1]
+            numberOfRealizations = local_struct['realization']
+            paths_latlon_org = paths_latlon_org.reshape((2, path_length, numberOfRealizations, noise_level_len))
+        else:
             acquisition_length = local_struct['gps_freq_Hz'] * local_struct['acquisition_time_sec']
-            local_struct['acquisition_length'] = acquisition_length
-
-            transformed_paths = []  # empty not used
-            reconstructed_latlon_paths = []  # empty not used
-            reconstructed_WM_paths = []  # empty not used
-
-            paths_wm_org = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
             paths_latlon_org = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
-            paths_wm_noisy = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
-            paths_latlon_noisy = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
-            noise_vals = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
 
-            self.logger.info('Starting generation for training with <%d> realizations and <%d> path length',
-                             numberOfRealizations, acquisition_length)
-            for lvl in range(noise_level_len):
-                for realization in range(numberOfRealizations):
-                    # Generate random data
-                    self.logger.debug('Generating random data for realization <%d>', realization)
+        local_struct['acquisition_length'] = acquisition_length
 
+        paths_wm_org = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
+        paths_wm_noisy = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
+        paths_latlon_noisy = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
+        noise_vals = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
+        transformed_paths = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
+
+        reconstructed_latlon_paths = {}
+        reconstructed_WM_paths = {}
+
+        reconstruction_algorithms = identify_algorithms(local_struct)
+        for algorithm in reconstruction_algorithms:
+            reconstructed_latlon_paths[algorithm] = np.zeros(
+                (2, acquisition_length, numberOfRealizations, noise_level_len))
+            reconstructed_WM_paths[algorithm] = np.zeros(
+                (2, acquisition_length, numberOfRealizations, noise_level_len))
+
+        self.logger.info('Starting simulation with <%d> realizations and <%d> path length', numberOfRealizations,
+                         acquisition_length)
+
+        for lvl in range(noise_level_len):
+            for realization in range(numberOfRealizations):
+                # Generate random data
+                self.logger.debug('Generating random data for realization <%d>', realization)
+                if not use_csv_data:
                     (paths_wm_org[:, :, realization, lvl], paths_latlon_org[:, :, realization, lvl]) = \
                         random_2d_path_generator(local_struct)
-
                     # Generate noise for each realization
                     (paths_wm_noisy[:, :, realization, lvl], paths_latlon_noisy[:, :, realization, lvl],
                      noise_vals[:, :, realization, lvl]) = \
                         noise_generator(local_struct, paths_wm_org[:, :, realization, lvl], noise_level[lvl])
+                else:
+                    paths_wm_org[:, :, realization, lvl] = cord.generate_WM_array(
+                        paths_latlon_org[:, :, realization, lvl])
+                    paths_latlon_noisy[:, :, realization, lvl] = paths_latlon_org[:, :, realization, lvl]
+                    paths_wm_noisy[:, :, realization, lvl] = paths_wm_org[:, :, realization, lvl]
 
-            nnObj = CNeuralNetwork(local_struct)
-            nnObj.train_nn(paths_latlon_org, paths_latlon_noisy)
-            nnObj.save_models(modelname_lat, modelname_lon)
-
-            if nnObj.dump_nn_summary():
-                self.logAnalyzer(nnObj.messageSummary_dict, modelname)
-
-        else:
-            # Iterate over the total number of realizations
-            if use_csv_data:
-                acquisition_length = path_length
-                paths_latlon_org, latlon_accuracy, latlon_interval = munge_csv(csv_path, path_length)
-                local_struct['realization'] = latlon_accuracy.shape[-1]
-                numberOfRealizations = local_struct['realization']
-                paths_latlon_org = paths_latlon_org.reshape((2, path_length, numberOfRealizations, noise_level_len))
-            else:
-                acquisition_length = local_struct['gps_freq_Hz'] * local_struct['acquisition_time_sec']
-                paths_latlon_org = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
-            paths_wm_org = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
-            local_struct['acquisition_length'] = acquisition_length
-            paths_wm_noisy = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
-            paths_latlon_noisy = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
-            noise_vals = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
-            transformed_paths = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
-
-            reconstructed_latlon_paths = {}
-            reconstructed_WM_paths = {}
-
-            reconstruction_algorithms = identify_algorithms(local_struct)
-            for algorithm in reconstruction_algorithms:
-                reconstructed_latlon_paths[algorithm] = np.zeros(
-                    (2, acquisition_length, numberOfRealizations, noise_level_len))
-                reconstructed_WM_paths[algorithm] = np.zeros(
-                    (2, acquisition_length, numberOfRealizations, noise_level_len))
-
-            self.logger.info('Starting simulation with <%d> realizations and <%d> path length', numberOfRealizations,
-                             acquisition_length)
-            for lvl in range(noise_level_len):
-                for realization in range(numberOfRealizations):
-                    # Generate random data
-                    self.logger.debug('Generating random data for realization <%d>', realization)
-                    if not use_csv_data:
-                        (paths_wm_org[:, :, realization, lvl], paths_latlon_org[:, :, realization, lvl]) = \
-                            random_2d_path_generator(local_struct)
-                        (paths_wm_noisy[:, :, realization, lvl], paths_latlon_noisy[:, :, realization, lvl],
-                         noise_vals[:, :, realization, lvl]) = \
-                            noise_generator(local_struct, paths_wm_org[:, :, realization, lvl], noise_level[lvl])
-                    else:
-                        paths_wm_org[:, :, realization, lvl] = cord.generate_WM_array(
-                            paths_latlon_org[:, :, realization, lvl])
-                        paths_latlon_noisy[:, :, realization, lvl] = paths_latlon_org[:, :, realization, lvl]
-                        paths_wm_noisy[:, :, realization, lvl] = paths_wm_org[:, :, realization, lvl]
-                    # Generate noise for each realization
-
-                    # Apply transforms
+                # Apply transforms
+                if not local_struct['bTrainNetwork']:
                     transformed_paths[:, :, realization, lvl] = \
                         transforms(local_struct, paths_latlon_noisy[:, :, realization, lvl])
 
@@ -262,8 +221,23 @@ class cFramework:
                             except CFrameworkError as frameErr:
                                 self.errorAnalyzer(frameErr, str((algorithm, lvl)))
 
-        # Store data in local struct 
+        if local_struct['bTrainNetwork']:
+            from NeuralNetworks.NN import CNeuralNetwork
+            # Iterate over the total number of realizations to generate training set
+            modelname = local_struct["RCT_ALG_NN"]["modelname"]
+            modelname_lat = self.paramPath + 'NeuralNetworks' + direc_ident \
+                            + modelname + "_lat.h5"
+            modelname_lon = self.paramPath + 'NeuralNetworks' + direc_ident + 'Models' + direc_ident \
+                            + modelname + "_lon.h5"
 
+            nnObj = CNeuralNetwork(local_struct)
+            nnObj.train_nn(paths_latlon_org, paths_latlon_noisy)
+            nnObj.save_models(modelname_lat, modelname_lon)
+
+            if nnObj.dump_nn_summary():
+                self.logAnalyzer(nnObj.messageSummary_dict, modelname)
+
+        # Store data in local struct
         local_struct['RESULTS']['paths_wm_org'] = paths_wm_org
         local_struct['RESULTS']['paths_latlon_org'] = paths_latlon_org
         local_struct['RESULTS']['paths_wm_noisy'] = paths_wm_noisy

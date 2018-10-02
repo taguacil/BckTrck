@@ -26,6 +26,7 @@
     
     "CSV_DATA"                  : {
         "bUse_csv_data"             : false,
+        "bPlot_real_path"           : false,
         "csv_path"                  : ".",
         "path_length"               : 512
     
