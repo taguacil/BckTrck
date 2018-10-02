@@ -150,43 +150,8 @@ class cFramework:
         # Set seed
         if use_random_seed:
             np.random.seed(random_seed)
-
-        if use_csv_data:
-
-            local_struct['acquisition_length'] = path_length
-            paths_latlon_real, latlon_accuracy, latlon_interval = munge_csv(csv_path, path_length)
-            local_struct['realization'] = latlon_accuracy.shape[-1]
-            numberOfRealizations = local_struct['realization']
-
-            paths_wm_real = np.zeros((2, path_length, numberOfRealizations))
-            transformed_real_paths = np.zeros((2, path_length, numberOfRealizations))
-
-            reconstructed_real_latlon_paths = {}
-            reconstructed_real_WM_paths = {}
-
-            reconstruction_algorithms = identify_algorithms(local_struct)
-            for algorithm in reconstruction_algorithms:
-                reconstructed_real_latlon_paths[algorithm] = np.zeros((2, path_length, numberOfRealizations))
-                reconstructed_real_WM_paths[algorithm] = np.zeros((2, path_length, numberOfRealizations))
-
-            for realization in range(numberOfRealizations):
-                transformed_real_paths[:, :, realization] = transforms(local_struct,
-                                                                       paths_latlon_real[:, :, realization])
-                paths_wm_real[:, :, realization] = cord.generate_WM_array(paths_latlon_real[:, :, realization])
-                if local_struct['bReconstruct']:
-                    temp = reconstructor(local_struct, paths_latlon_real[:, :, realization])
-                    for algorithm in reconstruction_algorithms:
-                        reconstructed_real_latlon_paths[algorithm][:, :, realization] = temp[algorithm][:, :]
-                        reconstructed_real_WM_paths[algorithm][:, :, realization] = cord.generate_WM_array(
-                            temp[algorithm][:, :])
-
-            local_struct['RESULTS']['paths_wm_org'] = paths_wm_real
-            local_struct['RESULTS']['paths_latlon_org'] = paths_latlon_real
-            local_struct['RESULTS']['transformed_paths'] = transformed_real_paths
-            local_struct['RESULTS']['reconstructed_latlon_paths'] = reconstructed_real_latlon_paths
-            local_struct['RESULTS']['reconstructed_WM_paths'] = reconstructed_real_WM_paths
-
-        elif local_struct['bTrainNetwork']:
+        
+        if local_struct['bTrainNetwork']:
             # Iterate over the total number of realizations to generate training set
             modelname = local_struct["RCT_ALG_NN"]["modelname"]
             modelname_lat = self.paramPath + 'NeuralNetworks' + direc_ident \
@@ -231,10 +196,17 @@ class cFramework:
 
         else:
             # Iterate over the total number of realizations
-            acquisition_length = local_struct['gps_freq_Hz'] * local_struct['acquisition_time_sec']
-            local_struct['acquisition_length'] = acquisition_length
+            if use_csv_data:
+                acquisition_length = path_length
+                paths_latlon_org, latlon_accuracy, latlon_interval = munge_csv(csv_path, path_length)
+                local_struct['realization'] = latlon_accuracy.shape[-1]
+                numberOfRealizations = local_struct['realization']
+                paths_latlon_org = paths_latlon_org.reshape((2, path_length, numberOfRealizations, noise_level_len))
+            else :
+                acquisition_length = local_struct['gps_freq_Hz'] * local_struct['acquisition_time_sec']
+                paths_latlon_org = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
             paths_wm_org = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
-            paths_latlon_org = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
+            local_struct['acquisition_length'] = acquisition_length
             paths_wm_noisy = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
             paths_latlon_noisy = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
             noise_vals = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
@@ -256,14 +228,18 @@ class cFramework:
                 for realization in range(numberOfRealizations):
                     # Generate random data
                     self.logger.debug('Generating random data for realization <%d>', realization)
-
-                    (paths_wm_org[:, :, realization, lvl], paths_latlon_org[:, :, realization, lvl]) = \
-                        random_2d_path_generator(local_struct)
-
+                    if not use_csv_data :
+                        (paths_wm_org[:, :, realization, lvl], paths_latlon_org[:, :, realization, lvl]) = \
+                            random_2d_path_generator(local_struct)
+                        (paths_wm_noisy[:, :, realization, lvl], paths_latlon_noisy[:, :, realization, lvl],
+                            noise_vals[:, :, realization, lvl]) = \
+                            noise_generator(local_struct, paths_wm_org[:, :, realization, lvl], noise_level[lvl])
+                    else : 
+                        paths_wm_org[:, :, realization, lvl]      = cord.generate_WM_array(paths_latlon_org[:, :, realization,lvl])
+                        paths_latlon_noisy[:,:, realization, lvl] = paths_latlon_org[:,:, realization, lvl]
+                        paths_wm_noisy[:,:, realization, lvl]     = paths_wm_org[:,:, realization, lvl]
                     # Generate noise for each realization
-                    (paths_wm_noisy[:, :, realization, lvl], paths_latlon_noisy[:, :, realization, lvl],
-                     noise_vals[:, :, realization, lvl]) = \
-                        noise_generator(local_struct, paths_wm_org[:, :, realization, lvl], noise_level[lvl])
+                    
 
                     # Apply transforms
                     transformed_paths[:, :, realization, lvl] = \
@@ -285,7 +261,8 @@ class cFramework:
                             except CFrameworkError as frameErr:
                                 self.errorAnalyzer(frameErr, str((algorithm, lvl)))
 
-        # Store data in local struct TODO Will not work until csv is removed properly
+        # Store data in local struct 
+        
         local_struct['RESULTS']['paths_wm_org'] = paths_wm_org
         local_struct['RESULTS']['paths_latlon_org'] = paths_latlon_org
         local_struct['RESULTS']['paths_wm_noisy'] = paths_wm_noisy
@@ -293,7 +270,7 @@ class cFramework:
         local_struct['RESULTS']['transformed_paths'] = transformed_paths
         local_struct['RESULTS']['reconstructed_latlon_paths'] = reconstructed_latlon_paths
         local_struct['RESULTS']['reconstructed_WM_paths'] = reconstructed_WM_paths
-
+        
         self.logger.debug('Generating results and plotting')
         try:
             process_data(local_struct)
