@@ -64,4 +64,13 @@ def reconstructor(params, path):
         except ValueError as valerr:
             raise CFrameworkError(valerr.args[0]) from valerr
 
+    elif params['RCT_ALG_NN']["bReconstruct_NN"]:
+        from NeuralNetworks.NN import CNeuralNetwork
+        nnObj = CNeuralNetwork(params)
+        try:
+            temp = nnObj.nn_inference(normalized_path)
+            reconstructed_paths = np.sqrt(var) * temp + mean
+        except ValueError as valerr:
+            raise CFrameworkError(valerr.args[0]) from valerr
+
     return reconstructed_paths

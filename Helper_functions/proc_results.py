@@ -49,26 +49,37 @@ else:
 # the main processing function
 def process_data(params):
     data_obj = cProcessFile(params)
-    if params["CSV_DATA"]["bUse_csv_data"]:
-        data_obj.plot_real_path_recon()
-    else:
-        _, _, _, _, MSE_r_latlon, reconstructed_db_latlon = data_obj.calculate_MSE()
-        data_obj.plot_path_org_2d()
-        data_obj.plot_path_noisy_2d()
-        data_obj.plot_MSE()
-        data_obj.analyze_DCT()
-        data_obj.power_spectral_density()
-        params["RESULTS"]["reconstructed_db_latlon"] = reconstructed_db_latlon
-        params["RESULTS"]["MSE_latlon"] = MSE_r_latlon
-        if params["bSimplified_Results"]:
-            del params['RESULTS']['paths_wm_org']
-            del params['RESULTS']['paths_latlon_org']
-            del params['RESULTS']['paths_wm_noisy']
-            del params['RESULTS']['paths_latlon_noisy']
-            del params['RESULTS']['reconstructed_latlon_paths']
-            del params['RESULTS']['reconstructed_WM_paths']
-            if not params['TRANSFORM']['bDctTransform']:
-                del params['RESULTS']['transformed_paths']
+
+    if not params["bTrainNetwork"]:
+        if params["CSV_DATA"]["bUse_csv_data"]&params["CSV_DATA"]["bPlot_real_path"]:
+            data_obj.plot_real_path_recon()
+        else :
+            MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon, reconstructed_db_latlon = \
+                data_obj.calculate_MSE()
+            try:
+                data_obj.plot_path_org_2d()
+                data_obj.plot_path_noisy_2d()
+                data_obj.plot_MSE(MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon)
+                data_obj.plot_SNR(reconstructed_db_latlon)
+                data_obj.analyze_DCT()
+                data_obj.power_spectral_density()
+            except KeyError as key_error:
+                    message = "Could not find key %s" %(key_error.args[0])
+                    errdict = {"file": __file__, "message": message, "errorType": CErrorTypes.value}
+                    raise CFrameworkError(errdict) from key_error
+
+            params["RESULTS"]["reconstructed_db_latlon"] = reconstructed_db_latlon
+            params["RESULTS"]["MSE_latlon"] = MSE_r_latlon
+
+    if params["bSimplified_Results"]:  # TODO logic will only work after csv is integrated
+        del params['RESULTS']['paths_wm_org']
+        del params['RESULTS']['paths_latlon_org']
+        del params['RESULTS']['paths_wm_noisy']
+        del params['RESULTS']['paths_latlon_noisy']
+        del params['RESULTS']['reconstructed_latlon_paths']
+        del params['RESULTS']['reconstructed_WM_paths']
+        if not params['TRANSFORM']['bDctTransform']:
+            del params['RESULTS']['transformed_paths']
 
     return data_obj.set_pickle_file(params)
 
@@ -113,22 +124,17 @@ class cProcessFile:
                            "message": "Could not dump in pickle file", "errorType": CErrorTypes.ioerror}
                 raise CFrameworkError(errdict) from io_error
 
-
     # Read from txt file pickle format into dictionary
     def get_pickle_file(self):
         with open(self.m_filename, 'rb') as txt_file_read:
             return pickle.load(txt_file_read)
 
     def calculate_MSE(self):
-        x_axis = self.m_noise_level_meter
-        paths_wm_org_ext = np.transpose(np.array([self.m_paths_wm_org, ] * len(x_axis)), (1, 2, 3, 0))
-        paths_latlon_org_ext = np.transpose(np.array([self.m_paths_latlon_org, ] * len(x_axis)), (1, 2, 3, 0))
-
-        l2_noise_wm = np.sqrt(np.mean((paths_wm_org_ext[0, :, :, :] - self.m_paths_wm_noisy[0, :, :, :]) ** 2 + (
-                paths_wm_org_ext[1, :, :, :] - self.m_paths_wm_noisy[1, :, :, :]) ** 2, axis=0))
+        l2_noise_wm = np.sqrt(np.mean((self.m_paths_wm_org[0, :, :, :] - self.m_paths_wm_noisy[0, :, :, :]) ** 2 + (
+                self.m_paths_wm_org[1, :, :, :] - self.m_paths_wm_noisy[1, :, :, :]) ** 2, axis=0))
         l2_noise_latlon = np.sqrt(np.mean(
-            (paths_latlon_org_ext[0, :, :, :] - self.m_paths_latlon_noisy[0, :, :, :]) ** 2 + (
-                    paths_latlon_org_ext[1, :, :, :] - self.m_paths_latlon_noisy[1, :, :, :]) ** 2, axis=0))
+            (self.m_paths_latlon_org[0, :, :, :] - self.m_paths_latlon_noisy[0, :, :, :]) ** 2 + (
+                    self.m_paths_latlon_org[1, :, :, :] - self.m_paths_latlon_noisy[1, :, :, :]) ** 2, axis=0))
 
         MSE_noise_WM = np.mean(l2_noise_wm, axis=0)
         MSE_noise_latlon = np.mean(l2_noise_latlon, axis=0)
@@ -143,36 +149,41 @@ class cProcessFile:
             for key in self.reconstructed_latlon_paths.keys():
                 r_path = self.reconstructed_latlon_paths[key]
 
-                l2_r_latlon = np.sqrt(np.mean((paths_latlon_org_ext[0, :, :, :] - r_path[0, :, :, :]) ** 2 + (
-                        paths_latlon_org_ext[1, :, :, :] - r_path[1, :, :, :]) ** 2, axis=0))
+                l2_r_latlon = np.sqrt(np.mean((self.m_paths_latlon_org[0, :, :, :] - r_path[0, :, :, :]) ** 2 + (
+                        self.m_paths_latlon_org[1, :, :, :] - r_path[1, :, :, :]) ** 2, axis=0))
+
+                l1_org_latlon = np.mean(abs(self.m_paths_latlon_org[0, :, :, :]) + abs(
+                    self.m_paths_latlon_org[1, :, :, :]), axis=0)
+                l1_r_latlon = np.mean(abs(self.m_paths_latlon_org[0, :, :, :] - r_path[0, :, :, :]) + abs(
+                    self.m_paths_latlon_org[1, :, :, :] - r_path[1, :, :, :]), axis=0)
+
                 MSE_r_latlon[key] = np.mean(l2_r_latlon, axis=0)
-                # Ratio of reconstruction error to error from noisy data in decibels
-                reconstructed_db_latlon[key] = 20 * np.log10(MSE_r_latlon[
-                                                                 key] / MSE_noise_latlon)
+                # Ratio of f/f-f'
+                reconstructed_db_latlon[key] = 20 * np.log10(np.mean(l1_org_latlon/l1_r_latlon, axis=0))
 
                 r2_path = self.reconstructed_wm_paths[key]
 
-                l2_r_wm = np.sqrt(np.mean((paths_wm_org_ext[0, :, :, :] - r2_path[0, :, :, :]) ** 2 + (
-                        paths_wm_org_ext[1, :, :, :] - r2_path[1, :, :, :]) ** 2, axis=0))
+                l2_r_wm = np.sqrt(np.mean((self.m_paths_wm_org[0, :, :, :] - r2_path[0, :, :, :]) ** 2 + (
+                        self.m_paths_wm_org[1, :, :, :] - r2_path[1, :, :, :]) ** 2, axis=0))
                 MSE_r_wm[key] = np.mean(l2_r_wm, axis=0)
-                max_error[key] = np.mean(np.sqrt(np.max((paths_wm_org_ext[0, :, :, :] - r2_path[0, :, :, :]) ** 2 + (
-                        paths_wm_org_ext[1, :, :, :] - r2_path[1, :, :, :]) ** 2, axis=0)), axis=0)
+                max_error[key] = np.mean(np.sqrt(np.max((self.m_paths_wm_org[0, :, :, :] - r2_path[0, :, :, :]) ** 2 + (
+                        self.m_paths_wm_org[1, :, :, :] - r2_path[1, :, :, :]) ** 2, axis=0)), axis=0)
 
         return MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon, reconstructed_db_latlon
 
     # Plot real path and reconstruction
     def plot_real_path_recon(self):
         logger.debug('Plotting real path and stitched reconstruction')
-        latlon_real = self.m_paths_latlon_org.reshape((2, self.m_path_length * self.m_number_realization))
+        latlon_real = self.m_paths_latlon_org[:,:,:,0].transpose(0,2,1).reshape((2, self.m_path_length * self.m_number_realization))
 
         plt.plot(latlon_real[1], latlon_real[0], 'b-*')
         if self.m_bReconstruct:
             logger.debug('Plotting MSE of reconstructed paths latlon')
 
             for key in self.reconstructed_latlon_paths.keys():
-                r_path = self.reconstructed_latlon_paths[key].reshape(
+                r_path = self.reconstructed_latlon_paths[key][:,:,:,0].transpose(0,2,1).reshape(
                     (2, self.m_path_length * self.m_number_realization))
-
+                
                 l2_r_latlon = np.sqrt(np.mean((latlon_real[0] - r_path[0]) ** 2 + (latlon_real[1] - r_path[1]) ** 2))
 
                 plt.plot(r_path[1], r_path[0], 'r-*')
@@ -196,10 +207,10 @@ class cProcessFile:
             logger.debug('Plotting original path in webmercator coordinates')
             if self.m_plotStruct['bPlotAllrealizations']:
                 for k in range(self.m_number_realization):
-                    plt.plot(self.m_paths_wm_org[0, :, k], self.m_paths_wm_org[1, :, k], 'b-*')
+                    plt.plot(self.m_paths_wm_org[0, :, k, 0], self.m_paths_wm_org[1, :, k, 0], 'b-*')
             else:
-                plt.plot(self.m_paths_wm_org[0, :, 0], self.m_paths_wm_org[1, :, 0], 'b-*')
-                logger.warning('Plotting only first realization for visibility')
+                plt.plot(self.m_paths_wm_org[0, :, 0, 0], self.m_paths_wm_org[1, :, 0, 0], 'b-*')
+                logger.warning('Plotting only first realization and noise level for visibility')
 
             plt.grid()
             plt.title('Original cartesian Path')
@@ -212,11 +223,11 @@ class cProcessFile:
             logger.debug('Plotting original path in webmercator coordinates')
             if self.m_plotStruct['bPlotAllrealizations']:
                 for k in range(self.m_number_realization):
-                    plt.plot(x_axis, self.m_paths_wm_org[0, :, k], 'b-*')
+                    plt.plot(x_axis, self.m_paths_wm_org[0, :, k, 0], 'b-*')
 
             else:
-                logger.warning('Plotting only first realization for visibility')
-                plt.plot(x_axis, self.m_paths_wm_org[0, :, 0], 'b-*')
+                logger.warning('Plotting only first realization and noise level for visibility')
+                plt.plot(x_axis, self.m_paths_wm_org[0, :, 0, 0], 'b-*')
 
                 # Plotting x coordinates
             plt.grid()
@@ -228,10 +239,10 @@ class cProcessFile:
             # Plotting y coordinates
             if self.m_plotStruct['bPlotAllrealizations']:
                 for k in range(self.m_number_realization):
-                    plt.plot(x_axis, self.m_paths_wm_org[1, :, k], 'r-*')
+                    plt.plot(x_axis, self.m_paths_wm_org[1, :, k, 0], 'r-*')
 
             else:
-                plt.plot(x_axis, self.m_paths_wm_org[1, :, 0], 'r-*')
+                plt.plot(x_axis, self.m_paths_wm_org[1, :, 0, 0], 'r-*')
 
             plt.grid()
             plt.title('Original webmercator Path -Y')
@@ -244,11 +255,11 @@ class cProcessFile:
             logger.debug('Plotting original longitude and latitude')
             if self.m_plotStruct['bPlotAllrealizations']:
                 for k in range(self.m_number_realization):
-                    plt.plot(x_axis, self.m_paths_latlon_org[0, :, k], 'r-*')
+                    plt.plot(x_axis, self.m_paths_latlon_org[0, :, k, 0], 'r-*')
 
             else:
-                logger.warning('Plotting only first realization for visibility')
-                plt.plot(x_axis, self.m_paths_latlon_org[0, :, 0], 'r-*')
+                logger.warning('Plotting only first realization and noise level for visibility')
+                plt.plot(x_axis, self.m_paths_latlon_org[0, :, 0, 0], 'r-*')
 
             # Plotting Latitude
             plt.grid()
@@ -260,11 +271,11 @@ class cProcessFile:
             # Plotting Longitude
             if self.m_plotStruct['bPlotAllrealizations']:
                 for k in range(self.m_number_realization):
-                    plt.plot(x_axis, self.m_paths_latlon_org[1, :, k], 'b-*')
+                    plt.plot(x_axis, self.m_paths_latlon_org[1, :, k, 0], 'b-*')
 
             else:
-                logger.warning('Plotting only first realization for visibility')
-                plt.plot(x_axis, self.m_paths_latlon_org[1, :, 0], 'b-*')
+                logger.warning('Plotting only first realization and noise level for visibility')
+                plt.plot(x_axis, self.m_paths_latlon_org[1, :, 0, 0], 'b-*')
 
             plt.grid()
             plt.title('Original longitude')
@@ -280,9 +291,9 @@ class cProcessFile:
 
         for noise in range(len(noise_level)):
             paths_wm_noisy = self.m_paths_wm_noisy[:, :, :, noise]
-            paths_wm_org = self.m_paths_wm_org
+            paths_wm_org = self.m_paths_wm_org[:, :, :, noise]
             paths_latlon_noisy = self.m_paths_latlon_noisy[:, :, :, noise]
-            paths_latlon_org = self.m_paths_latlon_org
+            paths_latlon_org = self.m_paths_latlon_org[:, :, :, noise]
 
             if self.m_plotStruct['bPlotPath_WM_noisy']:
                 logger.debug('Plotting noisy path in webmercator coordinates')
@@ -532,12 +543,11 @@ class cProcessFile:
                 plt.show()
 
     # Plot MSE - mean error rate
-    def plot_MSE(self):
+    def plot_MSE(self, MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon):
         if self.m_plotStruct['bPlotMSE']:
             logger.debug('Plotting MSE of WM and latlon values')
             # Set of params
             x_axis = self.m_noise_level_meter
-            MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon, _ = self.calculate_MSE()
 
             if self.m_bReconstruct:
                 logger.debug('Plotting MSE of reconstructed paths latlon')
@@ -579,6 +589,29 @@ class cProcessFile:
                 self.m_acquisition_length, self.m_number_realization))
             plt.xlabel('Noise level (meters)')
             plt.ylabel('MSE')
+            plt.show()
+
+    # Plot SNR - mean error rate
+    def plot_SNR(self, reconstructed_db_latlon):
+        if self.m_plotStruct['bPlotSNR']:
+            logger.debug('Plotting SNR values')
+            # Set of params
+            x_axis = self.m_noise_level_meter
+
+            if self.m_bReconstruct:
+                logger.debug('Plotting SNR of reconstructed paths latlon')
+                for key in self.reconstructed_latlon_paths.keys():
+                    plt.plot(x_axis, reconstructed_db_latlon[key], '-*',
+                             label="SNR_latlon for %s with %.1f %% SR" % (key, self.m_lasso_sampling_ratio * 100))
+
+            # Plotting SNR
+            plt.xscale('log')
+            plt.grid()
+            plt.legend(loc="upper right")
+            plt.title('SNR for %d samples and %d iteratirons' % (
+                self.m_acquisition_length, self.m_number_realization))
+            plt.xlabel('Noise level (meters)')
+            plt.ylabel('SNR [dB]')
             plt.show()
 
     # DCT analysis
@@ -659,9 +692,9 @@ class cProcessFile:
             fs = 1e3
             noise_level = self.m_noise_level_meter
 
-            logger.warning('Plotting only first realization for visibility')
-            f_lat, Plat_den = signal.periodogram(self.m_paths_latlon_org[0, :, 0], fs, return_onesided=False)
-            f_lon, Plon_den = signal.periodogram(self.m_paths_latlon_org[1, :, 0], fs, return_onesided=False)
+            logger.warning('Plotting only first realization and noise level for visibility')
+            f_lat, Plat_den = signal.periodogram(self.m_paths_latlon_org[0, :, 0, 0], fs, return_onesided=False)
+            f_lon, Plon_den = signal.periodogram(self.m_paths_latlon_org[1, :, 0, 0], fs, return_onesided=False)
 
             plt.semilogy(ft.fftshift(f_lat), ft.fftshift(Plat_den))
             # plt.xlim([-(fs/2-1), fs/2-1])
