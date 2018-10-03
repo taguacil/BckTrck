@@ -225,12 +225,13 @@ class cFramework:
             from NeuralNetworks.NN import CNeuralNetwork
             # Iterate over the total number of realizations to generate training set
             modelname = local_struct["RCT_ALG_NN"]["modelname"]
-            modelname_lat = self.paramPath + 'NeuralNetworks' + direc_ident \
+            modelname_lat = self.paramPath + 'NeuralNetworks' + direc_ident + 'Models' + direc_ident \
                             + modelname + "_lat.h5"
             modelname_lon = self.paramPath + 'NeuralNetworks' + direc_ident + 'Models' + direc_ident \
                             + modelname + "_lon.h5"
 
             nnObj = CNeuralNetwork(local_struct)
+            nnObj.design_nn()
             nnObj.train_nn(paths_latlon_org, paths_latlon_noisy)
             nnObj.save_models(modelname_lat, modelname_lon)
 
@@ -272,10 +273,7 @@ class cFramework:
         if self.frameworklog_list["bNologs"]:
             self.frameworklog_list["bNologs"] = False
 
-        if master_key in self.frameworklog_list.keys():
-            self.frameworklog_list[master_key] = message
-        else:
-            self.frameworklog_list = {master_key: message}
+        self.frameworklog_list[master_key] = message
 
 
 # Main function definition  MUST BE at the END OF FILE

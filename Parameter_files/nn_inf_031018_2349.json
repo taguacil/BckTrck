@@ -1,0 +1,34 @@
+{
+    "bSimplified_Results"       : true,
+    
+    "gps_freq_Hz"               : 1,
+    "realization"               : 10,
+    "acquisition_time_sec"      : 200,
+    "stepsize"                  : 1,
+    
+    "random_seed"               : 123,
+    "bUse_random_seed"          : false,
+    
+    "noise_level_meter"         : [20,10,1,0.5,0.0005],
+    "noise_std_meter"           : 0,
+    
+    "bUse_static_init"          : true,
+    "staticLat"                 : 0,
+    "staticLon"                 : 0,
+
+    "bReconstruct"              : true,
+    "bTrainNetwork"             : false,
+
+    "RCT_ALG_NN"             : {
+        "bReconstruct_NN"        : true,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.5,
+        "modelname"              : "firstNN"
+    },
+
+    "PLOT"                      : {
+        "bPlotAllrealizations"      : false,
+        "bPlotLonLat_time_reconst"  : true,
+        "bPlotMSE"                  : true
+    }
+}

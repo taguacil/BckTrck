@@ -39,6 +39,8 @@ def identify_algorithms(params):
         temp.append("Lasso")
     if params['RCT_ALG_BFGS']["bReconstruct_bfgs"]:
         temp.append("BFGS")
+    if params['RCT_ALG_NN']["bReconstruct_NN"]:
+        temp.append("NN")
     return temp
 
 

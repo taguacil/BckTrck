@@ -40,7 +40,7 @@ else:
     direc_ident = "/"
 
 workingDir = os.getcwd()
-resultsPath = workingDir + direc_ident + 'Models' + direc_ident
+resultsPath = workingDir + direc_ident + 'NeuralNetworks' + direc_ident + 'Models' + direc_ident
 
 
 class CNeuralNetwork:
@@ -56,6 +56,7 @@ class CNeuralNetwork:
             raise CFrameworkError(errdict)
 
         self.m_acquisition_length = struct['acquisition_length']
+        self.alpha = struct['RCT_ALG_NN']["alpha"]
         if struct['bTrainNetwork']:
             self.m_model_lat = keras.Sequential()
             self.m_model_lon = keras.Sequential()
@@ -78,7 +79,6 @@ class CNeuralNetwork:
             errdict = {"file": __file__, "message": "Invalid number of samples", "errorType": CErrorTypes.value}
             raise CFrameworkError(errdict)
 
-        self.alpha = struct['RCT_ALG_NN']["alpha"]
         self.noiseLevel_len = len(struct['noise_level_meter'])
         if self.noiseLevel_len <= 0:
             logger.debug("Noise array cannot be empty")
@@ -154,8 +154,8 @@ class CNeuralNetwork:
                                         (self.number_of_samples, totalrealizations)))
 
         # Randomly pick 80% training and 20% validation from totalrealizations
-        validateIndices = np.random.choice(totalrealizations, np.floor(0.2 * totalrealizations), replace=False)
-        trainIndices = all(np.array(range(totalrealizations)) != a for a in validateIndices)
+        validateIndices = np.random.choice(totalrealizations, int(np.floor(0.2 * totalrealizations)), replace=False)
+        trainIndices = np.array([n for n in range(totalrealizations) if n not in validateIndices])
 
         # Train the models
         results_lat = self.m_model_lat.fit(
@@ -194,17 +194,19 @@ class CNeuralNetwork:
 
     def load_models(self, modelname_lat, modelname_lon):
         # Loads both models from unique names from directory NeuralNetworks/Models
-        self.m_model_lat = keras.models.load_model(modelname_lat)
-        self.m_model_lon = keras.models.load_model(modelname_lon)
+        self.m_model_lat = keras.models.load_model(modelname_lat,
+                                                   custom_objects={'activation_fun': self.activation_fun})
+        self.m_model_lon = keras.models.load_model(modelname_lon,
+                                                   custom_objects={'activation_fun': self.activation_fun})
 
     def normalize_path_training(self, paths_latlon_org, paths_latlon_noisy):
         # Normalizing both downsampled and original data
-        mean = np.repeat(np.expand_dims(np.mean(paths_latlon_org, axis=1), axis=1), self.number_of_samples, axis=1)
-        var = np.repeat(np.expand_dims(np.var(paths_latlon_org, axis=1), axis=1), self.number_of_samples, axis=1)
+        mean = np.repeat(np.expand_dims(np.mean(paths_latlon_org, axis=1), axis=1), self.m_acquisition_length, axis=1)
+        var = np.repeat(np.expand_dims(np.var(paths_latlon_org, axis=1), axis=1), self.m_acquisition_length, axis=1)
         paths_latlon_org_norm = (paths_latlon_org - mean) / np.sqrt(var)
 
-        mean = np.repeat(np.expand_dims(np.mean(paths_latlon_noisy, axis=1), axis=1), self.m_acquisition_length, axis=1)
-        var = np.repeat(np.expand_dims(np.var(paths_latlon_noisy, axis=1), axis=1), self.m_acquisition_length, axis=1)
+        mean = np.repeat(np.expand_dims(np.mean(paths_latlon_noisy, axis=1), axis=1), self.number_of_samples, axis=1)
+        var = np.repeat(np.expand_dims(np.var(paths_latlon_noisy, axis=1), axis=1), self.number_of_samples, axis=1)
         paths_latlon_noisy_norm = (paths_latlon_noisy - mean) / np.sqrt(var)
 
         return paths_latlon_org_norm, paths_latlon_noisy_norm
@@ -218,7 +220,7 @@ class CNeuralNetwork:
             raise CFrameworkError(errdict)
         else:
             if self.identifier in self.messageSummary_dict.keys():
-                    self.identifier[self.identifier] += message
+                    self.messageSummary_dict[self.identifier] += message
             else:
-                self.messageSummary_dict = {self.identifier: message}
+                self.messageSummary_dict[self.identifier] = message
 
