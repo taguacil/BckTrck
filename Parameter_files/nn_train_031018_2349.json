@@ -22,14 +22,14 @@
         "bReconstruct_NN"        : false,
         "sampling_ratio"         : 0.20,
         "alpha"                  : 0.5,
-        "modelname"              : "NNnoiseless_random"
+        "modelname"              : "NNnoiseless_real"
     },
 
     "CSV_DATA"                  : {
-        "bUse_csv_data"             : false,
+        "bUse_csv_data"             : true,
         "bPlot_real_path"           : false,
-        "csv_path"                  : ".",
-        "path_length"               : 512
+        "csv_path"                  : "CSV_data/gpsLocations_Taimir_1.csv",
+        "path_length"               : 200
     
     }
 }

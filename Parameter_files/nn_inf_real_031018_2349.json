@@ -23,7 +23,7 @@
         "bReconstruct_NN"        : true,
         "sampling_ratio"         : 0.20,
         "alpha"                  : 0.5,
-        "modelname"              : "NNshit"
+        "modelname"              : "NNnoiseless_random"
     },
 
     "RCT_ALG_LASSO"             : {
@@ -36,7 +36,7 @@
     "CSV_DATA"                  : {
         "bUse_csv_data"             : true,
         "bPlot_real_path"           : true,
-        "csv_path"                  : "CSV_data/gpsLocations_Taimir_2.csv",
+        "csv_path"                  : "CSV_data/gpsLocations_Taimir_1.csv",
         "path_length"               : 200
     },
     
