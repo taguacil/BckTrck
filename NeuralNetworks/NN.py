@@ -61,8 +61,8 @@ class CNeuralNetwork:
             self.m_model_lat = keras.Sequential()
             self.m_model_lon = keras.Sequential()
         else:
-            modelname_lat = resultsPath + struct['RCT_ALG_NN']["modelname"] + "_lat.h5"
-            modelname_lon = resultsPath + struct['RCT_ALG_NN']["modelname"] + "_lon.h5"
+            modelname_lat = resultsPath + struct['RCT_ALG_NN']["modelname"]
+            modelname_lon = resultsPath + struct['RCT_ALG_NN']["modelname"]
             try:
                 self.load_models(modelname_lat, modelname_lon)
             except FileNotFoundError:
@@ -183,21 +183,51 @@ class CNeuralNetwork:
         return True
 
     def nn_inference(self, path_latlon_noisy):
-        # Perform inference on given path
-        self.m_model_lat.predict(path_latlon_noisy[0])
-        self.m_model_lon.predict(path_latlon_noisy[1])
+        # Perform inference on given path 
+        samples = np.sort(np.random.choice(self.m_acquisition_length, self.number_of_samples, replace=False))
+        path_latlon_noisy_dnw = path_latlon_noisy[:,samples].transpose()
+        
+        path_lat = np.array([path_latlon_noisy_dnw[:, 0]])
+        path_lon = np.array([path_latlon_noisy_dnw[:, 1]])
+        
+        # Check if vector length is the same as input layer is implicitly done by ValueError
+        path_lat_reconst = self.m_model_lat.predict(path_lat)
+        path_lon_reconst = self.m_model_lon.predict(path_lon)
+        
+        return path_lat_reconst, path_lon_reconst
 
     def save_models(self, modelname_lat, modelname_lon):
-        # Save both models with unique name in directory NeuralNetworks/Models
-        self.m_model_lat.save(modelname_lat)
-        self.m_model_lon.save(modelname_lon)
+        # serialize model to JSON
+        model_lat_json = self.m_model_lat.to_json()
+        model_lon_json = self.m_model_lon.to_json()
+        with open(modelname_lat + "_lat.json", "w") as json_file:
+            json_file.write(model_lat_json)
+        with open(modelname_lon + "_lon.json", "w") as json_file:
+            json_file.write(model_lon_json)
+        # serialize weights to HDF5
+        self.m_model_lat.save_weights(modelname_lat + "_lat.h5")
+        self.m_model_lon.save_weights(modelname_lon + "_lon.h5")
 
     def load_models(self, modelname_lat, modelname_lon):
         # Loads both models from unique names from directory NeuralNetworks/Models
-        self.m_model_lat = keras.models.load_model(modelname_lat,
-                                                   custom_objects={'activation_fun': self.activation_fun})
-        self.m_model_lon = keras.models.load_model(modelname_lon,
-                                                   custom_objects={'activation_fun': self.activation_fun})
+        modelpath_lat_json = modelname_lat + "_lat.json"
+        modelpath_lon_json = modelname_lat + "_lon.json"
+        modelpath_lat_h5 = modelname_lat + "_lat.h5"
+        modelpath_lon_h5 = modelname_lat + "_lon.h5"
+        # load json and create model
+        json_file = open(modelpath_lat_json, 'r')
+        loaded_model_json = json_file.read()
+        json_file.close()
+        self.m_model_lat = keras.models.model_from_json(loaded_model_json, 
+                                                        custom_objects={'activation_fun': self.activation_fun})
+        json_file = open(modelpath_lon_json, 'r')
+        loaded_model_json = json_file.read()
+        json_file.close()
+        self.m_model_lon = keras.models.model_from_json(loaded_model_json, 
+                                                        custom_objects={'activation_fun': self.activation_fun})
+        # load weights into new model
+        self.m_model_lat.load_weights(modelpath_lat_h5)
+        self.m_model_lon.load_weights(modelpath_lon_h5)
 
     def normalize_path_training(self, paths_latlon_org, paths_latlon_noisy):
         # Normalizing both downsampled and original data

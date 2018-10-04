@@ -2,7 +2,7 @@
     "bSimplified_Results"       : true,
     
     "gps_freq_Hz"               : 1,
-    "realization"               : 10,
+    "realization"               : 500,
     "acquisition_time_sec"      : 200,
     "stepsize"                  : 1,
     

@@ -79,20 +79,21 @@ class cFramework:
 
         # create logger with 'spam_application'
         self.logger = logging.getLogger('BckTrk')
-        self.logger.setLevel(logging.INFO)
+        logLevel = 15 # can be logging.INFO or DEBUG 
+        self.logger.setLevel(logLevel)
 
         # create file handler which logs even debug messages
         now = datetime.datetime.now()
         self.fh = logging.FileHandler(
             self.paramPath + 'Logs' + direc_ident + 'BckTrk_Log_' + now.strftime("%Y-%m-%d") + '.log')
-        self.fh.setLevel(logging.INFO)
+        self.fh.setLevel(logLevel)
 
         self.local_struct['currentTime'] = now
         self.local_struct['workingDir'] = workingDir
 
         # create console handler with same log level
         self.ch = logging.StreamHandler()
-        self.ch.setLevel(logging.INFO)
+        self.ch.setLevel(logLevel)
 
         # create formatter and add it to the handlers
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -171,6 +172,7 @@ class cFramework:
 
         reconstructed_latlon_paths = {}
         reconstructed_WM_paths = {}
+        bNN_initialized = False
 
         reconstruction_algorithms = identify_algorithms(local_struct)
         for algorithm in reconstruction_algorithms:
@@ -185,7 +187,7 @@ class cFramework:
         for lvl in range(noise_level_len):
             for realization in range(numberOfRealizations):
                 # Generate random data
-                self.logger.debug('Generating random data for realization <%d>', realization)
+                self.logger.log(15, 'Generating random data for realization <%d>', realization)
                 if not use_csv_data:
                     (paths_wm_org[:, :, realization, lvl], paths_latlon_org[:, :, realization, lvl]) = \
                         random_2d_path_generator(local_struct)
@@ -207,6 +209,10 @@ class cFramework:
                     # Apply reconstruction algorithms
                     if local_struct['bReconstruct']:
                         for algorithm in reconstruction_algorithms:
+                            if algorithm == "NN" and not bNN_initialized:
+                                from NeuralNetworks.NN import CNeuralNetwork
+                                local_struct['nnObj'] = CNeuralNetwork(local_struct)
+                                bNN_initialized = True
                             try:
                                 temp = reconstructor(local_struct, paths_latlon_noisy[:, :, realization, lvl])
                                 reconstructed_latlon_paths[algorithm][:, :, realization, lvl] = temp
@@ -226,9 +232,9 @@ class cFramework:
             # Iterate over the total number of realizations to generate training set
             modelname = local_struct["RCT_ALG_NN"]["modelname"]
             modelname_lat = self.paramPath + 'NeuralNetworks' + direc_ident + 'Models' + direc_ident \
-                            + modelname + "_lat.h5"
+                            + modelname
             modelname_lon = self.paramPath + 'NeuralNetworks' + direc_ident + 'Models' + direc_ident \
-                            + modelname + "_lon.h5"
+                            + modelname
 
             nnObj = CNeuralNetwork(local_struct)
             nnObj.design_nn()

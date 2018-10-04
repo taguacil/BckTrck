@@ -2,11 +2,11 @@
     "bSimplified_Results"       : true,
     
     "gps_freq_Hz"               : 1,
-    "realization"               : 10,
+    "realization"               : 100,
     "acquisition_time_sec"      : 200,
     "stepsize"                  : 1,
     
-    "random_seed"               : 123,
+    "random_seed"               : 5236,
     "bUse_random_seed"          : false,
     
     "noise_level_meter"         : [20,10,1,0.5,0.0005],
@@ -28,7 +28,7 @@
 
     "PLOT"                      : {
         "bPlotAllrealizations"      : false,
-        "bPlotLonLat_time_reconst"  : true,
+        "bPlotLonLat_time_reconst"  : false,
         "bPlotMSE"                  : true
     }
 }
