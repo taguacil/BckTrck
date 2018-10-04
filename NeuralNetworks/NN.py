@@ -71,7 +71,7 @@ class CNeuralNetwork:
                 errdict = {"file": __file__, "message": message, "errorType": CErrorTypes.value}
                 raise CFrameworkError(errdict)
 
-        self.number_of_samples = int(struct['RCT_ALG_LASSO']["sampling_ratio"] * struct["acquisition_length"])
+        self.number_of_samples = int(struct['RCT_ALG_NN']["sampling_ratio"] * struct["acquisition_length"])
         self.realizations = struct['realization']
 
         if self.number_of_samples <= 0:

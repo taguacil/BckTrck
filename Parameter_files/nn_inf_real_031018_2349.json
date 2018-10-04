@@ -6,10 +6,10 @@
     "acquisition_time_sec"      : 200,
     "stepsize"                  : 1,
     
-    "random_seed"               : 6468,
+    "random_seed"               : 5236,
     "bUse_random_seed"          : false,
     
-    "noise_level_meter"         : [1000,800,500,200,100,50,40,30,20,10,5,1],
+    "noise_level_meter"         : [1000,800,500,200,100,50,40,30,20,10,5,0.0005],
     "noise_std_meter"           : 0,
     
     "bUse_static_init"          : true,
@@ -29,14 +29,21 @@
     "RCT_ALG_LASSO"             : {
         "bReconstruct_from_dct"     : true,
         "bReconstruct_lasso"        : true,
-        "lasso_learning_rate"       : 0.01,
+        "lasso_learning_rate"       : 0.001,
         "sampling_ratio"            : 0.2
     },
-        
+    
+    "CSV_DATA"                  : {
+        "bUse_csv_data"             : true,
+        "bPlot_real_path"           : true,
+        "csv_path"                  : "CSV_data/gpsLocations_Taimir_2.csv",
+        "path_length"               : 200
+    },
+    
     "PLOT"                      : {
         "bPlotAllrealizations"      : false,
         "bPlotLonLat_time_reconst"  : true,
-        "bPlotMSE"                  : true,
-        "bPlotSNR"                  : true
+        "bPlotMSE"                  : false,
+        "bPlotSNR"                  : false
     }
 }

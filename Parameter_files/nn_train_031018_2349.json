@@ -2,14 +2,14 @@
     "bSimplified_Results"       : true,
     
     "gps_freq_Hz"               : 1,
-    "realization"               : 500,
+    "realization"               : 10000,
     "acquisition_time_sec"      : 200,
     "stepsize"                  : 1,
     
     "random_seed"               : 5235,
     "bUse_random_seed"          : false,
     
-    "noise_level_meter"         : [20,10,1,0.5,0.0005],
+    "noise_level_meter"         : [0.0005],
     "noise_std_meter"           : 0,
     
     "bUse_static_init"          : true,
@@ -22,7 +22,7 @@
         "bReconstruct_NN"        : false,
         "sampling_ratio"         : 0.20,
         "alpha"                  : 0.5,
-        "modelname"              : "firstNN"
+        "modelname"              : "NNnoiseless_random"
     },
 
     "CSV_DATA"                  : {

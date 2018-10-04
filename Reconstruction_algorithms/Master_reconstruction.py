@@ -37,37 +37,37 @@ logger = logging.getLogger('BckTrk')
 def identify_algorithms(params):
     temp = []
     if params['RCT_ALG_LASSO']["bReconstruct_lasso"]:
-        temp.append("Lasso")
+        temp.append("RCT_ALG_LASSO")
     if params['RCT_ALG_BFGS']["bReconstruct_bfgs"]:
-        temp.append("BFGS")
+        temp.append("RCT_ALG_BFGS")
     if params['RCT_ALG_NN']["bReconstruct_NN"]:
-        temp.append("NN")
+        temp.append("RCT_ALG_NN")
     return temp
 
 
 # The main processing function
-def reconstructor(params, path):
+def reconstructor(params, path, algorithm):
     logger.debug('Returns dictionary of different path reconstructions using different algorithms')
 
     mean = np.repeat(np.expand_dims(np.mean(path, axis=1), axis=1), params['acquisition_length'], axis=1)
     var = np.repeat(np.expand_dims(np.var(path, axis=1), axis=1), params['acquisition_length'], axis=1)
     normalized_path = (path - mean) / np.sqrt(var)
 
-    if params['RCT_ALG_LASSO']["bReconstruct_lasso"]:
+    if algorithm == "RCT_ALG_LASSO" and params['RCT_ALG_LASSO']["bReconstruct_lasso"]:
         try:
             temp = np.array([lasso_algo(params, normalized_path[0]), lasso_algo(params, normalized_path[1])])
             reconstructed_paths = np.sqrt(var) * temp + mean
         except ValueError as valerr:
             raise CFrameworkError(valerr.args[0]) from valerr
 
-    elif params['RCT_ALG_BFGS']["bReconstruct_bfgs"]:
+    elif algorithm == "RCT_ALG_BFGS" and params['RCT_ALG_BFGS']["bReconstruct_bfgs"]:
         try:
             temp = np.array([bfgs_algo(params, normalized_path[0]), bfgs_algo(params, normalized_path[1])])
             reconstructed_paths = np.sqrt(var) * temp + mean
         except ValueError as valerr:
             raise CFrameworkError(valerr.args[0]) from valerr
 
-    elif params['RCT_ALG_NN']["bReconstruct_NN"]:
+    elif algorithm == "RCT_ALG_NN" and params['RCT_ALG_NN']["bReconstruct_NN"]:
         logger.debug('Entering NN reconstruction')
         try:
             logger.debug('Beginning inference')

@@ -79,7 +79,8 @@ class cFramework:
 
         # create logger with 'spam_application'
         self.logger = logging.getLogger('BckTrk')
-        logLevel = 15 # can be logging.INFO or DEBUG 
+        REALIZATION_log=15
+        logLevel = REALIZATION_log # can be logging.INFO or DEBUG 
         self.logger.setLevel(logLevel)
 
         # create file handler which logs even debug messages
@@ -140,8 +141,7 @@ class cFramework:
         use_random_seed = local_struct['bUse_random_seed']
         random_seed = local_struct['random_seed']
         numberOfRealizations = local_struct['realization']
-        noise_level = local_struct['noise_level_meter']
-        noise_level_len = len(noise_level)
+        noise_level_len = len(local_struct['noise_level_meter'])
 
         use_csv_data = local_struct['CSV_DATA']['bUse_csv_data']
         csv_path = local_struct['CSV_DATA']['csv_path']
@@ -153,6 +153,9 @@ class cFramework:
 
         # Iterate over the total number of realizations
         if use_csv_data:
+            local_struct['noise_level_meter']=[0]
+            noise_level_len = 1
+            
             acquisition_length = path_length
             paths_latlon_org, latlon_accuracy, latlon_interval = munge_csv(csv_path, path_length)
             local_struct['realization'] = latlon_accuracy.shape[-1]
@@ -194,7 +197,7 @@ class cFramework:
                     # Generate noise for each realization
                     (paths_wm_noisy[:, :, realization, lvl], paths_latlon_noisy[:, :, realization, lvl],
                      noise_vals[:, :, realization, lvl]) = \
-                        noise_generator(local_struct, paths_wm_org[:, :, realization, lvl], noise_level[lvl])
+                        noise_generator(local_struct, paths_wm_org[:, :, realization, lvl], local_struct['noise_level_meter'][lvl])
                 else:
                     paths_wm_org[:, :, realization, lvl] = cord.generate_WM_array(
                         paths_latlon_org[:, :, realization, lvl])
@@ -209,12 +212,12 @@ class cFramework:
                     # Apply reconstruction algorithms
                     if local_struct['bReconstruct']:
                         for algorithm in reconstruction_algorithms:
-                            if algorithm == "NN" and not bNN_initialized:
+                            if algorithm == "RCT_ALG_NN" and not bNN_initialized:
                                 from NeuralNetworks.NN import CNeuralNetwork
                                 local_struct['nnObj'] = CNeuralNetwork(local_struct)
                                 bNN_initialized = True
                             try:
-                                temp = reconstructor(local_struct, paths_latlon_noisy[:, :, realization, lvl])
+                                temp = reconstructor(local_struct, paths_latlon_noisy[:, :, realization, lvl],algorithm)
                                 reconstructed_latlon_paths[algorithm][:, :, realization, lvl] = temp
                                 try:
                                     reconstructed_WM_paths[algorithm][:, :, realization, lvl] = \
