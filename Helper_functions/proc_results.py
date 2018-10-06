@@ -51,25 +51,25 @@ def process_data(params):
     data_obj = cProcessFile(params)
 
     if not params["bTrainNetwork"]:
-        if params["CSV_DATA"]["bUse_csv_data"]&params["CSV_DATA"]["bPlot_real_path"]:
+        if params["CSV_DATA"]["bPlot_real_path"]:
             data_obj.plot_real_path_recon()
-        else :
-            MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon, reconstructed_db_latlon = \
-                data_obj.calculate_MSE()
-            try:
-                data_obj.plot_path_org_2d()
-                data_obj.plot_path_noisy_2d()
-                data_obj.plot_MSE(MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon)
-                data_obj.plot_SNR(reconstructed_db_latlon)
-                data_obj.analyze_DCT()
-                data_obj.power_spectral_density()
-            except KeyError as key_error:
-                    message = "Could not find key %s" %(key_error.args[0])
-                    errdict = {"file": __file__, "message": message, "errorType": CErrorTypes.value}
-                    raise CFrameworkError(errdict) from key_error
+            
+        MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon, reconstructed_db_latlon = \
+            data_obj.calculate_MSE()
+        try:
+            data_obj.plot_path_org_2d()
+            data_obj.plot_path_noisy_2d()
+            data_obj.plot_MSE(MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon)
+            data_obj.plot_SNR(reconstructed_db_latlon)
+            data_obj.analyze_DCT()
+            data_obj.power_spectral_density()
+        except KeyError as key_error:
+                message = "Could not find key %s" %(key_error.args[0])
+                errdict = {"file": __file__, "message": message, "errorType": CErrorTypes.value}
+                raise CFrameworkError(errdict) from key_error
 
-            params["RESULTS"]["reconstructed_db_latlon"] = reconstructed_db_latlon
-            params["RESULTS"]["MSE_latlon"] = MSE_r_latlon
+        params["RESULTS"]["reconstructed_db_latlon"] = reconstructed_db_latlon
+        params["RESULTS"]["MSE_latlon"] = MSE_r_latlon
 
     if params["bSimplified_Results"]:  # TODO logic will only work after csv is integrated
         del params['RESULTS']['paths_wm_org']
@@ -87,7 +87,8 @@ def process_data(params):
 class cProcessFile:
     # Constructor
     def __init__(self, struct):
-        self.m_plotStruct = struct['PLOT']
+        self.struct = struct
+        self.m_plotStruct = self.struct['PLOT']
 
         if struct['bUse_filename']:
             self.m_filename = struct['workingDir'] + direc_ident + 'Results' + direc_ident + 'BckTrk_Res_' + struct[
@@ -104,7 +105,6 @@ class cProcessFile:
         self.m_noise_level_meter = struct['noise_level_meter']
 
         self.m_bReconstruct = struct['bReconstruct']
-        self.m_lasso_sampling_ratio = struct['RCT_ALG_LASSO']['sampling_ratio']
 
         self.m_paths_wm_org = struct['RESULTS']['paths_wm_org']
         self.m_paths_latlon_org = struct['RESULTS']['paths_latlon_org']
@@ -176,7 +176,7 @@ class cProcessFile:
         logger.debug('Plotting real path and stitched reconstruction')
         latlon_real = self.m_paths_latlon_org[:,:,:,0].transpose(0,2,1).reshape((2, self.m_path_length * self.m_number_realization))
 
-        plt.plot(latlon_real[1], latlon_real[0], 'b-*')
+        plt.plot(latlon_real[1], latlon_real[0], '-*', label="Original real path")
         if self.m_bReconstruct:
             logger.debug('Plotting MSE of reconstructed paths latlon')
 
@@ -186,15 +186,17 @@ class cProcessFile:
                 
                 l2_r_latlon = np.sqrt(np.mean((latlon_real[0] - r_path[0]) ** 2 + (latlon_real[1] - r_path[1]) ** 2))
 
-                plt.plot(r_path[1], r_path[0], 'r-*')
-                print('L2 for %s is %.6f' % (key, l2_r_latlon))
+                plt.plot(r_path[1], r_path[0], '-*',
+                                     label="Path for %s with %.1f %% sampling ratio" % (
+                                         key, self.struct[key]['sampling_ratio'] * 100))
+                logger.info('L2 for %s is %.6f' % (key, l2_r_latlon))
 
         plt.grid()
 
         plt.title('Real path from CSV data broken into %d segments' % (self.m_number_realization))
         plt.xlabel('Latitude')
         plt.ylabel('Longitude')
-        plt.legend(['Real path', 'Reconstruction'])
+        plt.legend(loc="upper right")
         plt.show()
 
     # Original path in 2D plotting
@@ -415,7 +417,7 @@ class cProcessFile:
                             r_path = self.reconstructed_latlon_paths[key]
                             plt.plot(x_axis, r_path[0, :, k, noise], '-*',
                                      label="Latitude for %s with %.1f %% sampling ratio" % (
-                                         key, self.m_lasso_sampling_ratio * 100))
+                                         key, self.struct[key]['sampling_ratio'] * 100))
 
                 else:
                     logger.warning('Plotting only first realization for visibility')
@@ -428,7 +430,7 @@ class cProcessFile:
                             r_path = self.reconstructed_latlon_paths[key]
                             plt.plot(x_axis, r_path[0, :, 0, noise], '-*',
                                      label="Latitude for %s with %.1f %% sampling ratio" % (
-                                         key, self.m_lasso_sampling_ratio * 100))
+                                         key, self.struct[key]['sampling_ratio'] * 100))
 
                 # Plotting Latitude
                 buf = "Noisy latitude for noise level %d (meters)" % (noise_level[noise])
@@ -450,7 +452,7 @@ class cProcessFile:
                             r_path = self.reconstructed_latlon_paths[key]
                             plt.plot(x_axis, r_path[1, :, 0, noise], '-*',
                                      label="Longitude for %s with %.1f %% sampling ratio" % (
-                                         key, self.m_lasso_sampling_ratio * 100))
+                                         key, self.struct[key]['sampling_ratio'] * 100))
 
                 else:
                     plt.plot(x_axis, paths_latlon_org[1, :, 0], '-*', label="Original longitude")
@@ -461,7 +463,7 @@ class cProcessFile:
                             r_path = self.reconstructed_latlon_paths[key]
                             plt.plot(x_axis, r_path[1, :, 0, noise], '-*',
                                      label="Longitude for %s with %.1f %% sampling ratio" % (
-                                         key, self.m_lasso_sampling_ratio * 100))
+                                         key, self.struct[key]['sampling_ratio'] * 100))
 
                 # Plotting Longitude
                 buf = "Noisy longitude for noise level %d (meters)" % (noise_level[noise])
@@ -486,7 +488,7 @@ class cProcessFile:
                             r_path = self.reconstructed_wm_paths[key]
                             plt.plot(x_axis, r_path[0, :, k, noise], '-*',
                                      label="x for %s with %.1f %% sampling ratio" % (
-                                         key, self.m_lasso_sampling_ratio * 100))
+                                         key, self.struct[key]['sampling_ratio'] * 100))
 
                 else:
                     logger.warning('Plotting only first realization for visibility')
@@ -499,7 +501,7 @@ class cProcessFile:
                             r_path = self.reconstructed_wm_paths[key]
                             plt.plot(x_axis, r_path[0, :, 0, noise], '-*',
                                      label="x for %s with %.1f %% sampling ratio" % (
-                                         key, self.m_lasso_sampling_ratio * 100))
+                                         key, self.struct[key]['sampling_ratio'] * 100))
 
                 # Plotting Latitude
                 buf = "Noisy x for noise level %d (meters)" % (noise_level[noise])
@@ -520,7 +522,7 @@ class cProcessFile:
                             r_path = self.reconstructed_wm_paths[key]
                             plt.plot(x_axis, r_path[1, :, 0, noise], '-*',
                                      label="y for %s with %.1f %% sampling ratio" % (
-                                         key, self.m_lasso_sampling_ratio * 100))
+                                         key, self.struct[key]['sampling_ratio'] * 100))
 
                 else:
                     plt.plot(x_axis, paths_wm_org[1, :, 0], '-*', label="Original y")
@@ -531,7 +533,7 @@ class cProcessFile:
                             r_path = self.reconstructed_wm_paths[key]
                             plt.plot(x_axis, r_path[1, :, 0, noise], '-*',
                                      label="y for %s with %.1f %% sampling ratio" % (
-                                         key, self.m_lasso_sampling_ratio * 100))
+                                         key, self.struct[key]['sampling_ratio'] * 100))
 
                 # Plotting Longitude
                 buf = "Noisy y for noise level %d (meters)" % (noise_level[noise])
@@ -553,7 +555,7 @@ class cProcessFile:
                 logger.debug('Plotting MSE of reconstructed paths latlon')
                 for key in self.reconstructed_latlon_paths.keys():
                     plt.plot(x_axis, MSE_r_latlon[key], '-*',
-                             label="MSE_latlon for %s with %.1f %% SR" % (key, self.m_lasso_sampling_ratio * 100))
+                             label="MSE_latlon for %s with %.1f %% SR" % (key, self.struct[key]['sampling_ratio'] * 100))
 
             # Plotting MSE
             plt.plot(x_axis, MSE_noise_latlon, '-*', label="MSE_latlon")
@@ -574,9 +576,9 @@ class cProcessFile:
 
                 for key in self.reconstructed_wm_paths.keys():
                     plt.plot(x_axis, MSE_r_wm[key], '-*',
-                             label="MSE_WM for %s with %.1f %% SR" % (key, self.m_lasso_sampling_ratio * 100))
+                             label="MSE_WM for %s with %.1f %% SR" % (key, self.struct[key]['sampling_ratio'] * 100))
                     plt.plot(x_axis, max_error[key], '-x', label="Average Max Error for %s with %.1f %% SR" % (
-                        key, self.m_lasso_sampling_ratio * 100))
+                        key, self.struct[key]['sampling_ratio'] * 100))
 
             plt.plot(x_axis, MSE_noise_WM, '-*', label="MSE_WM")
             ax = plt.gca()
@@ -602,7 +604,7 @@ class cProcessFile:
                 logger.debug('Plotting SNR of reconstructed paths latlon')
                 for key in self.reconstructed_latlon_paths.keys():
                     plt.plot(x_axis, reconstructed_db_latlon[key], '-*',
-                             label="SNR_latlon for %s with %.1f %% SR" % (key, self.m_lasso_sampling_ratio * 100))
+                             label="SNR_latlon for %s with %.1f %% SR" % (key, self.struct[key]['sampling_ratio'] * 100))
 
             # Plotting SNR
             plt.xscale('log')

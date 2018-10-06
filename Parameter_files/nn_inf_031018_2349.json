@@ -1,0 +1,56 @@
+{
+    "bSimplified_Results"       : true,
+    
+    "gps_freq_Hz"               : 1,
+    "realization"               : 100,
+    "acquisition_time_sec"      : 200,
+    "stepsize"                  : 1,
+    
+    "random_seed"               : 6468,
+    "bUse_random_seed"          : false,
+    
+    "noise_level_meter"         : [1000,800,500,200,100,50,40,30,20,10,5,1],
+    "noise_std_meter"           : 0,
+    
+    "bUse_static_init"          : true,
+    "staticLat"                 : 0,
+    "staticLon"                 : 0,
+
+    "bReconstruct"              : true,
+    "bTrainNetwork"             : false,
+
+    "RCT_ALG_NN_small"           : {
+        "bReconstruct"           : true,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.5,
+        "modelname"              : "NNnoise_random_shit"
+    },
+
+    "RCT_ALG_NN_Rand"            : {
+        "bReconstruct"           : true,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.5,
+        "modelname"              : "NNnoiseless_random"
+    },
+
+    "RCT_ALG_NN_NRand"           : {
+        "bReconstruct"           : true,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.5,
+        "modelname"              : "NNnoise_random"
+    },
+
+    "RCT_ALG_LASSO"             : {
+        "bReconstruct_from_dct"     : true,
+        "bReconstruct"              : true,
+        "lasso_learning_rate"       : 0.01,
+        "sampling_ratio"            : 0.2
+    },
+        
+    "PLOT"                      : {
+        "bPlotAllrealizations"      : false,
+        "bPlotLonLat_time_reconst"  : false,
+        "bPlotMSE"                  : true,
+        "bPlotSNR"                  : true
+    }
+}

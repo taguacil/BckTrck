@@ -40,37 +40,38 @@ else:
     direc_ident = "/"
 
 workingDir = os.getcwd()
-resultsPath = workingDir + direc_ident + 'Models' + direc_ident
+resultsPath = workingDir + direc_ident + 'NeuralNetworks' + direc_ident + 'Models' + direc_ident
 
 
 class CNeuralNetwork:
     # Constructor
-    def __init__(self, struct):
+    def __init__(self, struct, algorithm):
 
         self.messageSummary_dict = {}
         self.identifier = ""  # To describe which model the message belongs to
 
-        if struct['RCT_ALG_NN']["sampling_ratio"] > 1:
+        if struct[algorithm]["sampling_ratio"] > 1:
             logger.debug("Sampling_ratio larger than 1")
             errdict = {"file": __file__, "message": "Sampling_ratio larger than 1", "errorType": CErrorTypes.value}
             raise CFrameworkError(errdict)
 
         self.m_acquisition_length = struct['acquisition_length']
+        self.alpha = struct[algorithm]["alpha"]
         if struct['bTrainNetwork']:
             self.m_model_lat = keras.Sequential()
             self.m_model_lon = keras.Sequential()
         else:
-            modelname_lat = resultsPath + struct['RCT_ALG_NN']["modelname"] + "_lat.h5"
-            modelname_lon = resultsPath + struct['RCT_ALG_NN']["modelname"] + "_lon.h5"
+            modelname_lat = resultsPath + struct[algorithm]["modelname"]
+            modelname_lon = resultsPath + struct[algorithm]["modelname"]
             try:
                 self.load_models(modelname_lat, modelname_lon)
             except FileNotFoundError:
-                message = 'Model <%s> in directory <%s>not found!' % (struct['RCT_ALG_NN']["modelname"], resultsPath)
+                message = 'Model <%s> in directory <%s>not found!' % (struct[algorithm]["modelname"], resultsPath)
                 logger.debug(message)
                 errdict = {"file": __file__, "message": message, "errorType": CErrorTypes.value}
                 raise CFrameworkError(errdict)
 
-        self.number_of_samples = int(struct['RCT_ALG_LASSO']["sampling_ratio"] * struct["acquisition_length"])
+        self.number_of_samples = int(struct[algorithm]["sampling_ratio"] * struct["acquisition_length"])
         self.realizations = struct['realization']
 
         if self.number_of_samples <= 0:
@@ -78,7 +79,6 @@ class CNeuralNetwork:
             errdict = {"file": __file__, "message": "Invalid number of samples", "errorType": CErrorTypes.value}
             raise CFrameworkError(errdict)
 
-        self.alpha = struct['RCT_ALG_NN']["alpha"]
         self.noiseLevel_len = len(struct['noise_level_meter'])
         if self.noiseLevel_len <= 0:
             logger.debug("Noise array cannot be empty")
@@ -154,8 +154,8 @@ class CNeuralNetwork:
                                         (self.number_of_samples, totalrealizations)))
 
         # Randomly pick 80% training and 20% validation from totalrealizations
-        validateIndices = np.random.choice(totalrealizations, np.floor(0.2 * totalrealizations), replace=False)
-        trainIndices = all(np.array(range(totalrealizations)) != a for a in validateIndices)
+        validateIndices = np.random.choice(totalrealizations, int(np.floor(0.2 * totalrealizations)), replace=False)
+        trainIndices = np.array([n for n in range(totalrealizations) if n not in validateIndices])
 
         # Train the models
         results_lat = self.m_model_lat.fit(
@@ -183,28 +183,60 @@ class CNeuralNetwork:
         return True
 
     def nn_inference(self, path_latlon_noisy):
-        # Perform inference on given path
-        self.m_model_lat.predict(path_latlon_noisy[0])
-        self.m_model_lon.predict(path_latlon_noisy[1])
+        # Perform inference on given path 
+        samples = np.sort(np.random.choice(self.m_acquisition_length, self.number_of_samples, replace=False))
+        path_latlon_noisy_dnw = path_latlon_noisy[:,samples].transpose()
+        
+        path_lat = np.array([path_latlon_noisy_dnw[:, 0]])
+        path_lon = np.array([path_latlon_noisy_dnw[:, 1]])
+        
+        # Check if vector length is the same as input layer is implicitly done by ValueError
+        path_lat_reconst = self.m_model_lat.predict(path_lat)
+        path_lon_reconst = self.m_model_lon.predict(path_lon)
+        
+        return path_lat_reconst, path_lon_reconst
 
     def save_models(self, modelname_lat, modelname_lon):
-        # Save both models with unique name in directory NeuralNetworks/Models
-        self.m_model_lat.save(modelname_lat)
-        self.m_model_lon.save(modelname_lon)
+        # serialize model to JSON
+        model_lat_json = self.m_model_lat.to_json()
+        model_lon_json = self.m_model_lon.to_json()
+        with open(modelname_lat + "_lat.json", "w") as json_file:
+            json_file.write(model_lat_json)
+        with open(modelname_lon + "_lon.json", "w") as json_file:
+            json_file.write(model_lon_json)
+        # serialize weights to HDF5
+        self.m_model_lat.save_weights(modelname_lat + "_lat.h5")
+        self.m_model_lon.save_weights(modelname_lon + "_lon.h5")
 
     def load_models(self, modelname_lat, modelname_lon):
         # Loads both models from unique names from directory NeuralNetworks/Models
-        self.m_model_lat = keras.models.load_model(modelname_lat)
-        self.m_model_lon = keras.models.load_model(modelname_lon)
+        modelpath_lat_json = modelname_lat + "_lat.json"
+        modelpath_lon_json = modelname_lat + "_lon.json"
+        modelpath_lat_h5 = modelname_lat + "_lat.h5"
+        modelpath_lon_h5 = modelname_lat + "_lon.h5"
+        # load json and create model
+        json_file = open(modelpath_lat_json, 'r')
+        loaded_model_json = json_file.read()
+        json_file.close()
+        self.m_model_lat = keras.models.model_from_json(loaded_model_json, 
+                                                        custom_objects={'activation_fun': self.activation_fun})
+        json_file = open(modelpath_lon_json, 'r')
+        loaded_model_json = json_file.read()
+        json_file.close()
+        self.m_model_lon = keras.models.model_from_json(loaded_model_json, 
+                                                        custom_objects={'activation_fun': self.activation_fun})
+        # load weights into new model
+        self.m_model_lat.load_weights(modelpath_lat_h5)
+        self.m_model_lon.load_weights(modelpath_lon_h5)
 
     def normalize_path_training(self, paths_latlon_org, paths_latlon_noisy):
         # Normalizing both downsampled and original data
-        mean = np.repeat(np.expand_dims(np.mean(paths_latlon_org, axis=1), axis=1), self.number_of_samples, axis=1)
-        var = np.repeat(np.expand_dims(np.var(paths_latlon_org, axis=1), axis=1), self.number_of_samples, axis=1)
+        mean = np.repeat(np.expand_dims(np.mean(paths_latlon_org, axis=1), axis=1), self.m_acquisition_length, axis=1)
+        var = np.repeat(np.expand_dims(np.var(paths_latlon_org, axis=1), axis=1), self.m_acquisition_length, axis=1)
         paths_latlon_org_norm = (paths_latlon_org - mean) / np.sqrt(var)
 
-        mean = np.repeat(np.expand_dims(np.mean(paths_latlon_noisy, axis=1), axis=1), self.m_acquisition_length, axis=1)
-        var = np.repeat(np.expand_dims(np.var(paths_latlon_noisy, axis=1), axis=1), self.m_acquisition_length, axis=1)
+        mean = np.repeat(np.expand_dims(np.mean(paths_latlon_noisy, axis=1), axis=1), self.number_of_samples, axis=1)
+        var = np.repeat(np.expand_dims(np.var(paths_latlon_noisy, axis=1), axis=1), self.number_of_samples, axis=1)
         paths_latlon_noisy_norm = (paths_latlon_noisy - mean) / np.sqrt(var)
 
         return paths_latlon_org_norm, paths_latlon_noisy_norm
@@ -218,7 +250,7 @@ class CNeuralNetwork:
             raise CFrameworkError(errdict)
         else:
             if self.identifier in self.messageSummary_dict.keys():
-                    self.identifier[self.identifier] += message
+                    self.messageSummary_dict[self.identifier] += message
             else:
-                self.messageSummary_dict = {self.identifier: message}
+                self.messageSummary_dict[self.identifier] = message
 

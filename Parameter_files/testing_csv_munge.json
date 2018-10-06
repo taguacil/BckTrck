@@ -3,15 +3,17 @@
     "bUse_random_seed"          : false,
     "CSV_DATA"                  : {
         "bUse_csv_data"             : true,
+        "bPlot_real_path"           : true,
         "csv_path"                  : "CSV_data/gpsLocations_Taimir_1.csv",
         "path_length"               : 512
     },
-    "noise_level_meter"         : [0.0005],
+    "noise_level_meter"         : [1,0.0005],
     "noise_std_meter"           : 0,
     "bReconstruct"              : true,
+
     "RCT_ALG_LASSO"             : {
         "bReconstruct_from_dct"     : true,
-        "bReconstruct_lasso"        : true,
+        "bReconstruct"              : true,
         "lasso_learning_rate"       : 0.00001,
         "sampling_ratio"            : 1.0
     },
