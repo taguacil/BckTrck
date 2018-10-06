@@ -39,7 +39,6 @@ def identify_algorithms(params):
     temp = []
     for key in params.keys():
         if "RCT_ALG" in key:
-            print(params[key])
             if params[key]["bReconstruct"]:
                 temp.append(key)
 
