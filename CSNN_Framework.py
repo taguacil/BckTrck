@@ -157,7 +157,6 @@ class cFramework:
             noise_level_len = 1
 
             acquisition_length = path_length
-            noise_level_len = 1
             paths_latlon_org, latlon_accuracy, latlon_interval = munge_csv(csv_path, path_length)
             local_struct['realization'] = latlon_accuracy.shape[-1]
             numberOfRealizations = local_struct['realization']
