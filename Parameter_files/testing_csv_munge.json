@@ -3,10 +3,11 @@
     "bUse_random_seed"          : false,
     "CSV_DATA"                  : {
         "bUse_csv_data"             : true,
+        "bPlot_real_path"           : true,
         "csv_path"                  : "CSV_data/gpsLocations_Taimir_1.csv",
         "path_length"               : 512
     },
-    "noise_level_meter"         : [0.0005],
+    "noise_level_meter"         : [1,0.0005],
     "noise_std_meter"           : 0,
     "bReconstruct"              : true,
 

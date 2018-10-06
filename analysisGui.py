@@ -71,7 +71,6 @@ def create_main_frame(self):
     self.SNR_plots.setChecked(False)
     self.SNR_plots.stateChanged.connect(self.on_draw)
 
-
     #
     # Layout with box sizers
     #
@@ -127,6 +126,7 @@ class AppForm(QtWidgets.QMainWindow):
         create_status_bar(self)
 
         self.table_lin = CScanAnalysis.get_panda_table()
+        self.table_lin = self.table_lin[self.table_lin.SNR != 0]
         self.table_log = self.table_lin.copy()
         self.table_log.MSE = np.log10(self.table_log.MSE)
         self.sampling_ratios_values, self.path_lengths_values, \
