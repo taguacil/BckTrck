@@ -245,11 +245,14 @@ class cFramework:
 
             nnObj = CNeuralNetwork(local_struct, "RCT_ALG_NN")
             nnObj.design_nn()
-            nnObj.train_nn(paths_latlon_org, paths_latlon_noisy)
+            results_lat, results_lon = nnObj.train_nn(paths_latlon_org, paths_latlon_noisy)                
             nnObj.save_models(modelname_lat, modelname_lon)
 
             if nnObj.dump_nn_summary():
                 self.logAnalyzer(nnObj.messageSummary_dict, modelname)
+                
+            if local_struct["RCT_ALG_NN"]["bPlotTrainResults"]:
+                nnObj.train_result_visu(results_lat, results_lon, modelname)
 
         # Store data in local struct
         local_struct['RESULTS']['paths_wm_org'] = paths_wm_org

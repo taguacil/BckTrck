@@ -24,6 +24,7 @@ import numpy as np
 import keras
 import os
 import platform
+import matplotlib.pyplot as plt
 
 # User-defined library import
 from Helper_functions.framework_error import CFrameworkError
@@ -173,6 +174,8 @@ class CNeuralNetwork:
             validation_data=(lon_X[validateIndices, :], lon_y[validateIndices, :]),
             verbose=2
         )
+        
+        return results_lat, results_lon
 
     def dump_nn_summary(self):
         # Dumps summary to debugger output and to log file saved in logs
@@ -254,3 +257,14 @@ class CNeuralNetwork:
             else:
                 self.messageSummary_dict[self.identifier] = message
 
+    def train_result_visu(self, results_lat, results_lon, modelname):        
+        # Plot training & validation loss values
+        plt.plot(results_lat.history['loss'])
+        plt.plot(results_lat.history['val_loss'])
+        plt.plot(results_lon.history['loss'])
+        plt.plot(results_lon.history['val_loss'])
+        plt.title('Model <%s> loss' % modelname)
+        plt.ylabel('Loss')
+        plt.xlabel('Epoch')
+        plt.legend(['Lat Train', 'Lat Test', 'Lon Train', 'Lon Test'], loc='upper left')
+        plt.show()     
