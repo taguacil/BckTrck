@@ -79,20 +79,22 @@ class cFramework:
 
         # create logger with 'spam_application'
         self.logger = logging.getLogger('BckTrk')
-        self.logger.setLevel(logging.INFO)
+        REALIZATION_log = 15
+        logLevel = REALIZATION_log  # can be logging.INFO or DEBUG
+        self.logger.setLevel(logLevel)
 
         # create file handler which logs even debug messages
         now = datetime.datetime.now()
         self.fh = logging.FileHandler(
             self.paramPath + 'Logs' + direc_ident + 'BckTrk_Log_' + now.strftime("%Y-%m-%d") + '.log')
-        self.fh.setLevel(logging.INFO)
+        self.fh.setLevel(logLevel)
 
         self.local_struct['currentTime'] = now
         self.local_struct['workingDir'] = workingDir
 
         # create console handler with same log level
         self.ch = logging.StreamHandler()
-        self.ch.setLevel(logging.INFO)
+        self.ch.setLevel(logLevel)
 
         # create formatter and add it to the handlers
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -139,8 +141,7 @@ class cFramework:
         use_random_seed = local_struct['bUse_random_seed']
         random_seed = local_struct['random_seed']
         numberOfRealizations = local_struct['realization']
-        noise_level = local_struct['noise_level_meter']
-        noise_level_len = len(noise_level)
+        noise_level_len = len(local_struct['noise_level_meter'])
 
         use_csv_data = local_struct['CSV_DATA']['bUse_csv_data']
         csv_path = local_struct['CSV_DATA']['csv_path']
@@ -152,6 +153,9 @@ class cFramework:
 
         # Iterate over the total number of realizations
         if use_csv_data:
+            local_struct['noise_level_meter'] = [0]
+            noise_level_len = 1
+
             acquisition_length = path_length
             noise_level_len = 1
             paths_latlon_org, latlon_accuracy, latlon_interval = munge_csv(csv_path, path_length)
@@ -172,6 +176,7 @@ class cFramework:
 
         reconstructed_latlon_paths = {}
         reconstructed_WM_paths = {}
+        bNN_initialized = {}
 
         reconstruction_algorithms = identify_algorithms(local_struct)
         for algorithm in reconstruction_algorithms:
@@ -179,6 +184,7 @@ class cFramework:
                 (2, acquisition_length, numberOfRealizations, noise_level_len))
             reconstructed_WM_paths[algorithm] = np.zeros(
                 (2, acquisition_length, numberOfRealizations, noise_level_len))
+            bNN_initialized[algorithm] = False
 
         self.logger.info('Starting simulation with <%d> realizations and <%d> path length', numberOfRealizations,
                          acquisition_length)
@@ -186,14 +192,15 @@ class cFramework:
         for lvl in range(noise_level_len):
             for realization in range(numberOfRealizations):
                 # Generate random data
-                self.logger.debug('Generating random data for realization <%d>', realization)
+                self.logger.log(15, 'Generating random data for realization <%d>', realization)
                 if not use_csv_data:
                     (paths_wm_org[:, :, realization, lvl], paths_latlon_org[:, :, realization, lvl]) = \
                         random_2d_path_generator(local_struct)
                     # Generate noise for each realization
                     (paths_wm_noisy[:, :, realization, lvl], paths_latlon_noisy[:, :, realization, lvl],
                      noise_vals[:, :, realization, lvl]) = \
-                        noise_generator(local_struct, paths_wm_org[:, :, realization, lvl], noise_level[lvl])
+                        noise_generator(local_struct, paths_wm_org[:, :, realization, lvl],
+                                        local_struct['noise_level_meter'][lvl])
                 else:
                     paths_wm_org[:, :, realization, lvl] = cord.generate_WM_array(
                         paths_latlon_org[:, :, realization, lvl])
@@ -208,8 +215,14 @@ class cFramework:
                     # Apply reconstruction algorithms
                     if local_struct['bReconstruct']:
                         for algorithm in reconstruction_algorithms:
+                            if "NN" in algorithm and not bNN_initialized[algorithm]:
+                                from NeuralNetworks.NN import CNeuralNetwork
+                                nn_name = algorithm + "Obj"
+                                local_struct[nn_name] = CNeuralNetwork(local_struct, algorithm)
+                                bNN_initialized[algorithm] = True
                             try:
-                                temp = reconstructor(local_struct, paths_latlon_noisy[:, :, realization, lvl])
+                                temp = reconstructor(local_struct, paths_latlon_noisy[:, :, realization, lvl],
+                                                     algorithm)
                                 reconstructed_latlon_paths[algorithm][:, :, realization, lvl] = temp
                                 try:
                                     reconstructed_WM_paths[algorithm][:, :, realization, lvl] = \
@@ -226,12 +239,13 @@ class cFramework:
             from NeuralNetworks.NN import CNeuralNetwork
             # Iterate over the total number of realizations to generate training set
             modelname = local_struct["RCT_ALG_NN"]["modelname"]
-            modelname_lat = self.paramPath + 'NeuralNetworks' + direc_ident \
-                            + modelname + "_lat.h5"
+            modelname_lat = self.paramPath + 'NeuralNetworks' + direc_ident + 'Models' + direc_ident \
+                            + modelname
             modelname_lon = self.paramPath + 'NeuralNetworks' + direc_ident + 'Models' + direc_ident \
-                            + modelname + "_lon.h5"
+                            + modelname
 
-            nnObj = CNeuralNetwork(local_struct)
+            nnObj = CNeuralNetwork(local_struct, "RCT_ALG_NN")
+            nnObj.design_nn()
             nnObj.train_nn(paths_latlon_org, paths_latlon_noisy)
             nnObj.save_models(modelname_lat, modelname_lon)
 
@@ -273,10 +287,7 @@ class cFramework:
         if self.frameworklog_list["bNologs"]:
             self.frameworklog_list["bNologs"] = False
 
-        if master_key in self.frameworklog_list.keys():
-            self.frameworklog_list[master_key] = message
-        else:
-            self.frameworklog_list = {master_key: message}
+        self.frameworklog_list[master_key] = message
 
 
 # Main function definition  MUST BE at the END OF FILE
