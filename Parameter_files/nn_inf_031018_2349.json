@@ -23,7 +23,7 @@
         "bReconstruct"           : true,
         "sampling_ratio"         : 0.20,
         "alpha"                  : 0.5,
-        "modelname"              : "NNshit"
+        "modelname"              : "NNnoise_random_shit"
     },
 
     "RCT_ALG_NN_Rand"            : {

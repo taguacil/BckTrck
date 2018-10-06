@@ -37,9 +37,11 @@ logger = logging.getLogger('BckTrk')
 # Helper functions
 def identify_algorithms(params):
     temp = []
-    for key in params:
-        if "RCT_ALG" in key and params[key]["bReconstruct"]:
-            temp.append(key)
+    for key in params.keys():
+        if "RCT_ALG" in key:
+            print(params[key])
+            if params[key]["bReconstruct"]:
+                temp.append(key)
 
     return temp
 

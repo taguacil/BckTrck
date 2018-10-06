@@ -45,7 +45,7 @@
     
     "RCT_ALG_BFGS"             : {
         "bReconstruct_from_dct"     : false,
-        "bReconstruct_bfgs"         : false,
+        "bReconstruct"              : false,
         "bUse_gaussian_matrix"      : false,
         "lambda"                    : 0.01,
         "u"                         : 10e-6,
@@ -54,7 +54,7 @@
     },
 
     "RCT_ALG_NN"             : {
-        "bReconstruct_NN"        : false,
+        "bReconstruct"           : false,
         "sampling_ratio"         : 0.25,
         "alpha"                  : 0.5,
         "modelname"              : "default"
