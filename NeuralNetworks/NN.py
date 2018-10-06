@@ -45,33 +45,33 @@ resultsPath = workingDir + direc_ident + 'NeuralNetworks' + direc_ident + 'Model
 
 class CNeuralNetwork:
     # Constructor
-    def __init__(self, struct):
+    def __init__(self, struct, algorithm):
 
         self.messageSummary_dict = {}
         self.identifier = ""  # To describe which model the message belongs to
 
-        if struct['RCT_ALG_NN']["sampling_ratio"] > 1:
+        if struct[algorithm]["sampling_ratio"] > 1:
             logger.debug("Sampling_ratio larger than 1")
             errdict = {"file": __file__, "message": "Sampling_ratio larger than 1", "errorType": CErrorTypes.value}
             raise CFrameworkError(errdict)
 
         self.m_acquisition_length = struct['acquisition_length']
-        self.alpha = struct['RCT_ALG_NN']["alpha"]
+        self.alpha = struct[algorithm]["alpha"]
         if struct['bTrainNetwork']:
             self.m_model_lat = keras.Sequential()
             self.m_model_lon = keras.Sequential()
         else:
-            modelname_lat = resultsPath + struct['RCT_ALG_NN']["modelname"]
-            modelname_lon = resultsPath + struct['RCT_ALG_NN']["modelname"]
+            modelname_lat = resultsPath + struct[algorithm]["modelname"]
+            modelname_lon = resultsPath + struct[algorithm]["modelname"]
             try:
                 self.load_models(modelname_lat, modelname_lon)
             except FileNotFoundError:
-                message = 'Model <%s> in directory <%s>not found!' % (struct['RCT_ALG_NN']["modelname"], resultsPath)
+                message = 'Model <%s> in directory <%s>not found!' % (struct[algorithm]["modelname"], resultsPath)
                 logger.debug(message)
                 errdict = {"file": __file__, "message": message, "errorType": CErrorTypes.value}
                 raise CFrameworkError(errdict)
 
-        self.number_of_samples = int(struct['RCT_ALG_NN']["sampling_ratio"] * struct["acquisition_length"])
+        self.number_of_samples = int(struct[algorithm]["sampling_ratio"] * struct["acquisition_length"])
         self.realizations = struct['realization']
 
         if self.number_of_samples <= 0:

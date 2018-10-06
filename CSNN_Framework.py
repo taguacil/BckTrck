@@ -79,8 +79,8 @@ class cFramework:
 
         # create logger with 'spam_application'
         self.logger = logging.getLogger('BckTrk')
-        REALIZATION_log=15
-        logLevel = REALIZATION_log # can be logging.INFO or DEBUG 
+        REALIZATION_log = 15
+        logLevel = REALIZATION_log  # can be logging.INFO or DEBUG
         self.logger.setLevel(logLevel)
 
         # create file handler which logs even debug messages
@@ -153,9 +153,9 @@ class cFramework:
 
         # Iterate over the total number of realizations
         if use_csv_data:
-            local_struct['noise_level_meter']=[0]
+            local_struct['noise_level_meter'] = [0]
             noise_level_len = 1
-            
+
             acquisition_length = path_length
             paths_latlon_org, latlon_accuracy, latlon_interval = munge_csv(csv_path, path_length)
             local_struct['realization'] = latlon_accuracy.shape[-1]
@@ -175,7 +175,7 @@ class cFramework:
 
         reconstructed_latlon_paths = {}
         reconstructed_WM_paths = {}
-        bNN_initialized = False
+        bNN_initialized = {}
 
         reconstruction_algorithms = identify_algorithms(local_struct)
         for algorithm in reconstruction_algorithms:
@@ -183,6 +183,7 @@ class cFramework:
                 (2, acquisition_length, numberOfRealizations, noise_level_len))
             reconstructed_WM_paths[algorithm] = np.zeros(
                 (2, acquisition_length, numberOfRealizations, noise_level_len))
+            bNN_initialized[algorithm] = False
 
         self.logger.info('Starting simulation with <%d> realizations and <%d> path length', numberOfRealizations,
                          acquisition_length)
@@ -197,7 +198,8 @@ class cFramework:
                     # Generate noise for each realization
                     (paths_wm_noisy[:, :, realization, lvl], paths_latlon_noisy[:, :, realization, lvl],
                      noise_vals[:, :, realization, lvl]) = \
-                        noise_generator(local_struct, paths_wm_org[:, :, realization, lvl], local_struct['noise_level_meter'][lvl])
+                        noise_generator(local_struct, paths_wm_org[:, :, realization, lvl],
+                                        local_struct['noise_level_meter'][lvl])
                 else:
                     paths_wm_org[:, :, realization, lvl] = cord.generate_WM_array(
                         paths_latlon_org[:, :, realization, lvl])
@@ -212,12 +214,14 @@ class cFramework:
                     # Apply reconstruction algorithms
                     if local_struct['bReconstruct']:
                         for algorithm in reconstruction_algorithms:
-                            if algorithm == "RCT_ALG_NN" and not bNN_initialized:
+                            if "NN" in algorithm and not bNN_initialized[algorithm]:
                                 from NeuralNetworks.NN import CNeuralNetwork
-                                local_struct['nnObj'] = CNeuralNetwork(local_struct)
-                                bNN_initialized = True
+                                nn_name = algorithm + "Obj"
+                                local_struct[nn_name] = CNeuralNetwork(local_struct, algorithm)
+                                bNN_initialized[algorithm] = True
                             try:
-                                temp = reconstructor(local_struct, paths_latlon_noisy[:, :, realization, lvl],algorithm)
+                                temp = reconstructor(local_struct, paths_latlon_noisy[:, :, realization, lvl],
+                                                     algorithm)
                                 reconstructed_latlon_paths[algorithm][:, :, realization, lvl] = temp
                                 try:
                                     reconstructed_WM_paths[algorithm][:, :, realization, lvl] = \
@@ -239,7 +243,7 @@ class cFramework:
             modelname_lon = self.paramPath + 'NeuralNetworks' + direc_ident + 'Models' + direc_ident \
                             + modelname
 
-            nnObj = CNeuralNetwork(local_struct)
+            nnObj = CNeuralNetwork(local_struct, "RCT_ALG_NN")
             nnObj.design_nn()
             nnObj.train_nn(paths_latlon_org, paths_latlon_noisy)
             nnObj.save_models(modelname_lat, modelname_lon)

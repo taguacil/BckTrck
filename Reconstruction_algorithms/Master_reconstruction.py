@@ -33,15 +33,14 @@ import logging
 
 logger = logging.getLogger('BckTrk')
 
+
 # Helper functions
 def identify_algorithms(params):
     temp = []
-    if params['RCT_ALG_LASSO']["bReconstruct_lasso"]:
-        temp.append("RCT_ALG_LASSO")
-    if params['RCT_ALG_BFGS']["bReconstruct_bfgs"]:
-        temp.append("RCT_ALG_BFGS")
-    if params['RCT_ALG_NN']["bReconstruct_NN"]:
-        temp.append("RCT_ALG_NN")
+    for key in params:
+        if "RCT_ALG" in key and params[key]["bReconstruct"]:
+            temp.append(key)
+
     return temp
 
 
@@ -53,30 +52,31 @@ def reconstructor(params, path, algorithm):
     var = np.repeat(np.expand_dims(np.var(path, axis=1), axis=1), params['acquisition_length'], axis=1)
     normalized_path = (path - mean) / np.sqrt(var)
 
-    if algorithm == "RCT_ALG_LASSO" and params['RCT_ALG_LASSO']["bReconstruct_lasso"]:
+    if algorithm == "RCT_ALG_LASSO" and params['RCT_ALG_LASSO']["bReconstruct"]:
         try:
             temp = np.array([lasso_algo(params, normalized_path[0]), lasso_algo(params, normalized_path[1])])
             reconstructed_paths = np.sqrt(var) * temp + mean
         except ValueError as valerr:
             raise CFrameworkError(valerr.args[0]) from valerr
 
-    elif algorithm == "RCT_ALG_BFGS" and params['RCT_ALG_BFGS']["bReconstruct_bfgs"]:
+    elif algorithm == "RCT_ALG_BFGS" and params['RCT_ALG_BFGS']["bReconstruct"]:
         try:
             temp = np.array([bfgs_algo(params, normalized_path[0]), bfgs_algo(params, normalized_path[1])])
             reconstructed_paths = np.sqrt(var) * temp + mean
         except ValueError as valerr:
             raise CFrameworkError(valerr.args[0]) from valerr
 
-    elif algorithm == "RCT_ALG_NN" and params['RCT_ALG_NN']["bReconstruct_NN"]:
+    elif "NN" in algorithm and params[algorithm]["bReconstruct"]:
         logger.debug('Entering NN reconstruction')
         try:
             logger.debug('Beginning inference')
+            nn_name = algorithm + "Obj"
             temp = np.zeros((2, params['acquisition_length']))
-            temp[0], temp[1] =params['nnObj'].nn_inference(normalized_path)
+            temp[0], temp[1] = params[nn_name].nn_inference(normalized_path)
             reconstructed_paths = np.sqrt(var) * temp + mean
         except ValueError as valerr:
-            logger.debug('NN value error with message <%s>',valerr.args[0])
-            errdict = {"file": __file__, "message" : valerr.args[0], "errorType": CErrorTypes.value }
+            logger.debug('NN value error with message <%s>', valerr.args[0])
+            errdict = {"file": __file__, "message": valerr.args[0], "errorType": CErrorTypes.value}
             raise CFrameworkError(errdict) from valerr
 
     return reconstructed_paths

@@ -20,7 +20,7 @@
     "bTrainNetwork"             : false,
 
     "RCT_ALG_NN"             : {
-        "bReconstruct_NN"        : true,
+        "bReconstruct"           : true,
         "sampling_ratio"         : 0.20,
         "alpha"                  : 0.5,
         "modelname"              : "NNnoiseless_random"
@@ -28,7 +28,7 @@
 
     "RCT_ALG_LASSO"             : {
         "bReconstruct_from_dct"     : true,
-        "bReconstruct_lasso"        : true,
+        "bReconstruct"              : true,
         "lasso_learning_rate"       : 0.001,
         "sampling_ratio"            : 0.2
     },

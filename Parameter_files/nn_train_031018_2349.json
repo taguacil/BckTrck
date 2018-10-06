@@ -19,7 +19,7 @@
     "bTrainNetwork"             : true,
 
     "RCT_ALG_NN"             : {
-        "bReconstruct_NN"        : false,
+        "bReconstruct"           : false,
         "sampling_ratio"         : 0.20,
         "alpha"                  : 0.5,
         "modelname"              : "NNnoiseless_real"
