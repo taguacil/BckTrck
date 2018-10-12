@@ -58,6 +58,7 @@
         "bReconstruct"           : false,
         "sampling_ratio"         : 0.25,
         "alpha"                  : 0.5,
+        "delta"                  : 0.01,
         "modelname"              : "default"
     },
 

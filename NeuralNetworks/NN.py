@@ -22,6 +22,7 @@
 # Python library import
 import numpy as np
 import keras
+from keras.callbacks import EarlyStopping
 import os
 import platform
 import matplotlib.pyplot as plt
@@ -29,7 +30,6 @@ import matplotlib.pyplot as plt
 # User-defined library import
 from Helper_functions.framework_error import CFrameworkError
 from Helper_functions.framework_error import CErrorTypes
-from keras.callbacks import EarlyStopping
 # Logging
 import logging
 
@@ -58,6 +58,7 @@ class CNeuralNetwork:
 
         self.m_acquisition_length = struct['acquisition_length']
         self.alpha = struct[algorithm]["alpha"]
+        self.delta = struct[algorithm]["delta"]
         if struct['bTrainNetwork']:
             self.m_model_lat = keras.Sequential()
             self.m_model_lon = keras.Sequential()
@@ -167,7 +168,7 @@ class CNeuralNetwork:
 
         # Callbacks
 
-        callbacks = [EarlyStopping(monitor='val_loss', min_delta=0.001, patience=10, restore_best_weights=True, verbose=2)]
+        callbacks = [EarlyStopping(monitor='val_loss', min_delta=self.delta, patience=10, restore_best_weights=True, verbose=2)]
 
         # Train the models
 
