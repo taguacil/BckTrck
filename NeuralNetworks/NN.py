@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 # User-defined library import
 from Helper_functions.framework_error import CFrameworkError
 from Helper_functions.framework_error import CErrorTypes
-
+from keras.callbacks import EarlyStopping
 # Logging
 import logging
 
@@ -94,14 +94,20 @@ class CNeuralNetwork:
         self.m_model_lat.add(
             keras.layers.Dense(self.m_acquisition_length, activation=self.activation_fun,
                                input_shape=(self.number_of_samples,)))
-        self.m_model_lat.add(keras.layers.Dense(250, activation=self.activation_fun))
         self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(50, activation=self.activation_fun))
-        self.m_model_lat.add(keras.layers.Dense(250, activation=self.activation_fun))
+        self.m_model_lat.add(keras.layers.Dense(self.m_acquisition_length, activation=self.activation_fun))
+
+        """
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
         self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(50, activation=self.activation_fun))
-        self.m_model_lat.add(keras.layers.Dense(250, activation=self.activation_fun))
+        self.m_model_lat.add(keras.layers.Dense(64, activation=self.activation_fun))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(64, activation=self.activation_fun))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
+        
         self.m_model_lat.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
+        """
 
         self.m_model_lat.compile(
             optimizer="adam",
@@ -113,26 +119,27 @@ class CNeuralNetwork:
         self.m_model_lon.add(
             keras.layers.Dense(self.m_acquisition_length, activation=self.activation_fun,
                                input_shape=(self.number_of_samples,)))
-        self.m_model_lon.add(keras.layers.Dense(250, activation=self.activation_fun))
         self.m_model_lon.add(keras.layers.Dropout(0.1))
-        self.m_model_lon.add(keras.layers.Dense(50, activation=self.activation_fun))
-        self.m_model_lon.add(keras.layers.Dense(250, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun))
         self.m_model_lon.add(keras.layers.Dropout(0.1))
-        self.m_model_lon.add(keras.layers.Dense(50, activation=self.activation_fun))
-        self.m_model_lon.add(keras.layers.Dense(250, activation=self.activation_fun))
-        self.m_model_lon.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
+        self.m_model_lon.add(keras.layers.Dense(self.m_acquisition_length, activation=self.activation_fun))
 
+        """
+        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lon.add(keras.layers.Dense(64, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lon.add(keras.layers.Dense(64, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
+        """
         self.m_model_lon.compile(
             optimizer="adam",
             loss="mse",
             metrics=["mse"]
         )
 
-        self.m_model_lat.compile(
-            optimizer="adam",
-            loss="mse",
-            metrics=["mse"]
-        )
 
     def train_nn(self, org_latlon, input_latlon_noisy):
         # First we normalize
@@ -158,20 +165,29 @@ class CNeuralNetwork:
         validateIndices = np.random.choice(totalrealizations, int(np.floor(0.2 * totalrealizations)), replace=False)
         trainIndices = np.array([n for n in range(totalrealizations) if n not in validateIndices])
 
+        # Callbacks
+
+        callbacks = [EarlyStopping(monitor='val_loss', min_delta=0.001, patience=10, restore_best_weights=True, verbose=2)]
+
         # Train the models
+
         results_lat = self.m_model_lat.fit(
             lat_X[trainIndices, :], lat_y[trainIndices, :],
             epochs=1000,
             batch_size=32,
             validation_data=(lat_X[validateIndices, :], lat_y[validateIndices, :]),
+            callbacks=callbacks,
             verbose=2
         )
 
+
+        print('Training Lon')
         results_lon = self.m_model_lon.fit(
             lon_X[trainIndices, :], lon_y[trainIndices, :],
             epochs=1000,
             batch_size=32,
             validation_data=(lon_X[validateIndices, :], lon_y[validateIndices, :]),
+            callbacks=callbacks,
             verbose=2
         )
         
@@ -195,7 +211,7 @@ class CNeuralNetwork:
         
         # Check if vector length is the same as input layer is implicitly done by ValueError
         path_lat_reconst = self.m_model_lat.predict(path_lat)
-        path_lon_reconst = self.m_model_lon.predict(path_lon)
+        path_lon_reconst = self.m_model_lat.predict(path_lon)
         
         return path_lat_reconst, path_lon_reconst
 

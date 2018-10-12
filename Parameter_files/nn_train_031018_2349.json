@@ -3,7 +3,7 @@
     
     "gps_freq_Hz"               : 1,
     "realization"               : 10000,
-    "acquisition_time_sec"      : 200,
+    "acquisition_time_sec"      : 256,
     "stepsize"                  : 1,
     
     "random_seed"               : 5235,
@@ -19,14 +19,14 @@
     "bTrainNetwork"             : true,
 
     "RCT_ALG_NN"             : {
+        "bPlotTrainResults"      : true,
         "bReconstruct"           : false,
         "sampling_ratio"         : 0.20,
         "alpha"                  : 0.5,
-        "modelname"              : "NNnoiseless_real"
+        "modelname"              : "NNnoiseless_test_callback"
     },
-
     "CSV_DATA"                  : {
-        "bUse_csv_data"             : true,
+        "bUse_csv_data"             : false,
         "bPlot_real_path"           : false,
         "csv_path"                  : "CSV_data/gpsLocations_Taimir_1.csv",
         "path_length"               : 200
