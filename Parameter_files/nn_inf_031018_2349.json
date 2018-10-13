@@ -23,7 +23,7 @@
         "bReconstruct"           : true,
         "sampling_ratio"         : 0.20,
         "alpha"                  : 0.5,
-        "modelname"              : "NNnoise_random"
+        "modelname"              : "NNnoise_random_zebi"
     },
 
 

@@ -75,7 +75,7 @@ def reconstructor(params, path, algorithm):
             temp = np.zeros((2, params['acquisition_length']))
             temp[0], temp[1] = params[nn_name].nn_inference(normalized_path)
             reconstructed_paths = np.sqrt(var) * temp + mean
-        except ValueError as valerr:
+        except (ValueError,KeyError) as valerr:
             logger.debug('NN value error with message <%s>', valerr.args[0])
             errdict = {"file": __file__, "message": valerr.args[0], "errorType": CErrorTypes.value}
             raise CFrameworkError(errdict) from valerr

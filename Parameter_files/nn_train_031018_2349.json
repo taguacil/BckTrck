@@ -2,7 +2,7 @@
     "bSimplified_Results"       : true,
     
     "gps_freq_Hz"               : 1,
-    "realization"               : 10000,
+    "realization"               : 10,
     "acquisition_time_sec"      : 256,
     "stepsize"                  : 1,
     
@@ -18,13 +18,15 @@
 
     "bTrainNetwork"             : true,
 
-    "RCT_ALG_NN"             : {
+     "Train_NN"             : {
         "bPlotTrainResults"      : true,
-        "bReconstruct"           : false,
-        "sampling_ratio"         : 0.20,
+        "sampling_ratio"         : 0.25,
         "alpha"                  : 0.5,
-        "modelname"              : "NNnoiseless_test_callback"
+        "delta"                  : 0.01,
+        "modelname_lat"          : "",
+        "modelname_lon"          : ""
     },
+
     "CSV_DATA"                  : {
         "bUse_csv_data"             : false,
         "bPlot_real_path"           : false,
