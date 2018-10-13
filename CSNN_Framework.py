@@ -217,8 +217,11 @@ class cFramework:
                             if "NN" in algorithm and not bNN_initialized[algorithm]:
                                 from NeuralNetworks.NN import CNeuralNetwork
                                 nn_name = algorithm + "Obj"
-                                local_struct[nn_name] = CNeuralNetwork(local_struct, algorithm)
-                                bNN_initialized[algorithm] = True
+                                try:
+                                    local_struct[nn_name] = CNeuralNetwork(local_struct, algorithm)
+                                    bNN_initialized[algorithm] = True
+                                except CFrameworkError as frameErr:
+                                    self.errorAnalyzer(frameErr, str((algorithm, lvl)))
                             try:
                                 temp = reconstructor(local_struct, paths_latlon_noisy[:, :, realization, lvl],
                                                      algorithm)
@@ -237,19 +240,23 @@ class cFramework:
         if local_struct['bTrainNetwork']:
             from NeuralNetworks.NN import CNeuralNetwork
             # Iterate over the total number of realizations to generate training set
-            modelname = local_struct["RCT_ALG_NN"]["modelname"]
             modelname_lat = self.paramPath + 'NeuralNetworks' + direc_ident + 'Models' + direc_ident \
-                            + modelname
+                            + local_struct["Train_NN"]["modelname_lat"]
             modelname_lon = self.paramPath + 'NeuralNetworks' + direc_ident + 'Models' + direc_ident \
-                            + modelname
+                            + local_struct["Train_NN"]["modelname_lon"]
 
-            nnObj = CNeuralNetwork(local_struct, "RCT_ALG_NN")
+            nnObj = CNeuralNetwork(local_struct, "Train_NN")
             nnObj.design_nn()
-            nnObj.train_nn(paths_latlon_org, paths_latlon_noisy)
+            results_lat, results_lon = nnObj.train_nn(paths_latlon_org, paths_latlon_noisy)                
             nnObj.save_models(modelname_lat, modelname_lon)
 
-            if nnObj.dump_nn_summary():
-                self.logAnalyzer(nnObj.messageSummary_dict, modelname)
+            # if nnObj.dump_nn_summary():
+            #    self.logAnalyzer(nnObj.messageSummary_dict, modelname_lat)
+            #    self.logAnalyzer(nnObj.messageSummary_dict, modelname_lon)
+                
+            if local_struct["Train_NN"]["bPlotTrainResults"]:
+                nnObj.train_result_visu(results_lat, results_lon, local_struct["Train_NN"]["modelname_lat"],
+                                        local_struct["Train_NN"]["modelname_lon"])
 
         # Store data in local struct
         local_struct['RESULTS']['paths_wm_org'] = paths_wm_org

@@ -35,6 +35,15 @@
     "TRANSFORM"                 : {
         "bDctTransform"             : false
     },
+
+    "Train_NN"             : {
+        "bPlotTrainResults"      : false,
+        "sampling_ratio"         : 0.25,
+        "alpha"                  : 0.5,
+        "delta"                  : 0.01,
+        "modelname_lat"          : "",
+        "modelname_lon"          : ""
+    },
     
     "RCT_ALG_LASSO"             : {
         "bReconstruct_from_dct"     : false,

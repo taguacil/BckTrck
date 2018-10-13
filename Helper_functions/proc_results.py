@@ -153,9 +153,9 @@ class cProcessFile:
                         self.m_paths_latlon_org[1, :, :, :] - r_path[1, :, :, :]) ** 2, axis=0))
 
                 l1_org_latlon = np.mean(abs(self.m_paths_latlon_org[0, :, :, :]) + abs(
-                    self.m_paths_latlon_org[1, :, :, :]), axis=0)
+                    self.m_paths_latlon_org[1, :, :, :]), axis=1)
                 l1_r_latlon = np.mean(abs(self.m_paths_latlon_org[0, :, :, :] - r_path[0, :, :, :]) + abs(
-                    self.m_paths_latlon_org[1, :, :, :] - r_path[1, :, :, :]), axis=0)
+                    self.m_paths_latlon_org[1, :, :, :] - r_path[1, :, :, :]), axis=1)
 
                 MSE_r_latlon[key] = np.mean(l2_r_latlon, axis=0)
                 # Ratio of f/f-f'

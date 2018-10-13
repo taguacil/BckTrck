@@ -9,7 +9,7 @@
     "random_seed"               : 6468,
     "bUse_random_seed"          : false,
     
-    "noise_level_meter"         : [1000,800,500,200,100,50,40,30,20,10,5,1],
+    "noise_level_meter"         : [50,40,30,20,10,5,1],
     "noise_std_meter"           : 0,
     
     "bUse_static_init"          : true,
@@ -19,26 +19,13 @@
     "bReconstruct"              : true,
     "bTrainNetwork"             : false,
 
-    "RCT_ALG_NN_small"           : {
+    "RCT_ALG_NN"           : {
         "bReconstruct"           : true,
         "sampling_ratio"         : 0.20,
         "alpha"                  : 0.5,
-        "modelname"              : "NNnoise_random_shit"
+        "modelname"              : "NNnoise_random_zebi"
     },
 
-    "RCT_ALG_NN_Rand"            : {
-        "bReconstruct"           : true,
-        "sampling_ratio"         : 0.20,
-        "alpha"                  : 0.5,
-        "modelname"              : "NNnoiseless_random"
-    },
-
-    "RCT_ALG_NN_NRand"           : {
-        "bReconstruct"           : true,
-        "sampling_ratio"         : 0.20,
-        "alpha"                  : 0.5,
-        "modelname"              : "NNnoise_random"
-    },
 
     "RCT_ALG_LASSO"             : {
         "bReconstruct_from_dct"     : true,
