@@ -1,10 +1,10 @@
 {
     "realization"               : 100,
-    "acquisition_time_sec"      : 10,
+    "acquisition_time_sec"      : 200,
     "random_seed"               : 8941,
     "bUse_random_seed"          : true,
     
-    "noise_level_meter"         : [1000,800,500,200,100,50,40,30,20,10,5,1],
+    "noise_level_meter"         : [20,10,1,0.5,0.0005],
     "noise_std_meter"           : 0,
     
     "bReconstruct"              : true,
@@ -15,9 +15,9 @@
     
     "RCT_ALG_LASSO"             : {
         "bReconstruct_from_dct"     : true,
-        "bReconstruct_lasso"        : true,
-        "lasso_learning_rate"       : 1,
-        "sampling_ratio"            : 0.1
+        "bReconstruct"              : true,
+        "lasso_learning_rate"       : 0.01,
+        "sampling_ratio"            : 0.2
     },
     
     "PLOT"                      : {

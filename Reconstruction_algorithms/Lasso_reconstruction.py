@@ -25,8 +25,6 @@ import scipy.fftpack as ft
 from sklearn.linear_model import Lasso
 from Helper_functions.framework_error import CErrorTypes
 
-import sys
-
 ## Logging
 import logging
 
