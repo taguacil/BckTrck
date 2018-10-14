@@ -3,13 +3,13 @@
     
     "gps_freq_Hz"               : 1,
     "realization"               : 100,
-    "acquisition_time_sec"      : 200,
+    "acquisition_time_sec"      : 256,
     "stepsize"                  : 1,
     
     "random_seed"               : 6468,
     "bUse_random_seed"          : false,
     
-    "noise_level_meter"         : [50,40,30,20,10,5,1],
+    "noise_level_meter"         : [10,7,5,3,2,1,0.5,0.0005],
     "noise_std_meter"           : 0,
     
     "bUse_static_init"          : true,
@@ -19,13 +19,19 @@
     "bReconstruct"              : true,
     "bTrainNetwork"             : false,
 
-    "RCT_ALG_NN"           : {
+    "RCT_ALG_NN_05"           : {
         "bReconstruct"           : true,
         "sampling_ratio"         : 0.20,
         "alpha"                  : 0.5,
-        "modelname"              : "NNnoise_random_zebi"
+        "modelname"              : "noisy_2layers_05"
     },
 
+    "RCT_ALG_NN_linear"           : {
+        "bReconstruct"           : true,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.5,
+        "modelname"              : "noisy_2layers_linear"
+    },
 
     "RCT_ALG_LASSO"             : {
         "bReconstruct_from_dct"     : true,
