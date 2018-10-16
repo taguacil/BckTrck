@@ -79,6 +79,8 @@ class CNeuralNetwork:
 
         self.number_of_samples = int(struct[algorithm]["sampling_ratio"] * struct["acquisition_length"])
         self.realizations = struct['realization']
+        print(self.number_of_samples)
+        print(self.realizations)
 
         if self.number_of_samples <= 0:
             logger.debug("Number of samples cannot be 0 or negative")

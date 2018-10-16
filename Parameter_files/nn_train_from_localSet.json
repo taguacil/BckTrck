@@ -1,18 +1,19 @@
 {
     "bSimplified_Results"       : true,
     "filename"                  : "TrainingSet",
+    "bGenerateData"             : false,
 
     "gps_freq_Hz"               : 1,
-    "realization"               : 10000,
+    "realization"               : 2,
     "acquisition_time_sec"      : 256,
     "stepsize"                  : 1,
-    
+
     "random_seed"               : 5235,
     "bUse_random_seed"          : false,
-    
+
     "noise_level_meter"         : [10,7,5,3,2,1,0.5,0.0005],
     "noise_std_meter"           : 0,
-    
+
     "bUse_static_init"          : true,
     "staticLat"                 : 0,
     "staticLon"                 : 0,

@@ -1,9 +1,9 @@
 {
     "workingDir"                : "",
     "currentTime"               : 0,
-    
-    "bUse_filename"             : false,
+
     "filename"                  : "default",
+    "bGenerateData"             : false,
     "bSimplified_Results"       : false,
     
     "gps_freq_Hz"               : 1,
@@ -38,6 +38,7 @@
 
     "Train_NN"             : {
         "bPlotTrainResults"      : false,
+        "bUseGeneratedData"      : false,
         "sampling_ratio"         : 0.25,
         "alpha"                  : 0.5,
         "delta"                  : 0.01,
