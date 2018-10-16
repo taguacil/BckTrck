@@ -80,7 +80,7 @@ class cFramework:
         # create logger with 'spam_application'
         self.logger = logging.getLogger('BckTrk')
         REALIZATION_log = 15
-        logLevel = logging.DEBUG  # can be logging.INFO or DEBUG
+        logLevel = REALIZATION_log  # can be logging.INFO or DEBUG
         self.logger.setLevel(logLevel)
 
         # create file handler which logs even debug messages

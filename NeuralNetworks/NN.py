@@ -79,8 +79,6 @@ class CNeuralNetwork:
 
         self.number_of_samples = int(struct[algorithm]["sampling_ratio"] * struct["acquisition_length"])
         self.realizations = struct['realization']
-        print(self.number_of_samples)
-        print(self.realizations)
 
         if self.number_of_samples <= 0:
             logger.debug("Number of samples cannot be 0 or negative")
@@ -98,24 +96,43 @@ class CNeuralNetwork:
 
     def design_nn(self):
         # For lat
+        # Godzilla
         self.m_model_lat.add(
-            keras.layers.Dense(self.m_acquisition_length, activation='linear',
+            keras.layers.Dense(self.m_acquisition_length, activation=self.activation_fun,
                                input_shape=(self.number_of_samples,)))
-        self.m_model_lat.add(keras.layers.Dense(256, activation='linear'))
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
         self.m_model_lat.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
 
         """
+        # Pyro
+        self.m_model_lat.add(
+            keras.layers.Dense(self.m_acquisition_length, activation=self.activation_fun,
+                               input_shape=(self.number_of_samples,)))
+        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun))
         self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
-        self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(64, activation=self.activation_fun))
-        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
-        self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(64, activation=self.activation_fun))
-        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
-        
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
         self.m_model_lat.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
         """
-
         self.m_model_lat.compile(
             optimizer="adam",
             loss="mse",
@@ -123,19 +140,29 @@ class CNeuralNetwork:
         )
 
         # For lon
+        # Thor
+        self.m_model_lat.add(
+            keras.layers.Dense(self.m_acquisition_length, activation=self.activation_fun,
+                               input_shape=(self.number_of_samples,)))
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lat.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
+
+        """
+        # Pluto
         self.m_model_lon.add(
             keras.layers.Dense(self.m_acquisition_length, activation=self.activation_fun,
                                input_shape=(self.number_of_samples,)))
-        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun))
-        self.m_model_lon.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
-
-        """
-        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun))
-        self.m_model_lon.add(keras.layers.Dropout(0.1))
-        self.m_model_lon.add(keras.layers.Dense(64, activation=self.activation_fun))
-        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun))
-        self.m_model_lon.add(keras.layers.Dropout(0.1))
-        self.m_model_lon.add(keras.layers.Dense(64, activation=self.activation_fun))
         self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun))
         self.m_model_lon.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
         """
@@ -172,7 +199,7 @@ class CNeuralNetwork:
         # Callbacks
 
         callbacks = [
-            EarlyStopping(monitor='val_loss', min_delta=self.delta, patience=100, restore_best_weights=True, verbose=2)]
+            EarlyStopping(monitor='val_loss', min_delta=self.delta, patience=150, restore_best_weights=True, verbose=2)]
 
         # Train the models, Keras will be loaded, both models will be created
         # The bTrain[lat,lon] boolean only controls the fitting
