@@ -100,27 +100,27 @@ class CNeuralNetwork:
         self.m_model_lat.add(
             keras.layers.Dense(self.m_acquisition_length, activation=self.activation_fun,
                                input_shape=(self.number_of_samples,)))
-        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
         self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
-        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
         self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun))
-        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
         self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
-        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
         self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun))
-        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
         self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
-        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
         self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
-        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
         self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun))
-        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
         self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
-        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
         self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun))
-        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
         self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
-        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
         self.m_model_lat.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
 
         """
@@ -130,7 +130,7 @@ class CNeuralNetwork:
                                input_shape=(self.number_of_samples,)))
         self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun))
         self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
-        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
         self.m_model_lat.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
         """
         self.m_model_lat.compile(
@@ -141,22 +141,22 @@ class CNeuralNetwork:
 
         # For lon
         # Thor
-        self.m_model_lat.add(
+        self.m_model_lon.add(
             keras.layers.Dense(self.m_acquisition_length, activation=self.activation_fun,
                                input_shape=(self.number_of_samples,)))
         self.m_model_lon.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun))
         self.m_model_lon.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dense(48, activation=self.activation_fun))
         self.m_model_lon.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun))
         self.m_model_lon.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun))
         self.m_model_lon.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dense(48, activation=self.activation_fun))
         self.m_model_lon.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
-        self.m_model_lat.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
+        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
 
         """
         # Pluto

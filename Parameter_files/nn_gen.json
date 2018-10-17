@@ -4,14 +4,14 @@
     "bGenerateData"             : true,
 
     "gps_freq_Hz"               : 1,
-    "realization"               : 50000,
+    "realization"               : 10000,
     "acquisition_time_sec"      : 256,
     "stepsize"                  : 1,
 
     "random_seed"               : 1000,
     "bUse_random_seed"          : false,
 
-    "noise_level_meter"         : [50,45,40,35,30,25,20,15,10,7,5,4,3,2,1,0.5,0.0005],
+    "noise_level_meter"         : [40,35,30,25,20,15,10,9,8,7,6,5,4,3,2,1,0.0005],
     "noise_std_meter"           : 0,
 
     "bUse_static_init"          : true,
