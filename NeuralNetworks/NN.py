@@ -95,6 +95,10 @@ class CNeuralNetwork:
         return keras.activations.relu(x, alpha=self.alpha)
 
     def design_nn(self):
+        # Optimizers
+        # nn_opt = keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
+        nn_opt= keras.optimizers.SGD(lr=0.001, momentum=0.9, decay=0.0, nesterov=True)
+        
         # For lat
         # Godzilla
         self.m_model_lat.add(
@@ -134,7 +138,7 @@ class CNeuralNetwork:
         self.m_model_lat.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
         """
         self.m_model_lat.compile(
-            optimizer="adam",
+            optimizer=nn_opt,
             loss="mse",
             metrics=["mse"]
         )
@@ -167,7 +171,7 @@ class CNeuralNetwork:
         self.m_model_lon.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
         """
         self.m_model_lon.compile(
-            optimizer="adam",
+            optimizer=nn_opt,
             loss="mse",
             metrics=["mse"]
         )
