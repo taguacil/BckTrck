@@ -4,7 +4,7 @@
     "CSV_DATA"                  : {
         "bUse_csv_data"             : true,
         "bPlot_real_path"           : true,
-        "csv_path"                  : "CSV_data/gpsLocations_Taimir_1.csv",
+        "csv_path"                  : "CSV_data/gpsLocations_Taimir_3.csv",
         "path_length"               : 256
     },
     "noise_level_meter"         : [0.0005],
@@ -34,6 +34,8 @@
     "PLOT"                      : {
         "xlimits"                   : [-25,25],
         "ylimits"                   : [-25,25],
-        "bPlotAllrealizations"      : false
+        "bPlotAllrealizations"      : true,
+        "bPlotLonLat_time_reconst"  : true,
+        "bPlotWM_time_reconst"      : false
     }
 }

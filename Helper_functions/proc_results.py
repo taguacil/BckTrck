@@ -53,6 +53,8 @@ def process_data(params):
     if not params["bTrainNetwork"]:
         if params["CSV_DATA"]["bPlot_real_path"]:
             data_obj.plot_real_path_recon()
+            data_obj.plot_path_org_2d()
+            data_obj.plot_path_noisy_2d()
 
         MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon, reconstructed_db_latlon = \
             data_obj.calculate_MSE()
@@ -104,7 +106,7 @@ class cProcessFile:
 
         self.m_filename = filepath + struct['filename'] + '.txt'
 
-        self.m_acquisition_length = struct['gps_freq_Hz'] * struct['acquisition_time_sec']
+        self.m_acquisition_length = struct['acquisition_length']
         self.m_number_realization = struct['realization']
 
         self.m_path_length = struct['CSV_DATA']['path_length']
@@ -413,14 +415,14 @@ class cProcessFile:
                         plt.plot(x_axis, paths_latlon_org[0, :, k], '-*',
                                  label="Original latitude for realization %.1f" % (k))
 
-                    if self.m_bReconstruct:
-                        logger.debug('Plotting MSE of reconstructed paths')
+                        if self.m_bReconstruct:
+                            logger.debug('Plotting MSE of reconstructed paths')
 
-                        for key in self.reconstructed_latlon_paths.keys():
-                            r_path = self.reconstructed_latlon_paths[key]
-                            plt.plot(x_axis, r_path[0, :, k, noise], '-*',
-                                     label="Latitude for %s with %.1f %% sampling ratio" % (
-                                         key, self.struct[key]['sampling_ratio'] * 100))
+                            for key in self.reconstructed_latlon_paths.keys():
+                                r_path = self.reconstructed_latlon_paths[key]
+                                plt.plot(x_axis, r_path[0, :, k, noise], '-*',
+                                         label="Latitude for %s with %.1f %% sr for rl %.1f" % (
+                                             key, self.struct[key]['sampling_ratio'] * 100, k))
 
                 else:
                     logger.warning('Plotting only first realization for visibility')
@@ -432,8 +434,8 @@ class cProcessFile:
                         for key in self.reconstructed_latlon_paths.keys():
                             r_path = self.reconstructed_latlon_paths[key]
                             plt.plot(x_axis, r_path[0, :, 0, noise], '-*',
-                                     label="Latitude for %s with %.1f %% sampling ratio" % (
-                                         key, self.struct[key]['sampling_ratio'] * 100))
+                                     label="Latitude for %s with %.1f %% sr for rl %.1f" % (
+                                         key, self.struct[key]['sampling_ratio'] * 100, k))
 
                 # Plotting Latitude
                 buf = "Noisy latitude for noise level %d (meters)" % (noise_level[noise])
