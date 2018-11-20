@@ -26,8 +26,8 @@
         "sampling_ratio"         : 0.2,
         "alpha"                  : 0.8,
         "delta"                  : 0.0001,
-        "modelname_lat"          : "Pyro_08",
-        "modelname_lon"          : "Pluto_08"
+        "modelname_lat"          : "Godzilla_08_amsgrad",
+        "modelname_lon"          : "Thor_08_amsgrad"
     },
 
     "CSV_DATA"                  : {

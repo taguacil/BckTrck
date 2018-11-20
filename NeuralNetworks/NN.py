@@ -43,8 +43,7 @@ else:
 workingDir = os.getcwd()
 resultsPath = workingDir + direc_ident + 'NeuralNetworks' + direc_ident + 'Models' + direc_ident
 
-
-# os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+#os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 class CNeuralNetwork:
     # Constructor
@@ -96,37 +95,61 @@ class CNeuralNetwork:
 
     def design_nn(self):
         # Optimizers
-        # nn_opt = keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
-        nn_opt= keras.optimizers.SGD(lr=0.001, momentum=0.9, decay=0.0, nesterov=True)
-        
+        ##nn_opt = keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
+        ##nn_opt = keras.optimizers.Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False) ## DIVERGENCE
+        ##nn_opt = keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-8, decay=1e-6, amsgrad=False)
+        ##nn_opt = keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-8, decay=1e-6, amsgrad=True)
+        nn_opt = keras.optimizers.SGD(lr=0.01, momentum=0.9, decay=1e-6, nesterov=True)
+
         # For lat
+        """
         # Godzilla
         self.m_model_lat.add(
             keras.layers.Dense(self.m_acquisition_length, activation=self.activation_fun,
                                input_shape=(self.number_of_samples,)))
         self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
         self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun))
+        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
         self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
         self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun))
+        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
         self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
         self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
         self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun))
+        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
         self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
         self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun))
+        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
         self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
         self.m_model_lat.add(keras.layers.Dropout(0.1))
         self.m_model_lat.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
 
+        """
+        # Sparta
+        self.m_model_lat.add(
+            keras.layers.Dense(self.m_acquisition_length, activation=self.activation_fun,
+                               input_shape=(self.number_of_samples,)))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
+        
         """
         # Pyro
         self.m_model_lat.add(
@@ -144,24 +167,42 @@ class CNeuralNetwork:
         )
 
         # For lon
+        
+        # Loki
+        self.m_model_lon.add(
+            keras.layers.Dense(self.m_acquisition_length, activation=self.activation_fun,
+                               input_shape=(self.number_of_samples,)))
+        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lon.add(keras.layers.Dense(48, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lon.add(keras.layers.Dense(48, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lon.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
+        """
+
         # Thor
         self.m_model_lon.add(
             keras.layers.Dense(self.m_acquisition_length, activation=self.activation_fun,
                                input_shape=(self.number_of_samples,)))
         self.m_model_lon.add(keras.layers.Dropout(0.1))
-        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
         self.m_model_lon.add(keras.layers.Dropout(0.1))
-        self.m_model_lon.add(keras.layers.Dense(48, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dense(48, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
         self.m_model_lon.add(keras.layers.Dropout(0.1))
-        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
         self.m_model_lon.add(keras.layers.Dropout(0.1))
-        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
         self.m_model_lon.add(keras.layers.Dropout(0.1))
-        self.m_model_lon.add(keras.layers.Dense(48, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dense(48, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
         self.m_model_lon.add(keras.layers.Dropout(0.1))
-        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun))
+        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
         self.m_model_lon.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
-
+        
+"""
         """
         # Pluto
         self.m_model_lon.add(

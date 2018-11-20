@@ -24,10 +24,10 @@
         "bPlotTrainResults"      : true,
         "bUseGeneratedData"      : true,
         "sampling_ratio"         : 0.2,
-        "alpha"                  : 0.8,
+        "alpha"                  : 0.5,
         "delta"                  : 0.0001,
-        "modelname_lat"          : "Godzilla_08_epsilon_decay_amsgrad_ker",
-        "modelname_lon"          : "Thor_08_epsilon_decay_amsgrad_ker"
+        "modelname_lat"          : "Godzilla_05_NAGD_0.01_0.9",
+        "modelname_lon"          : "Thor_05_NAGD_0.01_0.9"
     },
 
     "CSV_DATA"                  : {
