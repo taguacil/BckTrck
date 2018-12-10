@@ -49,10 +49,22 @@
     "RCT_ALG_LASSO"             : {
         "bReconstruct_from_dct"     : false,
         "bReconstruct"              : false,
+        "bUse_gaussian_matrix"      : false,
         "lasso_learning_rate"       : 0.01,
         "sampling_ratio"            : 0.25    
     },
-    
+
+    "RCT_ALG_ADAPTIVE_LASSO"     : {
+        "bReconstruct_from_dct"     : false,
+        "bReconstruct"              : false,
+        "bUse_gaussian_matrix"      : false,
+        "lasso_learning_rate"       : 0.01,
+        "sampling_ratio"            : 0.25,
+        "forgetting_factor"         : 0.9,
+        "threshold"                 : 0.5,
+        "error_baseline"            : 100
+    },
+
     "RCT_ALG_BFGS"             : {
         "bReconstruct_from_dct"     : false,
         "bReconstruct"              : false,
@@ -60,7 +72,20 @@
         "lambda"                    : 0.01,
         "u"                         : 10e-6,
         "maxiter"                   : 500,
-        "sampling_ratio"            : 0.25    
+        "sampling_ratio"            : 0.25
+    },
+
+    "RCT_ALG_ADAPTIVE_BFGS"             : {
+        "bReconstruct_from_dct"     : false,
+        "bReconstruct"              : false,
+        "bUse_gaussian_matrix"      : false,
+        "lambda"                    : 0.01,
+        "u"                         : 10e-6,
+        "maxiter"                   : 500,
+        "sampling_ratio"            : 0.25,
+        "forgetting_factor"         : 0.9,
+        "threshold"                 : 0.5,
+        "error_baseline"            : 100
     },
 
     "RCT_ALG_NN"             : {
@@ -86,7 +111,9 @@
         "bPlotMSE"                  : false,
         "bPlotSNR"                  : false,
         "bPlotDCTAnalysis"          : false,
-        "bPlotPSD"                  : false
+        "bPlotPSD"                  : false,
+        "bPlotAvgSR"                : false,
+        "bPlotAccuracy"             : false
     }, 
     
     "RESULTS"                   : {
@@ -95,8 +122,10 @@
         "paths_wm_noisy"                     : [0,0,0,0],
         "paths_latlon_noisy"                 : [0,0,0,0],
         "transformed_paths"                  : [0,0,0,0],
+        "noise_vals"                         : [0,0,0],
         "reconstructed_latlon_paths"         : {},
         "reconstructed_WM_paths"             : {},
+        "final_sampling_ratio"               : {},
         "reconstructed_db_latlon"            : {},
         "MSE_latlon"                         : {}
     }

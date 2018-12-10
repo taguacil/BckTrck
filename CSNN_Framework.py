@@ -81,6 +81,7 @@ class cFramework:
         self.logger = logging.getLogger('BckTrk')
         REALIZATION_log = 15
         logLevel = REALIZATION_log  # can be logging.INFO or DEBUG
+        #logLevel = logging.DEBUG
         self.logger.setLevel(logLevel)
 
         # create file handler which logs even debug messages
@@ -170,11 +171,12 @@ class cFramework:
         paths_wm_org = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
         paths_wm_noisy = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
         paths_latlon_noisy = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
-        noise_vals = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
+        noise_vals = np.zeros((acquisition_length, numberOfRealizations, noise_level_len))
         transformed_paths = np.zeros((2, acquisition_length, numberOfRealizations, noise_level_len))
 
         reconstructed_latlon_paths = {}
         reconstructed_WM_paths = {}
+        final_sampling_ratio = {}
         bNN_initialized = {}
 
         reconstruction_algorithms = identify_algorithms(local_struct)
@@ -183,6 +185,7 @@ class cFramework:
                 (2, acquisition_length, numberOfRealizations, noise_level_len))
             reconstructed_WM_paths[algorithm] = np.zeros(
                 (2, acquisition_length, numberOfRealizations, noise_level_len))
+            final_sampling_ratio[algorithm] = np.zeros((numberOfRealizations, noise_level_len))
             bNN_initialized[algorithm] = False
 
         if local_struct['bTrainNetwork'] and local_struct['Train_NN']['bUseGeneratedData']:
@@ -216,7 +219,7 @@ class cFramework:
                             random_2d_path_generator(local_struct)
                         # Generate noise for each realization
                         (paths_wm_noisy[:, :, realization, lvl], paths_latlon_noisy[:, :, realization, lvl],
-                         noise_vals[:, :, realization, lvl]) = \
+                         noise_vals[:, realization, lvl]) = \
                             noise_generator(local_struct, paths_wm_org[:, :, realization, lvl],
                                             local_struct['noise_level_meter'][lvl])
                     else:
@@ -242,8 +245,9 @@ class cFramework:
                                     except CFrameworkError as frameErr:
                                         self.errorAnalyzer(frameErr, str((algorithm, lvl)))
                                 try:
-                                    temp = reconstructor(local_struct, paths_latlon_noisy[:, :, realization, lvl],
-                                                         algorithm)
+                                    temp, final_sampling_ratio[algorithm][realization, lvl] = reconstructor(
+                                        local_struct, paths_latlon_noisy[:, :, realization, lvl],
+                                        algorithm, noise_vals[:, realization, lvl])
                                     reconstructed_latlon_paths[algorithm][:, :, realization, lvl] = temp
                                     try:
                                         reconstructed_WM_paths[algorithm][:, :, realization, lvl] = \
@@ -266,13 +270,13 @@ class cFramework:
 
             nnObj = CNeuralNetwork(local_struct, "Train_NN")
             nnObj.design_nn()
-            results_lat, results_lon = nnObj.train_nn(paths_latlon_org, paths_latlon_noisy)                
+            results_lat, results_lon = nnObj.train_nn(paths_latlon_org, paths_latlon_noisy)
             nnObj.save_models(modelname_lat, modelname_lon)
 
             # if nnObj.dump_nn_summary():
             #    self.logAnalyzer(nnObj.messageSummary_dict, modelname_lat)
             #    self.logAnalyzer(nnObj.messageSummary_dict, modelname_lon)
-                
+
             if local_struct["Train_NN"]["bPlotTrainResults"]:
                 nnObj.train_result_visu(results_lat, results_lon, local_struct["Train_NN"]["modelname_lat"],
                                         local_struct["Train_NN"]["modelname_lon"])
@@ -285,6 +289,8 @@ class cFramework:
         local_struct['RESULTS']['transformed_paths'] = transformed_paths
         local_struct['RESULTS']['reconstructed_latlon_paths'] = reconstructed_latlon_paths
         local_struct['RESULTS']['reconstructed_WM_paths'] = reconstructed_WM_paths
+        local_struct['RESULTS']['final_sampling_ratio'] = final_sampling_ratio
+        local_struct['RESULTS']['noise_vals'] = noise_vals
 
         self.logger.debug('Generating results and plotting')
         try:

@@ -49,6 +49,8 @@ else:
 # the main processing function
 def process_data(params):
     data_obj = cProcessFile(params)
+    data_obj.plotAvgSR()
+    data_obj.plotAccuracy()
 
     if not params["bTrainNetwork"]:
         if params["CSV_DATA"]["bPlot_real_path"]:
@@ -80,6 +82,9 @@ def process_data(params):
         del params['RESULTS']['paths_latlon_noisy']
         del params['RESULTS']['reconstructed_latlon_paths']
         del params['RESULTS']['reconstructed_WM_paths']
+        del params['RESULTS']['final_sampling_ratio']
+        del params['RESULTS']['noise_vals']
+
         if not params['TRANSFORM']['bDctTransform']:
             del params['RESULTS']['transformed_paths']
 
@@ -122,6 +127,10 @@ class cProcessFile:
         self.transformed_paths = struct['RESULTS']['transformed_paths']
         self.reconstructed_latlon_paths = struct['RESULTS']['reconstructed_latlon_paths']
         self.reconstructed_wm_paths = struct['RESULTS']['reconstructed_WM_paths']
+        self.final_sampling_ratio = struct['RESULTS']['final_sampling_ratio']
+        self.noise_vals = struct['RESULTS']['noise_vals']
+
+        self.average_sampling_ratio = {}
 
     # Write dictionary into pickle format to txt file
     def set_pickle_file(self, struct):
@@ -193,7 +202,7 @@ class cProcessFile:
 
                 plt.plot(r_path[1], r_path[0], '-*',
                          label="Path for %s with %.1f %% sampling ratio" % (
-                             key, self.struct[key]['sampling_ratio'] * 100))
+                             key, self.average_sampling_ratio[key] * 100))
                 logger.info('L2 for %s is %.6f' % (key, l2_r_latlon))
 
         plt.grid()
@@ -422,7 +431,7 @@ class cProcessFile:
                                 r_path = self.reconstructed_latlon_paths[key]
                                 plt.plot(x_axis, r_path[0, :, k, noise], '-*',
                                          label="Latitude for %s with %.1f %% sr for rl %.1f" % (
-                                             key, self.struct[key]['sampling_ratio'] * 100, k))
+                                             key, self.average_sampling_ratio[key] * 100, k))
 
                 else:
                     logger.warning('Plotting only first realization for visibility')
@@ -435,7 +444,7 @@ class cProcessFile:
                             r_path = self.reconstructed_latlon_paths[key]
                             plt.plot(x_axis, r_path[0, :, 0, noise], '-*',
                                      label="Latitude for %s with %.1f %% sr for rl %.1f" % (
-                                         key, self.struct[key]['sampling_ratio'] * 100, k))
+                                         key, self.average_sampling_ratio[key] * 100, k))
 
                 # Plotting Latitude
                 buf = "Noisy latitude for noise level %d (meters)" % (noise_level[noise])
@@ -457,7 +466,7 @@ class cProcessFile:
                             r_path = self.reconstructed_latlon_paths[key]
                             plt.plot(x_axis, r_path[1, :, 0, noise], '-*',
                                      label="Longitude for %s with %.1f %% sampling ratio" % (
-                                         key, self.struct[key]['sampling_ratio'] * 100))
+                                         key, self.average_sampling_ratio[key] * 100))
 
                 else:
                     plt.plot(x_axis, paths_latlon_org[1, :, 0], '-*', label="Original longitude")
@@ -468,7 +477,7 @@ class cProcessFile:
                             r_path = self.reconstructed_latlon_paths[key]
                             plt.plot(x_axis, r_path[1, :, 0, noise], '-*',
                                      label="Longitude for %s with %.1f %% sampling ratio" % (
-                                         key, self.struct[key]['sampling_ratio'] * 100))
+                                         key, self.average_sampling_ratio[key] * 100))
 
                 # Plotting Longitude
                 buf = "Noisy longitude for noise level %d (meters)" % (noise_level[noise])
@@ -493,7 +502,7 @@ class cProcessFile:
                             r_path = self.reconstructed_wm_paths[key]
                             plt.plot(x_axis, r_path[0, :, k, noise], '-*',
                                      label="x for %s with %.1f %% sampling ratio" % (
-                                         key, self.struct[key]['sampling_ratio'] * 100))
+                                         key, self.average_sampling_ratio[key] * 100))
 
                 else:
                     logger.warning('Plotting only first realization for visibility')
@@ -506,7 +515,7 @@ class cProcessFile:
                             r_path = self.reconstructed_wm_paths[key]
                             plt.plot(x_axis, r_path[0, :, 0, noise], '-*',
                                      label="x for %s with %.1f %% sampling ratio" % (
-                                         key, self.struct[key]['sampling_ratio'] * 100))
+                                         key, self.average_sampling_ratio[key] * 100))
 
                 # Plotting Latitude
                 buf = "Noisy x for noise level %d (meters)" % (noise_level[noise])
@@ -527,7 +536,7 @@ class cProcessFile:
                             r_path = self.reconstructed_wm_paths[key]
                             plt.plot(x_axis, r_path[1, :, 0, noise], '-*',
                                      label="y for %s with %.1f %% sampling ratio" % (
-                                         key, self.struct[key]['sampling_ratio'] * 100))
+                                         key, self.average_sampling_ratio[key] * 100))
 
                 else:
                     plt.plot(x_axis, paths_wm_org[1, :, 0], '-*', label="Original y")
@@ -538,7 +547,7 @@ class cProcessFile:
                             r_path = self.reconstructed_wm_paths[key]
                             plt.plot(x_axis, r_path[1, :, 0, noise], '-*',
                                      label="y for %s with %.1f %% sampling ratio" % (
-                                         key, self.struct[key]['sampling_ratio'] * 100))
+                                         key, self.average_sampling_ratio[key] * 100))
 
                 # Plotting Longitude
                 buf = "Noisy y for noise level %d (meters)" % (noise_level[noise])
@@ -561,7 +570,7 @@ class cProcessFile:
                 for key in self.reconstructed_latlon_paths.keys():
                     plt.plot(x_axis, MSE_r_latlon[key], '-*',
                              label="MSE_latlon for %s with %.1f %% SR" % (
-                             key, self.struct[key]['sampling_ratio'] * 100))
+                                 key, self.average_sampling_ratio[key] * 100))
 
             # Plotting MSE
             plt.plot(x_axis, MSE_noise_latlon, '-*', label="MSE_latlon")
@@ -582,9 +591,9 @@ class cProcessFile:
 
                 for key in self.reconstructed_wm_paths.keys():
                     plt.plot(x_axis, MSE_r_wm[key], '-*',
-                             label="MSE_WM for %s with %.1f %% SR" % (key, self.struct[key]['sampling_ratio'] * 100))
+                             label="MSE_WM for %s with %.1f %% SR" % (key, self.average_sampling_ratio[key] * 100))
                     plt.plot(x_axis, max_error[key], '-x', label="Average Max Error for %s with %.1f %% SR" % (
-                        key, self.struct[key]['sampling_ratio'] * 100))
+                        key, self.average_sampling_ratio[key] * 100))
 
             plt.plot(x_axis, MSE_noise_WM, '-*', label="MSE_WM")
             ax = plt.gca()
@@ -611,7 +620,7 @@ class cProcessFile:
                 for key in self.reconstructed_latlon_paths.keys():
                     plt.plot(x_axis, reconstructed_db_latlon[key], '-*',
                              label="SNR_latlon for %s with %.1f %% SR" % (
-                             key, self.struct[key]['sampling_ratio'] * 100))
+                                 key, self.average_sampling_ratio[key] * 100))
 
             # Plotting SNR
             plt.xscale('log')
@@ -733,3 +742,53 @@ class cProcessFile:
             plt.ylabel('PSD [V**2/Hz]')
             plt.ylim(10e-13, np.max(Plat_den))
             plt.show()
+
+    # Average sampling ratio calculation and plotting
+    def plotAvgSR(self):
+        logger.debug('Triggering average sampling ratio')
+
+        x_axis = self.m_noise_level_meter
+        for key in self.reconstructed_latlon_paths.keys():
+            self.average_sampling_ratio[key] = np.mean(self.final_sampling_ratio[key])
+
+            if self.m_plotStruct['bPlotAvgSR']:
+                logger.debug('Plotting average sampling ratio')
+                plt.plot(x_axis, self.final_sampling_ratio[key][0, :] * 100, '-*', label="Avg SR for %s" % key)
+
+        # Plotting SNR
+        if self.m_plotStruct['bPlotAvgSR']:
+            # plt.xscale('log')
+            plt.grid()
+            plt.legend(loc="upper right")
+            plt.title('Average SR across different algorithms')
+            plt.xlabel('Noise level (meters)')
+            plt.ylabel('Average Sampling Ratio [%]')
+            plt.show()
+
+    # Plot accuracy of path across realizations
+    def plotAccuracy(self):
+        logger.debug('Plotting accuracy over time')
+
+        if self.m_plotStruct['bPlotAccuracy']:
+            # Set of params
+            x_axis = range(0, self.m_acquisition_length)
+            noise_level = self.m_noise_level_meter
+            for noise in range(len(noise_level)):
+
+                if self.m_plotStruct['bPlotAllrealizations']:
+                    for k in range(self.m_number_realization):
+                        plt.plot(x_axis, self.noise_vals[:, k, noise], '-*', label="Noise for realization %.1f" % (k))
+
+                else:
+                    logger.warning('Plotting only first realization for visibility')
+                    plt.plot(x_axis, self.noise_vals[:, 0, noise], '-*',
+                             label="Received accuracy ")
+
+                # Plotting Latitude
+                buf = "Accuracy for noise level %d (meters)" % (noise_level[noise])
+                plt.grid()
+                plt.title(buf)
+                plt.legend(loc="upper right")
+                plt.xlabel('Number of steps')
+                plt.ylabel('Accuracy [m]')
+                plt.show()

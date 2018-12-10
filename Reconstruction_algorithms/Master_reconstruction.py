@@ -23,8 +23,9 @@
 import numpy as np
 
 # User-defined library import
-from .Lasso_reconstruction import lasso_algo
-from .BFGS_reconstruction import bfgs_algo
+from .Lasso_reconstruction import cLasso
+from .BFGS_reconstruction import cBFGS
+from .Adaptive_sampling import cAdaptiveSampling
 from Helper_functions.framework_error import CFrameworkError
 from Helper_functions.framework_error import CErrorTypes
 
@@ -45,8 +46,28 @@ def identify_algorithms(params):
     return temp
 
 
+def lassoOps(params, adaptive, normalized_path, noise_dist):
+    adaptiveObj = cAdaptiveSampling(params, adaptive, noise_dist)
+    lassoObj = cLasso(params)
+    samples, final_sampling_ratio = adaptiveObj.adaptiveSample()
+    normalized_lat = lassoObj.reconstructor(normalized_path[0], samples)
+    normalized_lon = lassoObj.reconstructor(normalized_path[1], samples)
+    temp = np.array([normalized_lat, normalized_lon])
+    return temp, final_sampling_ratio
+
+
+def bfgsOps(params, adaptive, normalized_path, noise_dist):
+    adaptiveObj = cAdaptiveSampling(params, adaptive, noise_dist)
+    bfgsObj = cBFGS(params)
+    samples, final_sampling_ratio = adaptiveObj.adaptiveSample()
+    normalized_lat = bfgsObj.bfgs_run(normalized_path[0], samples)
+    normalized_lon = bfgsObj.bfgs_run(normalized_path[1], samples)
+    temp = np.array([normalized_lat, normalized_lon])
+    return temp, final_sampling_ratio
+
+
 # The main processing function
-def reconstructor(params, path, algorithm):
+def reconstructor(params, path, algorithm, noise_dist):
     logger.debug('Returns dictionary of different path reconstructions using different algorithms')
 
     mean = np.repeat(np.expand_dims(np.mean(path, axis=1), axis=1), params['acquisition_length'], axis=1)
@@ -55,15 +76,25 @@ def reconstructor(params, path, algorithm):
 
     if algorithm == "RCT_ALG_LASSO" and params['RCT_ALG_LASSO']["bReconstruct"]:
         try:
-            temp = np.array([lasso_algo(params, normalized_path[0]), lasso_algo(params, normalized_path[1])])
-            reconstructed_paths = np.sqrt(var) * temp + mean
+            temp, final_sampling_ratio = lassoOps(params['RCT_ALG_LASSO'], False, normalized_path, noise_dist)
+        except ValueError as valerr:
+            raise CFrameworkError(valerr.args[0]) from valerr
+
+    if algorithm == "RCT_ALG_ADAPTIVE_LASSO" and params['RCT_ALG_ADAPTIVE_LASSO']["bReconstruct"]:
+        try:
+            temp, final_sampling_ratio = lassoOps(params['RCT_ALG_ADAPTIVE_LASSO'], True, normalized_path, noise_dist)
         except ValueError as valerr:
             raise CFrameworkError(valerr.args[0]) from valerr
 
     elif algorithm == "RCT_ALG_BFGS" and params['RCT_ALG_BFGS']["bReconstruct"]:
         try:
-            temp = np.array([bfgs_algo(params, normalized_path[0]), bfgs_algo(params, normalized_path[1])])
-            reconstructed_paths = np.sqrt(var) * temp + mean
+            temp, final_sampling_ratio = lassoOps(params['RCT_ALG_BFGS'], False, normalized_path, noise_dist)
+        except ValueError as valerr:
+            raise CFrameworkError(valerr.args[0]) from valerr
+
+    elif algorithm == "RCT_ALG_ADAPTIVE_BFGS" and params['RCT_ALG_ADAPTIVE_BFGS']["bReconstruct"]:
+        try:
+            temp, final_sampling_ratio = lassoOps(params['RCT_ALG_ADAPTIVE_BFGS'], True, normalized_path, noise_dist)
         except ValueError as valerr:
             raise CFrameworkError(valerr.args[0]) from valerr
 
@@ -74,10 +105,11 @@ def reconstructor(params, path, algorithm):
             nn_name = algorithm + "Obj"
             temp = np.zeros((2, params['acquisition_length']))
             temp[0], temp[1] = params[nn_name].nn_inference(normalized_path)
-            reconstructed_paths = np.sqrt(var) * temp + mean
-        except (ValueError,KeyError) as valerr:
+            final_sampling_ratio = params[algorithm]["sampling_ratio"]
+        except (ValueError, KeyError) as valerr:
             logger.debug('NN value error with message <%s>', valerr.args[0])
             errdict = {"file": __file__, "message": valerr.args[0], "errorType": CErrorTypes.value}
             raise CFrameworkError(errdict) from valerr
 
-    return reconstructed_paths
+    reconstructed_paths = np.sqrt(var) * temp + mean
+    return reconstructed_paths, final_sampling_ratio

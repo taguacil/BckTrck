@@ -35,8 +35,8 @@ logger = logging.getLogger('BckTrk')
 # the main processing function
 def noise_generator(params, positions_wm, noise_level):
     data_obj = cAWGN(params, noise_level)
-    noise = data_obj.generate_noisy_signal_dist()  ## if noise needed later
-    data_obj.add_noise_signal(positions_wm, noise)
+    data_obj.generate_noisy_signal_dist()
+    data_obj.add_noise_signal(positions_wm)
     return data_obj.m_noisy_positions_wm, data_obj.m_noisy_positions_latlon, data_obj.noise_dist
 
 
@@ -51,7 +51,7 @@ class cAWGN:
         self.m_noise_level = noise_level
         self.noise = np.transpose(
             np.random.multivariate_normal([0, 0], [[1 ** 2, 0], [0, 1 ** 2]], self.m_acquisition_length))
-        self.noise_dist = np.zeros((1, self.m_acquisition_length))
+        self.noise_dist = np.zeros(self.m_acquisition_length)
 
     # noise generation based on the distance
     def generate_noisy_signal_dist(self):
@@ -60,15 +60,18 @@ class cAWGN:
         number_of_chunks = len(self.m_noise_std)
 
         try:
-            chunk_len = np.floor(self.m_acquisition_length / number_of_chunks)
+            chunk_len = int(self.m_acquisition_length / number_of_chunks)
             rest = self.m_acquisition_length - (chunk_len * number_of_chunks)
+            if chunk_len == 0:
+                raise ValueError
         except ValueError as valerr:
             logger.debug('Invalid chunk length <%s>', valerr.args[0])
             errdict = {"file": __file__, "message": valerr.args[0], "errorType": CErrorTypes.value}
             raise CFrameworkError(errdict) from valerr
 
         chunkIndex = np.random.choice(number_of_chunks, number_of_chunks, replace=False)
-        for chunk in range(chunkIndex):
+        iter = 0
+        for chunk in chunkIndex:
             blocklength = chunk_len
             if isFirstChunk:
                 blocklength = chunk_len + rest
@@ -76,7 +79,8 @@ class cAWGN:
 
             noise_dist_chunk = np.random.normal(loc=self.m_noise_level, scale=self.m_noise_std[chunk], size=blocklength)
             # Concatenate back the chunks
-            self.noise_dist = np.concatenate((self.noise_dist, noise_dist_chunk), axis=0)
+            self.noise_dist[iter*blocklength:(iter+1)*blocklength] = np.abs(noise_dist_chunk)
+            iter = iter + 1
         try:
             self.noise = self.noise * self.noise_dist
         except ValueError as valerr:
@@ -85,7 +89,7 @@ class cAWGN:
             raise CFrameworkError(errdict) from valerr
 
     # add noise to signal and convert back to latlon
-    def add_noise_signal(self, positions_wm, noise):
+    def add_noise_signal(self, positions_wm):
         logger.debug("Applying noise to signal and converting back to latlon")
-        self.m_noisy_positions_wm = positions_wm + noise
+        self.m_noisy_positions_wm = positions_wm + self.noise
         self.m_noisy_positions_latlon = cord.generate_latlon_array(self.m_noisy_positions_wm)

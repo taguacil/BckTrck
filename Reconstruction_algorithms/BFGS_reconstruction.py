@@ -31,47 +31,48 @@ import logging
 logger = logging.getLogger('BckTrk')
 
 
-def bfgs_algo(params, path):
-    algo_model = cBFGS(params, path)
-
-    return algo_model.scipy_func()
-
-
 class cBFGS:
     # Constructor
-    def __init__(self, struct, path):
+    def __init__(self, struct):
 
-        if struct['RCT_ALG_BFGS']["sampling_ratio"] > 1:
-            logger.error("Sampling_ratio larger than 1")
-            sys.exit("Sampling_ratio larger than 1")
+        self.bUse_gaussian_matrix = struct['bUse_gaussian_matrix']
+        self.m_lambda_param = struct['lambda']
+        self.m_u = struct['u']
+        self.m_reconstruct_from_dct = struct['bReconstruct_from_dct']
+        self.m_maxiter = struct['maxiter']
 
-        self.m_acquisition_length = struct['acquisition_length']
-        self.m_lambda_param = struct['RCT_ALG_BFGS']['lambda']
-        self.m_u = struct['RCT_ALG_BFGS']['u']
-        self.m_number_of_samples = int(
-            struct['RCT_ALG_BFGS']["sampling_ratio"] * struct["gps_freq_Hz"] * struct["acquisition_time_sec"])
-        self.m_reconstruct_from_dct = struct['RCT_ALG_BFGS']['bReconstruct_from_dct']
-        self.m_maxiter = struct['RCT_ALG_BFGS']['maxiter']
+        self.m_A = 0
+        self.m_y = 0
+        self.bUseSciGradient = True  # HardCoded
 
-        self.m_D = ft.dct(np.eye(self.m_acquisition_length), norm='ortho')
+    # argument definition
+    def bfgs_run(self, path, samples):
+        logger.debug("BFGS starting")
 
-        if struct['RCT_ALG_BFGS']['bUse_gaussian_matrix']:
-            self.m_gaussian_matrix = np.random.normal(0, 1, [self.m_number_of_samples,
-                                                             self.m_acquisition_length]) / self.m_acquisition_length
-            self.m_A = np.dot(self.m_gaussian_matrix, self.m_D)
-            self.m_y = np.dot(self.m_gaussian_matrix, path)
+        acquisition_length = len(path)
+
+        D = ft.dct(np.eye(acquisition_length), norm='ortho')
+        # Initial values
+        x0 = np.random.normal(0, 1, acquisition_length)
+
+        if self.bUse_gaussian_matrix:
+            self.m_A = np.dot(samples, D)
+            self.m_y = np.dot(samples, path)
         else:
-            samples = np.sort(np.random.choice(self.m_acquisition_length, self.m_number_of_samples, replace=False))
-            self.m_A = self.m_D[samples]
+            self.m_A = D[samples]
             self.m_y = path[samples]
 
-        # Initial values
-        self.x0 = np.random.normal(0, 1, self.m_acquisition_length)
+        if self.bUseSciGradient:
+            reconst_path = self.scipy_func(x0, D)
+        else:
+            reconst_path = self.reconstructor(x0, D)
+
+        return reconst_path
 
     # scipi
-    def scipy_func(self):
-        xopt = opt.fmin_bfgs(self.cost_fun, self.x0, maxiter=self.m_maxiter, norm=1)
-        return np.dot(self.m_D, xopt)
+    def scipy_func(self, x0, D):
+        xopt = opt.fmin_bfgs(self.cost_fun, x0, maxiter=self.m_maxiter, norm=1)
+        return np.dot(D, xopt)
 
     # Objective function
     def cost_fun(self, x):
@@ -112,7 +113,7 @@ class cBFGS:
         return grad
 
     # Reconstruction function
-    def reconstructor(self):
+    def reconstructor(self, x0, D):
         if self.m_reconstruct_from_dct:
             logger.debug("BFGS reconstruction with DCT transform")
 
@@ -123,7 +124,6 @@ class cBFGS:
         beta = 0.4
         k = 0
         Armijo_search = 20
-        x0 = self.x0
         n = x0.shape[0]
         B = np.eye(n)
         g = self.gradient(x0)
@@ -161,7 +161,7 @@ class cBFGS:
             k = k + 1
 
         # output
-        reconstructed_path = np.dot(self.D, x0)
+        reconstructed_path = np.dot(D, x0)
         # check cost value
         print(self.cost_fun(x0))
 

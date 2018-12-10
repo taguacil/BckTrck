@@ -23,52 +23,36 @@
 import numpy as np
 import scipy.fftpack as ft
 from sklearn.linear_model import Lasso
-from Helper_functions.framework_error import CErrorTypes
 
-## Logging
+# Logging
 import logging
 
 logger = logging.getLogger('BckTrk')
 
 
-# The main processing function
-def lasso_algo(params, path):
-    algo_model = cLasso(params)
-    return algo_model.reconstructor(path)
-
-
 class cLasso:
     # Constructor
     def __init__(self, struct):
-
-        if struct['RCT_ALG_LASSO']["sampling_ratio"] > 1:
-            logger.debug("Sampling_ratio larger than 1")
-            errdict = {"file": __file__, "message": "Sampling_ratio larger than 1", "errorType": CErrorTypes.value}
-            raise ValueError(errdict)
-
-        self.m_acquisition_length = struct['acquisition_length']
-        self.m_model = Lasso(alpha=struct['RCT_ALG_LASSO']['lasso_learning_rate'], tol=0.0001, fit_intercept=False,
-                             normalize=True)
-
-        self.number_of_samples = int(struct['RCT_ALG_LASSO']["sampling_ratio"] * struct["acquisition_length"])
-        self.reconstruct_from_dct = struct['RCT_ALG_LASSO']['bReconstruct_from_dct']
-
-        if self.number_of_samples <= 0:
-            logger.debug("Number of samples cannot be 0 or negative")
-            errdict = {"file": __file__, "message" : "Invalid number of samples", "errorType": CErrorTypes.value }
-            raise ValueError(errdict)
+        self.reconstruct_from_dct = struct['bReconstruct_from_dct']
+        self.m_model = Lasso(alpha=struct['lasso_learning_rate'], tol=0.0001, fit_intercept=False, normalize=True)
+        self.bUse_gaussian_matrix = struct['bUse_gaussian_matrix']
 
     # Reconstruction function
-    def reconstructor(self, path):
+    def reconstructor(self, path, samples):
         if self.reconstruct_from_dct:
             logger.debug("LASSO reconstruction with DCT transform")
 
-            k = self.number_of_samples
-            samples = np.sort(np.random.choice(self.m_acquisition_length, k, replace=False))
-            D = ft.dct(np.eye(self.m_acquisition_length), norm='ortho')
-            A = D[samples]
+            acquisition_length = len(path)
+            D = ft.dct(np.eye(acquisition_length), norm='ortho')
 
-            self.m_model.fit(A, path[samples])
+            if self.bUse_gaussian_matrix:
+                A = np.dot(samples, D)  # Samples here is implicitly a randomly generated gaussian matrix
+                y = np.dot(samples, path)
+            else:
+                A = D[samples]
+                y = path[samples]
+
+            self.m_model.fit(A, y)
 
             reconstructed_path = ft.idct(self.m_model.coef_, norm='ortho')
             reconstructed_path = reconstructed_path + np.mean(path[samples] - reconstructed_path[samples])
