@@ -32,7 +32,7 @@ import logging
 import platform
 
 # User-defined library import
-from Helper_functions.proc_results import process_data
+from Helper_functions.proc_results import process_data, get_pickle_file
 from Helper_functions.transforms import transforms
 from Navigation.Random_walker import random_2d_path_generator
 import Navigation.Coordinates as cord
@@ -185,57 +185,76 @@ class cFramework:
                 (2, acquisition_length, numberOfRealizations, noise_level_len))
             bNN_initialized[algorithm] = False
 
-        self.logger.info('Starting simulation with <%d> realizations and <%d> path length', numberOfRealizations,
-                         acquisition_length)
+        if local_struct['bTrainNetwork'] and local_struct['Train_NN']['bUseGeneratedData']:
+            self.logger.info('Using generated data')
+            try:
+                dataFileName = 'TrainingSet'
+                filename = self.paramPath + 'NeuralNetworks' + direc_ident + dataFileName + '.txt'
+                try:
+                    loadedStruct = get_pickle_file(filename)
+                    # Assign the paths to local variables
+                    # TODO some other checks on some parameters can be done
+                    paths_latlon_org = loadedStruct['RESULTS']['paths_latlon_org']
+                    paths_latlon_noisy = loadedStruct['RESULTS']['paths_latlon_noisy']
+                except FileNotFoundError as filerr:
+                    self.logger.debug("Training set not found")
+                    errdict = {"file": __file__, "message": filerr.args[0],
+                               "errorType": CErrorTypes.range}
+                    raise CFrameworkError(errdict)
+            except CFrameworkError as frameErr:
+                self.errorAnalyzer(frameErr, "load training set")
 
-        for lvl in range(noise_level_len):
-            for realization in range(numberOfRealizations):
-                # Generate random data
-                self.logger.log(15, 'Generating random data for realization <%d>', realization)
-                if not use_csv_data:
-                    (paths_wm_org[:, :, realization, lvl], paths_latlon_org[:, :, realization, lvl]) = \
-                        random_2d_path_generator(local_struct)
-                    # Generate noise for each realization
-                    (paths_wm_noisy[:, :, realization, lvl], paths_latlon_noisy[:, :, realization, lvl],
-                     noise_vals[:, :, realization, lvl]) = \
-                        noise_generator(local_struct, paths_wm_org[:, :, realization, lvl],
-                                        local_struct['noise_level_meter'][lvl])
-                else:
-                    paths_wm_org[:, :, realization, lvl] = cord.generate_WM_array(
-                        paths_latlon_org[:, :, realization, lvl])
-                    paths_latlon_noisy[:, :, realization, lvl] = paths_latlon_org[:, :, realization, lvl]
-                    paths_wm_noisy[:, :, realization, lvl] = paths_wm_org[:, :, realization, lvl]
+        else:
+            self.logger.info('Starting simulation with <%d> realizations and <%d> path length', numberOfRealizations,
+                             acquisition_length)
+            for lvl in range(noise_level_len):
+                for realization in range(numberOfRealizations):
+                    # Generate random data
+                    self.logger.log(15, 'Generating random data for realization <%d>', realization)
+                    if not use_csv_data:
+                        (paths_wm_org[:, :, realization, lvl], paths_latlon_org[:, :, realization, lvl]) = \
+                            random_2d_path_generator(local_struct)
+                        # Generate noise for each realization
+                        (paths_wm_noisy[:, :, realization, lvl], paths_latlon_noisy[:, :, realization, lvl],
+                         noise_vals[:, :, realization, lvl]) = \
+                            noise_generator(local_struct, paths_wm_org[:, :, realization, lvl],
+                                            local_struct['noise_level_meter'][lvl])
+                    else:
+                        paths_wm_org[:, :, realization, lvl] = cord.generate_WM_array(
+                            paths_latlon_org[:, :, realization, lvl])
+                        paths_latlon_noisy[:, :, realization, lvl] = paths_latlon_org[:, :, realization, lvl]
+                        paths_wm_noisy[:, :, realization, lvl] = paths_wm_org[:, :, realization, lvl]
 
-                # Apply transforms
-                if not local_struct['bTrainNetwork']:
-                    transformed_paths[:, :, realization, lvl] = \
-                        transforms(local_struct, paths_latlon_noisy[:, :, realization, lvl])
+                    # Apply transforms
+                    if not local_struct['bTrainNetwork']:
+                        transformed_paths[:, :, realization, lvl] = \
+                            transforms(local_struct, paths_latlon_noisy[:, :, realization, lvl])
 
-                    # Apply reconstruction algorithms
-                    if local_struct['bReconstruct']:
-                        for algorithm in reconstruction_algorithms:
-                            if "NN" in algorithm and not bNN_initialized[algorithm]:
-                                from NeuralNetworks.NN import CNeuralNetwork
-                                nn_name = algorithm + "Obj"
+                        # Apply reconstruction algorithms
+                        if local_struct['bReconstruct']:
+                            for algorithm in reconstruction_algorithms:
+                                if "NN" in algorithm and not bNN_initialized[algorithm]:
+                                    from NeuralNetworks.NN import CNeuralNetwork
+                                    nn_name = algorithm + "Obj"
+                                    try:
+                                        local_struct[nn_name] = CNeuralNetwork(local_struct, algorithm)
+                                        bNN_initialized[algorithm] = True
+                                    except CFrameworkError as frameErr:
+                                        self.errorAnalyzer(frameErr, str((algorithm, lvl)))
                                 try:
-                                    local_struct[nn_name] = CNeuralNetwork(local_struct, algorithm)
-                                    bNN_initialized[algorithm] = True
+                                    temp = reconstructor(local_struct, paths_latlon_noisy[:, :, realization, lvl],
+                                                         algorithm)
+                                    reconstructed_latlon_paths[algorithm][:, :, realization, lvl] = temp
+                                    try:
+                                        reconstructed_WM_paths[algorithm][:, :, realization, lvl] = \
+                                            cord.generate_WM_array(temp)
+                                    except ValueError as valerr:
+                                        self.logger.debug("Lat/Lon out of range in degrees")
+                                        errdict = {"file": __file__, "message": valerr.args[0],
+                                                   "errorType": CErrorTypes.range}
+                                        raise CFrameworkError(errdict)
                                 except CFrameworkError as frameErr:
                                     self.errorAnalyzer(frameErr, str((algorithm, lvl)))
-                            try:
-                                temp = reconstructor(local_struct, paths_latlon_noisy[:, :, realization, lvl],
-                                                     algorithm)
-                                reconstructed_latlon_paths[algorithm][:, :, realization, lvl] = temp
-                                try:
-                                    reconstructed_WM_paths[algorithm][:, :, realization, lvl] = \
-                                        cord.generate_WM_array(temp)
-                                except ValueError as valerr:
-                                    self.logger.debug("Lat/Lon out of range in degrees")
-                                    errdict = {"file": __file__, "message": valerr.args[0],
-                                               "errorType": CErrorTypes.range}
-                                    raise CFrameworkError(errdict)
-                            except CFrameworkError as frameErr:
-                                self.errorAnalyzer(frameErr, str((algorithm, lvl)))
 
         if local_struct['bTrainNetwork']:
             from NeuralNetworks.NN import CNeuralNetwork

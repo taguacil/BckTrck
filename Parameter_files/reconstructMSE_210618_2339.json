@@ -1,5 +1,5 @@
 {
-    "realization"               : 100,
+    "realization"               : 10,
     "acquisition_time_sec"      : 200,
     "random_seed"               : 8941,
     "bUse_random_seed"          : true,
