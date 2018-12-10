@@ -53,7 +53,9 @@ def process_data(params):
     if not params["bTrainNetwork"]:
         if params["CSV_DATA"]["bPlot_real_path"]:
             data_obj.plot_real_path_recon()
-            
+            data_obj.plot_path_org_2d()
+            data_obj.plot_path_noisy_2d()
+
         MSE_noise_WM, MSE_noise_latlon, MSE_r_wm, max_error, MSE_r_latlon, reconstructed_db_latlon = \
             data_obj.calculate_MSE()
         try:
@@ -64,9 +66,9 @@ def process_data(params):
             data_obj.analyze_DCT()
             data_obj.power_spectral_density()
         except KeyError as key_error:
-                message = "Could not find key %s" %(key_error.args[0])
-                errdict = {"file": __file__, "message": message, "errorType": CErrorTypes.value}
-                raise CFrameworkError(errdict) from key_error
+            message = "Could not find key %s" % (key_error.args[0])
+            errdict = {"file": __file__, "message": message, "errorType": CErrorTypes.value}
+            raise CFrameworkError(errdict) from key_error
 
         params["RESULTS"]["reconstructed_db_latlon"] = reconstructed_db_latlon
         params["RESULTS"]["MSE_latlon"] = MSE_r_latlon
@@ -84,20 +86,27 @@ def process_data(params):
     return data_obj.set_pickle_file(params)
 
 
+# Read from txt file pickle format into dictionary
+def get_pickle_file(filename):
+    with open(filename, 'rb') as txt_file_read:
+        return pickle.load(txt_file_read)
+
+
 class cProcessFile:
     # Constructor
     def __init__(self, struct):
         self.struct = struct
         self.m_plotStruct = self.struct['PLOT']
 
-        if struct['bUse_filename']:
-            self.m_filename = struct['workingDir'] + direc_ident + 'Results' + direc_ident + 'BckTrk_Res_' + struct[
-                'currentTime'].strftime("%Y%m%d_%H-%M-%S") + '_' + struct['filename'] + '.txt'
+        if struct['bGenerateData']:
+            filepath = struct['workingDir'] + direc_ident + 'NeuralNetworks' + direc_ident
         else:
-            self.m_filename = struct['workingDir'] + direc_ident + 'Results' + direc_ident + 'BckTrk_Res_' + struct[
-                'currentTime'].strftime("%Y%m%d_%H-%M-%S") + '.txt'
+            filepath = struct['workingDir'] + direc_ident + 'Results' + direc_ident + 'BckTrk_Res_' + struct[
+                'currentTime'].strftime("%Y%m%d_%H-%M-%S") + '_'
 
-        self.m_acquisition_length = struct['gps_freq_Hz'] * struct['acquisition_time_sec']
+        self.m_filename = filepath + struct['filename'] + '.txt'
+
+        self.m_acquisition_length = struct['acquisition_length']
         self.m_number_realization = struct['realization']
 
         self.m_path_length = struct['CSV_DATA']['path_length']
@@ -123,11 +132,6 @@ class cProcessFile:
                 errdict = {"file": __file__,
                            "message": "Could not dump in pickle file", "errorType": CErrorTypes.ioerror}
                 raise CFrameworkError(errdict) from io_error
-
-    # Read from txt file pickle format into dictionary
-    def get_pickle_file(self):
-        with open(self.m_filename, 'rb') as txt_file_read:
-            return pickle.load(txt_file_read)
 
     def calculate_MSE(self):
         l2_noise_wm = np.sqrt(np.mean((self.m_paths_wm_org[0, :, :, :] - self.m_paths_wm_noisy[0, :, :, :]) ** 2 + (
@@ -159,7 +163,7 @@ class cProcessFile:
 
                 MSE_r_latlon[key] = np.mean(l2_r_latlon, axis=0)
                 # Ratio of f/f-f'
-                reconstructed_db_latlon[key] = 20 * np.log10(np.mean(l1_org_latlon/l1_r_latlon, axis=0))
+                reconstructed_db_latlon[key] = 20 * np.log10(np.mean(l1_org_latlon / l1_r_latlon, axis=0))
 
                 r2_path = self.reconstructed_wm_paths[key]
 
@@ -174,21 +178,22 @@ class cProcessFile:
     # Plot real path and reconstruction
     def plot_real_path_recon(self):
         logger.debug('Plotting real path and stitched reconstruction')
-        latlon_real = self.m_paths_latlon_org[:,:,:,0].transpose(0,2,1).reshape((2, self.m_path_length * self.m_number_realization))
+        latlon_real = self.m_paths_latlon_org[:, :, :, 0].transpose(0, 2, 1).reshape(
+            (2, self.m_path_length * self.m_number_realization))
 
         plt.plot(latlon_real[1], latlon_real[0], '-*', label="Original real path")
         if self.m_bReconstruct:
             logger.debug('Plotting MSE of reconstructed paths latlon')
 
             for key in self.reconstructed_latlon_paths.keys():
-                r_path = self.reconstructed_latlon_paths[key][:,:,:,0].transpose(0,2,1).reshape(
+                r_path = self.reconstructed_latlon_paths[key][:, :, :, 0].transpose(0, 2, 1).reshape(
                     (2, self.m_path_length * self.m_number_realization))
-                
+
                 l2_r_latlon = np.sqrt(np.mean((latlon_real[0] - r_path[0]) ** 2 + (latlon_real[1] - r_path[1]) ** 2))
 
                 plt.plot(r_path[1], r_path[0], '-*',
-                                     label="Path for %s with %.1f %% sampling ratio" % (
-                                         key, self.struct[key]['sampling_ratio'] * 100))
+                         label="Path for %s with %.1f %% sampling ratio" % (
+                             key, self.struct[key]['sampling_ratio'] * 100))
                 logger.info('L2 for %s is %.6f' % (key, l2_r_latlon))
 
         plt.grid()
@@ -410,14 +415,14 @@ class cProcessFile:
                         plt.plot(x_axis, paths_latlon_org[0, :, k], '-*',
                                  label="Original latitude for realization %.1f" % (k))
 
-                    if self.m_bReconstruct:
-                        logger.debug('Plotting MSE of reconstructed paths')
+                        if self.m_bReconstruct:
+                            logger.debug('Plotting MSE of reconstructed paths')
 
-                        for key in self.reconstructed_latlon_paths.keys():
-                            r_path = self.reconstructed_latlon_paths[key]
-                            plt.plot(x_axis, r_path[0, :, k, noise], '-*',
-                                     label="Latitude for %s with %.1f %% sampling ratio" % (
-                                         key, self.struct[key]['sampling_ratio'] * 100))
+                            for key in self.reconstructed_latlon_paths.keys():
+                                r_path = self.reconstructed_latlon_paths[key]
+                                plt.plot(x_axis, r_path[0, :, k, noise], '-*',
+                                         label="Latitude for %s with %.1f %% sr for rl %.1f" % (
+                                             key, self.struct[key]['sampling_ratio'] * 100, k))
 
                 else:
                     logger.warning('Plotting only first realization for visibility')
@@ -429,8 +434,8 @@ class cProcessFile:
                         for key in self.reconstructed_latlon_paths.keys():
                             r_path = self.reconstructed_latlon_paths[key]
                             plt.plot(x_axis, r_path[0, :, 0, noise], '-*',
-                                     label="Latitude for %s with %.1f %% sampling ratio" % (
-                                         key, self.struct[key]['sampling_ratio'] * 100))
+                                     label="Latitude for %s with %.1f %% sr for rl %.1f" % (
+                                         key, self.struct[key]['sampling_ratio'] * 100, k))
 
                 # Plotting Latitude
                 buf = "Noisy latitude for noise level %d (meters)" % (noise_level[noise])
@@ -555,7 +560,8 @@ class cProcessFile:
                 logger.debug('Plotting MSE of reconstructed paths latlon')
                 for key in self.reconstructed_latlon_paths.keys():
                     plt.plot(x_axis, MSE_r_latlon[key], '-*',
-                             label="MSE_latlon for %s with %.1f %% SR" % (key, self.struct[key]['sampling_ratio'] * 100))
+                             label="MSE_latlon for %s with %.1f %% SR" % (
+                             key, self.struct[key]['sampling_ratio'] * 100))
 
             # Plotting MSE
             plt.plot(x_axis, MSE_noise_latlon, '-*', label="MSE_latlon")
@@ -604,7 +610,8 @@ class cProcessFile:
                 logger.debug('Plotting SNR of reconstructed paths latlon')
                 for key in self.reconstructed_latlon_paths.keys():
                     plt.plot(x_axis, reconstructed_db_latlon[key], '-*',
-                             label="SNR_latlon for %s with %.1f %% SR" % (key, self.struct[key]['sampling_ratio'] * 100))
+                             label="SNR_latlon for %s with %.1f %% SR" % (
+                             key, self.struct[key]['sampling_ratio'] * 100))
 
             # Plotting SNR
             plt.xscale('log')
