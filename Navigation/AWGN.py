@@ -59,28 +59,28 @@ class cAWGN:
         isFirstChunk = True
         number_of_chunks = len(self.m_noise_std)
 
+        chunkIndex = np.arange(number_of_chunks)
+        np.random.shuffle(self.m_noise_std)
         try:
-            chunk_len = int(self.m_acquisition_length / number_of_chunks)
-            rest = self.m_acquisition_length - (chunk_len * number_of_chunks)
-            if chunk_len == 0:
-                raise ValueError
+            chunk_lens = self.generate_rand_chunk(number_of_chunks)
         except ValueError as valerr:
-            logger.debug('Invalid chunk length <%s>', valerr.args[0])
+            logger.debug('All chunk lengths are zero')
             errdict = {"file": __file__, "message": valerr.args[0], "errorType": CErrorTypes.value}
             raise CFrameworkError(errdict) from valerr
 
-        chunkIndex = np.random.choice(number_of_chunks, number_of_chunks, replace=False)
-        iter = 0
         for chunk in chunkIndex:
-            blocklength = chunk_len
+            chunk_len = int(chunk_lens[chunk])
             if isFirstChunk:
-                blocklength = chunk_len + rest
+                debut = 0
+                fin = chunk_len
                 isFirstChunk = False
+            else:
+                debut = debut + int(chunk_lens[chunk - 1])
+                fin = chunk_len + debut
 
-            noise_dist_chunk = np.random.normal(loc=self.m_noise_level, scale=self.m_noise_std[chunk], size=blocklength)
+            noise_dist_chunk = np.random.normal(loc=self.m_noise_level, scale=self.m_noise_std[chunk], size=chunk_len)
             # Concatenate back the chunks
-            self.noise_dist[iter*blocklength:(iter+1)*blocklength] = np.abs(noise_dist_chunk)
-            iter = iter + 1
+            self.noise_dist[debut:fin] = np.abs(noise_dist_chunk)
         try:
             self.noise = self.noise * self.noise_dist
         except ValueError as valerr:
@@ -93,3 +93,20 @@ class cAWGN:
         logger.debug("Applying noise to signal and converting back to latlon")
         self.m_noisy_positions_wm = positions_wm + self.noise
         self.m_noisy_positions_latlon = cord.generate_latlon_array(self.m_noisy_positions_wm)
+
+    # generate random chunks lengths
+    def generate_rand_chunk(self, number_of_chunks):
+        logger.debug("Generating random chunk lengths for different std")
+        chunk_lens = np.zeros(number_of_chunks)
+        left_length = int(self.m_acquisition_length)
+        for item in range(number_of_chunks):
+            if not left_length == 0:
+                if item == number_of_chunks - 1:
+                    chunk_lens[item] = left_length
+                else:
+                    chunk_lens[item] = np.random.randint(0, left_length)
+                    left_length = left_length - chunk_lens[item]
+        if not np.any(chunk_lens):
+            raise ValueError
+        else:
+            return chunk_lens
