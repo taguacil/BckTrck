@@ -16,6 +16,7 @@ class RouteViewController: UIViewController, MKMapViewDelegate, LocationTableVie
     @IBOutlet weak var mapView: MKMapView!
     var locationVector : [CLLocation]?
     var est_coord : [CLLocationCoordinate2D]?
+    var AvgMSE : Int?
     var isEstimated = false
     
     override func viewDidLoad() {
@@ -52,6 +53,11 @@ class RouteViewController: UIViewController, MKMapViewDelegate, LocationTableVie
                 
             }
         }
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        showMSE()
     }
     
     override func didReceiveMemoryWarning() {
@@ -119,5 +125,11 @@ class RouteViewController: UIViewController, MKMapViewDelegate, LocationTableVie
     }
     
     //MARK: Private Properties
-    
+    private func showMSE()->(){
+        let alertMSE = UIAlertController(title: "Average MSE across entire path", message: nil, preferredStyle: UIAlertController.Style.alert)
+        alertMSE.addAction(UIAlertAction(title: "Continue", style: UIAlertAction.Style.default, handler:nil))
+        alertMSE.message = "Average MSE is \(AvgMSE!) meters"
+        print("Average MSE is \(AvgMSE!) meters")
+        self.present(alertMSE, animated: true, completion: nil)
+    }
 }

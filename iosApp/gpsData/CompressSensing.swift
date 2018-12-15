@@ -262,31 +262,28 @@ class CompressSensing : NSObject, NSCoding {
     }
     
     /* MSE */
-    private func MSE() -> Float {
-        let MSE = rmsq((lat_est-latArray_org)+(lon_est-lonArray_org))
+    private func MSE(lat_est:Array<Float>, lon_est:Array<Float>, lat_org: Array<Float>, lon_org: Array<Float>) -> Float {
+        let MSE = sqrt(measq((lat_est-lat_org))+measq((lon_est-lon_org)))
         print("Total latlon MSE \(MSE)")
         return MSE
     }
     //MARK: Complete computation for 1 block length
-    private func computeBlock() -> ([CLLocationCoordinate2D], Float) {
+    private func computeBlock() -> () {
         let downSampledIndices = randomSampling()
         let dctMat = eyeDCT(downSampledIndices: downSampledIndices)
         lassoReg(dctMat: dctMat)
         IDCT_weights(downSampledIndices: downSampledIndices)
-        let MSEblock = MSE()
-        var est_coord = [CLLocationCoordinate2D]()
-        for item in 0..<lat_est.count{
-            est_coord.append(CLLocationCoordinate2DMake(Double(lat_est[item]), Double(lon_est[item])))
-        }
-        return (est_coord, MSEblock)
     }
     
     // Entire computation for all input vector
-    func compute() -> ([CLLocationCoordinate2D],Float) {
+    func compute() -> ([CLLocationCoordinate2D],Int) {
         let totalLength = locationVector!.count
         let numberOfBlocks = Int(floor(Double(totalLength / blockLength!)))
+        var latTotal_est = Array<Float>()
+        var lonTotal_est = Array<Float>()
+        var latTotal_org = Array<Float>()
+        var lonTotal_org = Array<Float>()
         var est_coord = [CLLocationCoordinate2D]()
-        var AvgMSE : Float = 0
         
         for i in 0..<numberOfBlocks
         {
@@ -301,14 +298,21 @@ class CompressSensing : NSObject, NSCoding {
                 latArray_org.append(Float(item.coordinate.latitude))
                 lonArray_org.append(Float(item.coordinate.longitude))
             }
-            let (est_coord_block, MSEblock) = computeBlock()
-            AvgMSE = AvgMSE + MSEblock
-            for item in est_coord_block
+            computeBlock()
+            latTotal_est.append(contentsOf: lat_est)
+            lonTotal_est.append(contentsOf: lon_est)
+            latTotal_org.append(contentsOf: latArray_org)
+            lonTotal_org.append(contentsOf: lonArray_org)
+            
+            for k in 0..<blockLength!
             {
-                est_coord.append(item)
+                est_coord.append(CLLocationCoordinate2DMake(Double(lat_est[k]), Double(lon_est[k])))
             }
         }
-        return (est_coord, AvgMSE)
+        
+        let mse = MSE(lat_est: latTotal_est, lon_est: lonTotal_est, lat_org: latTotal_org, lon_org: lonTotal_org)
+        let MSE_wm = Int(mse*1e5)
+        return (est_coord, MSE_wm)
     }
     //MARK: Function to set parameters
     func setParam(maxIter:Int, pathLength:Int, samplingRatio:Double, learningRate:Float){

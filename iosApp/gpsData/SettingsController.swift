@@ -90,13 +90,13 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
     }
     
     // MARK: - Navigation
-    @IBAction func cancelButton(_ sender: Any) {
+    /*@IBAction func cancelButton(_ sender: Any) {
         let tmpController :UIViewController! = self.presentingViewController
         
         self.dismiss(animated: true, completion: {()->Void in
             tmpController.dismiss(animated: true, completion: nil)
         })
-    }
+    }*/
     
     @IBAction func setDefault(_ sender: UIButton) {
         iterTextField.text="512"
@@ -118,9 +118,7 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
         
         let alert = UIAlertController(title: "Invalid parameters", message: "One or more parameters are not set correctly", preferredStyle: UIAlertController.Style.alert)
         alert.addAction(UIAlertAction(title: "Back", style: UIAlertAction.Style.default, handler: nil))
-        let alertMSE = UIAlertController(title: "Average MSE across entire path", message: nil, preferredStyle: UIAlertController.Style.alert)
-        alertMSE.addAction(UIAlertAction(title: "Continue", style: UIAlertAction.Style.default, handler:nil))
-
+        
         switch(segue.identifier ?? "") {
         case "showReconstruct":
             if updateParams()
@@ -129,17 +127,14 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
                     fatalError("Unexpected destination: \(segue.destination)")
                 }
                 
-                
+                routeViewController.locationVector = locationVector
                 if let CS = CompressSensing(inputLocationVector: locationVector!)
                 {
                     os_log("Computation starts...", log: OSLog.default, type: .debug)
                     CS.setParam(maxIter: self.iterations!, pathLength: self.pathLength!, samplingRatio: self.samplingRatio!, learningRate: self.learningRate! )
                     let (est_coord, AvgMSE) = CS.compute()
-                    alertMSE.message = "Average MSE is \(AvgMSE)"
-                    print("Average MSE is \(AvgMSE)")
-                    self.present(alertMSE, animated: true, completion: nil)
                     routeViewController.est_coord = est_coord
-                    self.present(routeViewController, animated: true, completion: nil)
+                    routeViewController.AvgMSE = AvgMSE
                 }
             }
             else
