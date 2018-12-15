@@ -1,5 +1,8 @@
-__pycache__/
-Results/
-Logs/
+Python_Env/__pycache__/
+Python_Env/**/__pycache__/
+Python_Env/Results/
+Python_Env/Logs/
 .idea/
 .DS_Store
+Python_Env/.idea
+Python_Env/.DS_Store
