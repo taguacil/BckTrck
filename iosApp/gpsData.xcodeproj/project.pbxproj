@@ -371,7 +371,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-gpsData/Pods-gpsData-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-gpsData/Pods-gpsData-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/MachineLearningKit/MachineLearningKit.framework",
 				"${BUILT_PRODUCTS_DIR}/Upsurge/Upsurge.framework",
 			);
@@ -382,7 +382,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-gpsData/Pods-gpsData-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-gpsData/Pods-gpsData-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		D8380A9525CC4953E6E5909D /* [CP] Check Pods Manifest.lock */ = {

@@ -158,6 +158,8 @@ class CompressSensing : NSObject, NSCoding {
         meanLon = mean(lonValArray)
         stdLat  = std(latValArray)
         stdLon  = std(lonValArray)
+        if stdLat == 0 { stdLat = 1}
+        if stdLon == 0 { stdLon = 1}
         latValArray = Array((latValArray-meanLat)/(stdLat))
         lonValArray = Array((lonValArray-meanLon)/(stdLon))
         return downSampledIndices
