@@ -68,6 +68,7 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
     
     @IBOutlet weak var progressBar:UIProgressView!
     @IBOutlet weak var progressLabel: UILabel!
+    @IBOutlet weak var mseLabel: UILabel!
     
     
     override func viewDidLoad() {
@@ -80,9 +81,8 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
         
         // Enable the Apply button only if all fields have valid content.
         updateSaveButtonState()
-        progressBar.setProgress(0.0, animated: true)
-        self.progressLabel.text = String(format: "0%%")
         //progressBar.frame = CGRect(x: 10, y: 70, width: 250, height: 0)
+        init_variable_params()
         //alert.view.addSubview(progressBar)
         alertParams.addAction(UIAlertAction(title: "Continue", style: UIAlertAction.Style.default, handler:nil))
     }
@@ -118,8 +118,10 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
     
     @IBAction func applyButton(_ sender: UIButton) {
         //DispatchQueue.main.async {
-        progressBar.setProgress(0.0, animated: true)
-        self.progressLabel.text = String(format: "0%%")
+        init_variable_params()
+        self.progressLabel.textColor = UIColor.red
+        self.mseLabel.textColor = UIColor.red
+        
         if self.updateParams()
         {
             //self.present(alert, animated: true, completion: nil)
@@ -132,11 +134,10 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
                     DispatchQueue.main.async(flags: .barrier) {
                         repeat {
                             print (CS.progress)
-                            self.progressBar.setProgress(CS.progress, animated: true)
-                            let prog_per = CS.progress*100.0
-                            self.progressLabel.text = String(format: "%.1f%%", prog_per)
+                            self.updateParams(CS:CS)
                             usleep(2500)
                         } while CS.progress < 1.0
+                        self.updateParams(CS:CS)
                     }
                     CS.setParam(maxIter: self.iterations!, pathLength: self.pathLength!, samplingRatio: self.samplingRatio!, learningRate: self.learningRate! )
                     let (est_coord, AvgMSE) = CS.compute()
@@ -199,6 +200,23 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
         // Disable the Save button if the text field is empty.
         let text = iterTextField.text ?? ""
         applyButton.isEnabled = !text.isEmpty
+    }
+    
+    private func updateParams(CS: CompressSensing){
+        self.progressBar.setProgress(CS.progress, animated: true)
+        let prog_per = CS.progress*100.0
+        self.progressLabel.text = String(format: "%.1f%%", prog_per)
+        if (self.AvgMSE != nil)
+        {
+            self.mseLabel.text = String(format: "%d meters", self.AvgMSE!)
+        }
+    }
+    private func init_variable_params(){
+        progressBar.setProgress(0.0, animated: true)
+        self.progressLabel.text = String(format: "0%%")
+        self.mseLabel.text = String(format: "0 meters")
+        self.progressLabel.textColor = UIColor.black
+        self.mseLabel.textColor = UIColor.black
     }
     
     private func updateParams()->Bool {

@@ -57,7 +57,7 @@ class RouteViewController: UIViewController, MKMapViewDelegate, LocationTableVie
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        showMSE()
+        //showMSE()
     }
     
     override func didReceiveMemoryWarning() {
