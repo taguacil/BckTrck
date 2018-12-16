@@ -47,6 +47,8 @@ class CompressSensing : NSObject, NSCoding {
     var l1_penalty : Float? // learning rate
     var blockLength : Int?
     
+    var progress = Float(0)
+    
     var weights_lat: Matrix<Float>!
     var weights_lon: Matrix<Float>!
     
@@ -276,7 +278,7 @@ class CompressSensing : NSObject, NSCoding {
     }
     
     // Entire computation for all input vector
-    func compute() -> ([CLLocationCoordinate2D],Int) {
+    func compute() -> ([CLLocationCoordinate2D],Int) {        
         let totalLength = locationVector!.count
         let numberOfBlocks = Int(floor(Double(totalLength / blockLength!)))
         var latTotal_est = Array<Float>()
@@ -308,6 +310,7 @@ class CompressSensing : NSObject, NSCoding {
             {
                 est_coord.append(CLLocationCoordinate2DMake(Double(lat_est[k]), Double(lon_est[k])))
             }
+            progress += 1.0/Float(numberOfBlocks)
         }
         
         let mse = MSE(lat_est: latTotal_est, lon_est: lonTotal_est, lat_org: latTotal_org, lon_org: lonTotal_org)

@@ -318,7 +318,7 @@
                                 <rect key="frame" x="319" y="108" width="40" height="30"/>
                                 <state key="normal" title="Apply"/>
                                 <connections>
-                                    <segue destination="0VA-zY-95g" kind="show" identifier="showReconstruct" id="NBv-N4-wbn"/>
+                                    <action selector="applyButton:" destination="yCj-wd-rEm" eventType="touchDown" id="xzg-qQ-h3P"/>
                                 </connections>
                             </button>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="512; &lt;2000" textAlignment="natural" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="QDI-o0-mcw">
@@ -376,6 +376,24 @@
                                     <action selector="setDefault:" destination="yCj-wd-rEm" eventType="touchDown" id="HFa-tc-fRf"/>
                                 </connections>
                             </button>
+                            <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="rG0-uM-oOv">
+                                <rect key="frame" x="69" y="576" width="237" height="3"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            </progressView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Progress:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="sMb-EB-Jb1">
+                                <rect key="frame" x="131" y="537" width="73" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="0%" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vSa-Bf-FsT">
+                                <rect key="frame" x="212" y="537" width="73" height="21"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
@@ -413,12 +431,15 @@
                         <outlet property="iterTextField" destination="QDI-o0-mcw" id="pJ2-YR-SkX"/>
                         <outlet property="learningRateTextField" destination="4Sb-WJ-UhI" id="T7t-y4-sgg"/>
                         <outlet property="pathLengthTextField" destination="8qV-99-moA" id="czp-Sh-CcO"/>
+                        <outlet property="progressBar" destination="rG0-uM-oOv" id="Jhc-lC-4FG"/>
+                        <outlet property="progressLabel" destination="vSa-Bf-FsT" id="h2g-0M-b9a"/>
                         <outlet property="samplingRatioTextField" destination="7Im-lk-Mf0" id="ylh-Co-GN1"/>
+                        <segue destination="0VA-zY-95g" kind="show" identifier="showReconstruct" id="pMR-Lj-gPh"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="aRA-ge-Yme" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="4332" y="-82"/>
+            <point key="canvasLocation" x="4332" y="-82.019704433497537"/>
         </scene>
         <!--Mapped reconstructed-->
         <scene sceneID="Jeq-AK-Dqn">
@@ -473,6 +494,6 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="NBv-N4-wbn"/>
+        <segue reference="pMR-Lj-gPh"/>
     </inferredMetricsTieBreakers>
 </document>
