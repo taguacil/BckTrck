@@ -41,7 +41,13 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
     var samplingRatio:Double?
     var learningRate:Float?
     var locationVector : [CLLocation]?
-
+    var est_coord : [CLLocationCoordinate2D]?
+    var AvgMSE : Int?
+    
+    let alert = UIAlertController(title: "Computing", message: "please wait", preferredStyle: UIAlertController.Style.alert)
+    let alertParams = UIAlertController(title: "Invalid parameters!", message: "Parameters not correct, cannot proceed", preferredStyle: UIAlertController.Style.alert)
+    /*let progressBar = UIProgressView(progressViewStyle: .default)*/
+    
     @IBOutlet weak var iterTextField: UITextField! {
         didSet { iterTextField?.addDoneCancelToolbar() }
     }
@@ -60,13 +66,25 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
     
     @IBOutlet weak var applyButton: UIButton!
     
+    @IBOutlet weak var progressBar:UIProgressView!
+    @IBOutlet weak var progressLabel: UILabel!
+    @IBOutlet weak var mseLabel: UILabel!
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         iterTextField.delegate = self
+        pathLengthTextField.delegate = self
+        learningRateTextField.delegate = self
+        samplingRatioTextField.delegate = self
+        
         // Enable the Apply button only if all fields have valid content.
         updateSaveButtonState()
+        //progressBar.frame = CGRect(x: 10, y: 70, width: 250, height: 0)
+        init_variable_params()
+        //alert.view.addSubview(progressBar)
+        alertParams.addAction(UIAlertAction(title: "Continue", style: UIAlertAction.Style.default, handler:nil))
     }
     
     //MARK: UITextFieldDelegate
@@ -90,12 +108,54 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
     }
     
     // MARK: - Navigation
-    @IBAction func cancelButton(_ sender: Any) {
-        let tmpController :UIViewController! = self.presentingViewController
+    /*@IBAction func cancelButton(_ sender: Any) {
+     let tmpController :UIViewController! = self.presentingViewController
+     
+     self.dismiss(animated: true, completion: {()->Void in
+     tmpController.dismiss(animated: true, completion: nil)
+     })
+     }*/
+    
+    @IBAction func applyButton(_ sender: UIButton) {
+        //DispatchQueue.main.async {
+        init_variable_params()
+        self.progressLabel.textColor = UIColor.red
+        self.mseLabel.textColor = UIColor.red
         
-        self.dismiss(animated: true, completion: {()->Void in
-            tmpController.dismiss(animated: true, completion: nil)
-        })
+        if self.updateParams()
+        {
+            //self.present(alert, animated: true, completion: nil)
+            // Do the time critical stuff asynchronously
+            DispatchQueue.global(qos: .background).async {
+                
+                if let CS = CompressSensing(inputLocationVector: self.locationVector!)
+                {
+                    os_log("Computation starts...", log: OSLog.default, type: .debug)
+                    DispatchQueue.main.async(flags: .barrier) {
+                        repeat {
+                            print (CS.progress)
+                            self.updateParams(CS:CS)
+                            usleep(2500)
+                        } while CS.progress < 1.0
+                        self.updateParams(CS:CS)
+                    }
+                    CS.setParam(maxIter: self.iterations!, pathLength: self.pathLength!, samplingRatio: self.samplingRatio!, learningRate: self.learningRate! )
+                    let (est_coord, AvgMSE) = CS.compute()
+                    self.est_coord = est_coord
+                    self.AvgMSE = AvgMSE
+                }
+                DispatchQueue.main.async {
+                    /*self.alert.dismiss(animated: true, completion: {self.performSegue(withIdentifier: "showReconstruct", sender: nil)})*/
+                    self.performSegue(withIdentifier: "showReconstruct", sender: nil)
+                }
+            }
+        }
+        else
+        {
+            os_log("Parameters not correct, cannot proceed", log: OSLog.default, type: .error)
+            self.present(alertParams, animated: true, completion: nil)
+        }
+        //    }
     }
     
     @IBAction func setDefault(_ sender: UIButton) {
@@ -118,35 +178,17 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
         
         let alert = UIAlertController(title: "Invalid parameters", message: "One or more parameters are not set correctly", preferredStyle: UIAlertController.Style.alert)
         alert.addAction(UIAlertAction(title: "Back", style: UIAlertAction.Style.default, handler: nil))
-        let alertMSE = UIAlertController(title: "Average MSE across entire path", message: nil, preferredStyle: UIAlertController.Style.alert)
-        alertMSE.addAction(UIAlertAction(title: "Continue", style: UIAlertAction.Style.default, handler:nil))
-
+        
         switch(segue.identifier ?? "") {
         case "showReconstruct":
-            if updateParams()
-            {
-                guard let routeViewController = segue.destination as? RouteViewController else {
-                    fatalError("Unexpected destination: \(segue.destination)")
-                }
-                
-                
-                if let CS = CompressSensing(inputLocationVector: locationVector!)
-                {
-                    os_log("Computation starts...", log: OSLog.default, type: .debug)
-                    CS.setParam(maxIter: self.iterations!, pathLength: self.pathLength!, samplingRatio: self.samplingRatio!, learningRate: self.learningRate! )
-                    let (est_coord, AvgMSE) = CS.compute()
-                    alertMSE.message = "Average MSE is \(AvgMSE)"
-                    print("Average MSE is \(AvgMSE)")
-                    self.present(alertMSE, animated: true, completion: nil)
-                    routeViewController.est_coord = est_coord
-                    self.present(routeViewController, animated: true, completion: nil)
-                }
+            guard let routeViewController = segue.destination as? RouteViewController else {
+                fatalError("Unexpected destination: \(segue.destination)")
             }
-            else
-            {
-                os_log("Parameters not correct, cannot proceed", log: OSLog.default, type: .error)
-                self.present(alert, animated: true, completion: nil)
-            }
+            
+            routeViewController.locationVector = locationVector
+            sleep(2)
+            routeViewController.est_coord = est_coord
+            routeViewController.AvgMSE = AvgMSE
         default:
             fatalError("Unexpected Segue Identifier; \(String(describing: segue.identifier))")
         }
@@ -158,6 +200,23 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
         // Disable the Save button if the text field is empty.
         let text = iterTextField.text ?? ""
         applyButton.isEnabled = !text.isEmpty
+    }
+    
+    private func updateParams(CS: CompressSensing){
+        self.progressBar.setProgress(CS.progress, animated: true)
+        let prog_per = CS.progress*100.0
+        self.progressLabel.text = String(format: "%.1f%%", prog_per)
+        if (self.AvgMSE != nil)
+        {
+            self.mseLabel.text = String(format: "%d meters", self.AvgMSE!)
+        }
+    }
+    private func init_variable_params(){
+        progressBar.setProgress(0.0, animated: true)
+        self.progressLabel.text = String(format: "0%%")
+        self.mseLabel.text = String(format: "0 meters")
+        self.progressLabel.textColor = UIColor.black
+        self.mseLabel.textColor = UIColor.black
     }
     
     private func updateParams()->Bool {
