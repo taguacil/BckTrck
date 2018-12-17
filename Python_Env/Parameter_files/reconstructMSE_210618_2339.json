@@ -1,0 +1,26 @@
+{
+    "realization"               : 10,
+    "acquisition_time_sec"      : 200,
+    "random_seed"               : 8941,
+    "bUse_random_seed"          : true,
+    
+    "noise_level_meter"         : [20,10,1,0.5,0.0005],
+    "noise_std_meter"           : 0,
+    
+    "bReconstruct"              : true,
+    
+    "bUse_static_init"          : true,
+    "staticLat"                 : 0,
+    "staticLon"                 : 0,
+    
+    "RCT_ALG_LASSO"             : {
+        "bReconstruct_from_dct"     : true,
+        "bReconstruct"              : true,
+        "lasso_learning_rate"       : 0.01,
+        "sampling_ratio"            : 0.2
+    },
+    
+    "PLOT"                      : {
+        "bPlotMSE"                  : true
+    }
+}

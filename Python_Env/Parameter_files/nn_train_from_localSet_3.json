@@ -1,0 +1,40 @@
+{
+    "bSimplified_Results"       : true,
+    "filename"                  : "TrainingSet",
+    "bGenerateData"             : false,
+
+    "gps_freq_Hz"               : 1,
+    "realization"               : 10000,
+    "acquisition_time_sec"      : 256,
+    "stepsize"                  : 1,
+
+    "random_seed"               : 1000,
+    "bUse_random_seed"          : false,
+
+    "noise_level_meter"         : [40,35,30,25,20,15,10,9,8,7,6,5,4,3,2,1,0.0005],
+    "noise_std_meter"           : 0,
+
+    "bUse_static_init"          : true,
+    "staticLat"                 : 0,
+    "staticLon"                 : 0,
+
+    "bTrainNetwork"             : true,
+
+     "Train_NN"             : {
+        "bPlotTrainResults"      : true,
+        "bUseGeneratedData"      : true,
+        "sampling_ratio"         : 0.2,
+        "alpha"                  : 0.8,
+        "delta"                  : 0.0001,
+        "modelname_lat"          : "Godzilla_08_epsilon_decay_amsgrad",
+        "modelname_lon"          : "Thor_08_epsilon_decay_amsrgad"
+    },
+
+    "CSV_DATA"                  : {
+        "bUse_csv_data"             : false,
+        "bPlot_real_path"           : false,
+        "csv_path"                  : "CSV_data/gpsLocations_Taimir_1.csv",
+        "path_length"               : 200
+    
+    }
+}
