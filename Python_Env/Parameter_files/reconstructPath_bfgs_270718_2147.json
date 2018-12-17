@@ -1,0 +1,32 @@
+{
+    "realization"               : 1,
+    "acquisition_time_sec"      : 400,
+    "random_seed"               : 8941,
+    "use_random_seed"           : true,
+    
+    "noise_level_meter"         : [0.0005],
+    "noise_std_meter"           : 0,
+    
+    "bUse_static_init"          : true,
+    "staticLat"                 : 0,
+    "staticLon"                 : 0,
+    
+    "bReconstruct"              : true,
+    
+    "RCT_ALG_BFGS"             : {
+        "bReconstruct_from_dct"     : true,
+        "bReconstruct"              : true,
+        "bUse_gaussian_matrix"      : false,
+        "lambda"                    : 0.01,
+        "u"                         : 10e-6,
+        "maxiter"                   : 50,
+        "sampling_ratio"            : 0.25    
+    },
+    
+    "PLOT"                      : {
+        "bPlotAllrealizations"      : false,
+        "bPlotLonLat_time_reconst"  : true,
+        "bPlotWM_time_reconst"      : true
+    }
+    
+}
