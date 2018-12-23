@@ -277,8 +277,18 @@ class CompressSensing : NSObject, NSCoding {
         IDCT_weights(downSampledIndices: downSampledIndices)
     }
     
+    // UI update
+    private func updateProgress(obj:SettingsController, date:Date){
+        print (progress)
+        obj.progressBar.setProgress(progress, animated: true)
+        //let prog_per = progress*100.0
+        //obj.progressLabel.text = String(format: "%.1f%%", prog_per)
+        let diff = Date().timeIntervalSince(date)
+        obj.progressLabel.text = String(format: "%.1f secs", diff)
+    }
+    
     // Entire computation for all input vector
-    func compute() -> ([CLLocationCoordinate2D],Int) {        
+    func compute(obj:SettingsController, date:Date) -> ([CLLocationCoordinate2D],Int) {
         let totalLength = locationVector!.count
         let numberOfBlocks = Int(floor(Double(totalLength / blockLength!)))
         var latTotal_est = Array<Float>()
@@ -289,6 +299,10 @@ class CompressSensing : NSObject, NSCoding {
         
         for i in 0..<numberOfBlocks
         {
+            DispatchQueue.main.async{
+                self.updateProgress(obj:obj, date:date)
+            }
+            
             latArray_org.removeAll()
             lonArray_org.removeAll()
             lat_est.removeAll()
@@ -315,6 +329,10 @@ class CompressSensing : NSObject, NSCoding {
         
         let mse = MSE(lat_est: latTotal_est, lon_est: lonTotal_est, lat_org: latTotal_org, lon_org: lonTotal_org)
         let MSE_wm = Int(mse*1e5)
+        DispatchQueue.main.async{
+            self.updateProgress(obj:obj,date:date)
+            obj.mseLabel.text = String(format: "%d meters", MSE_wm)
+        }
         return (est_coord, MSE_wm)
     }
     //MARK: Function to set parameters

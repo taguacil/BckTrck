@@ -10,7 +10,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "gpsData/CompressSensing.swift"
-            timestampString = "566661133.736804"
+            timestampString = "567300006.383448"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "184"
@@ -26,7 +26,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "gpsData/CompressSensing.swift"
-            timestampString = "566661133.73698"
+            timestampString = "567300006.383793"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "173"
@@ -42,7 +42,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "gpsData/CompressSensing.swift"
-            timestampString = "566661133.737121"
+            timestampString = "567300006.384019"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "195"
@@ -58,7 +58,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "gpsData/CompressSensing.swift"
-            timestampString = "566661133.7372"
+            timestampString = "567300006.384238"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "228"
@@ -74,7 +74,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "gpsData/CompressSensing.swift"
-            timestampString = "566661133.7374099"
+            timestampString = "567300006.384454"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "272"
@@ -90,11 +90,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "gpsData/CompressSensing.swift"
-            timestampString = "566661133.737644"
+            timestampString = "567300006.38467"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "331"
-            endingLineNumber = "331">
+            startingLineNumber = "349"
+            endingLineNumber = "349">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -216,7 +216,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "gpsData/CompressSensing.swift"
-            timestampString = "566661133.738068"
+            timestampString = "567300006.385007"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "168"
@@ -232,11 +232,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "gpsData/CompressSensing.swift"
-            timestampString = "566661133.73817"
+            timestampString = "567300006.385247"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "329"
-            endingLineNumber = "329"
+            startingLineNumber = "347"
+            endingLineNumber = "347"
             landmarkName = "CompressSensing"
             landmarkType = "3">
          </BreakpointContent>
@@ -248,7 +248,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "gpsData/CompressSensing.swift"
-            timestampString = "566661133.738291"
+            timestampString = "567300006.385466"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "143"
@@ -264,11 +264,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "gpsData/SettingsController.swift"
-            timestampString = "566661133.738458"
+            timestampString = "567300006.385687"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "174"
-            endingLineNumber = "174"
+            startingLineNumber = "168"
+            endingLineNumber = "168"
             landmarkName = "prepare(for:sender:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -280,11 +280,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "gpsData/SettingsController.swift"
-            timestampString = "566661133.739226"
+            timestampString = "567300006.385736"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "229"
-            endingLineNumber = "229"
+            startingLineNumber = "214"
+            endingLineNumber = "214"
             landmarkName = "updateParams()"
             landmarkType = "7">
          </BreakpointContent>
@@ -296,12 +296,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "gpsData/CompressSensing.swift"
-            timestampString = "566661133.739695"
+            timestampString = "567300006.385779"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "292"
-            endingLineNumber = "292"
-            landmarkName = "compute()"
+            startingLineNumber = "306"
+            endingLineNumber = "306"
+            landmarkName = "compute(obj:date:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -312,7 +312,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "gpsData/CompressSensing.swift"
-            timestampString = "566661133.739754"
+            timestampString = "567300006.385995"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "268"
@@ -328,7 +328,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "gpsData/CompressSensing.swift"
-            timestampString = "566661133.7398061"
+            timestampString = "567300006.3862081"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "269"
@@ -344,7 +344,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "gpsData/CompressSensing.swift"
-            timestampString = "566661133.7398469"
+            timestampString = "567300006.386433"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "155"
@@ -360,7 +360,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "gpsData/CompressSensing.swift"
-            timestampString = "566661133.739911"
+            timestampString = "567300006.386647"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "159"
@@ -376,7 +376,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "gpsData/CompressSensing.swift"
-            timestampString = "566661133.739964"
+            timestampString = "567300006.3868639"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "154"
@@ -392,7 +392,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "gpsData/CompressSensing.swift"
-            timestampString = "566661133.740019"
+            timestampString = "567300006.387071"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "167"
@@ -408,12 +408,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "gpsData/CompressSensing.swift"
-            timestampString = "566661133.7400579"
+            timestampString = "567300006.3872809"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "317"
-            endingLineNumber = "317"
-            landmarkName = "compute()"
+            startingLineNumber = "336"
+            endingLineNumber = "336"
+            landmarkName = "compute(obj:date:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -424,93 +424,13 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "gpsData/CompressSensing.swift"
-            timestampString = "566661133.740114"
+            timestampString = "567300006.387495"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "318"
-            endingLineNumber = "318"
-            landmarkName = "compute()"
+            startingLineNumber = "328"
+            endingLineNumber = "328"
+            landmarkName = "compute(obj:date:)"
             landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "gpsData/SettingsController.swift"
-            timestampString = "566661133.740155"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "143"
-            endingLineNumber = "143"
-            landmarkName = "applyButton(_:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "gpsData/CompressSensing.swift"
-            timestampString = "566661133.740575"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "314"
-            endingLineNumber = "314"
-            landmarkName = "compute()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "gpsData/SettingsController.swift"
-            timestampString = "566661133.740696"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "147"
-            endingLineNumber = "147"
-            landmarkName = "applyButton(_:)"
-            landmarkType = "7">
-            <Locations>
-               <Location
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #1 () -&gt; () in gpsData.SettingsController.applyButton(__C.UIButton) -&gt; ()"
-                  moduleName = "gpsData"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/taimiraguacil/Documents/Simulation_Environment/iosApp/gpsData/SettingsController.swift"
-                  timestampString = "566660774.6271141"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "147"
-                  endingLineNumber = "147"
-                  offsetFromSymbolStart = "1692">
-               </Location>
-               <Location
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "closure #2 () -&gt; () in closure #1 () -&gt; () in gpsData.SettingsController.applyButton(__C.UIButton) -&gt; ()"
-                  moduleName = "gpsData"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/taimiraguacil/Documents/Simulation_Environment/iosApp/gpsData/SettingsController.swift"
-                  timestampString = "566660774.62924"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "149"
-                  endingLineNumber = "149"
-                  offsetFromSymbolStart = "36">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
