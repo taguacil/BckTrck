@@ -57,7 +57,7 @@ class RouteViewController: UIViewController, MKMapViewDelegate, LocationTableVie
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        //showMSE()
+        showMSE()
     }
     
     override func didReceiveMemoryWarning() {
@@ -128,7 +128,7 @@ class RouteViewController: UIViewController, MKMapViewDelegate, LocationTableVie
     private func showMSE()->(){
         let alertMSE = UIAlertController(title: "Average MSE across entire path", message: nil, preferredStyle: UIAlertController.Style.alert)
         alertMSE.addAction(UIAlertAction(title: "Continue", style: UIAlertAction.Style.default, handler:nil))
-        alertMSE.message = "Average MSE is \(AvgMSE!) meters"
+        alertMSE.message = "\(AvgMSE!) meters"
         print("Average MSE is \(AvgMSE!) meters")
         self.present(alertMSE, animated: true, completion: nil)
     }
