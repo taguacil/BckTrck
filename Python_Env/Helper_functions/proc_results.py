@@ -27,7 +27,8 @@
 import numpy as np
 from matplotlib.colors import LogNorm
 import matplotlib.pyplot as plt
-import _pickle  as pickle
+import matplotlib
+import _pickle as pickle
 import platform
 from scipy import signal
 import scipy.fftpack as ft
@@ -649,6 +650,12 @@ class cProcessFile:
 
             l1_norm_lat = np.mean(np.linalg.norm(transformed_paths[0], ord=1, axis=0), axis=0)
             l1_norm_lon = np.mean(np.linalg.norm(transformed_paths[1], ord=1, axis=0), axis=0)
+
+            font = {'family': 'normal',
+                    'size': 14}
+
+            matplotlib.rc('font', **font)
+
             for per in range(percent_len):
                 value = (np.abs(transformed_paths[0, :, :, :]) / np.abs(transformed_paths[0, 0, :, :]) < percentiles[
                     per])
@@ -657,18 +664,19 @@ class cProcessFile:
                     self.transformed_paths[1, 0, :, :]) < percentiles[per]), axis=(0, 1))
 
             for i in range(percent_len):
-                plt.plot(x_axis, average_lat[i, :] * 100, "-*", label="%.2f %%" % (percentiles[i] * 100))
+                plt.plot(x_axis, average_lat[i, :] * 100, "-*", label="%.2f %% of maximum" % (percentiles[i] * 100))
 
             # Plotting percentages wrt. noise levels for latitude
             # ax = plt.gca()
             # ax.invert_xaxis()
             # plt.yscale('log')
-            plt.xscale('log')
+            #plt.xscale('log')
             plt.grid()
             plt.legend(loc="upper right")
-            plt.title('DCT analysis for latitude')
+            #plt.title('DCT analysis for latitude')
             plt.xlabel('Noise level (meters)')
-            plt.ylabel('Percentage of values below given percentile [%%]')
+            plt.ylabel('Percentage of values below given threshold')
+            plt.rcParams["figure.figsize"] = [10, 10]
             plt.show()
 
             for i in range(percent_len):
