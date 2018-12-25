@@ -41,6 +41,7 @@ extension Array {
 class CompressSensing : NSObject, NSCoding {
     
     //MARK: Properties
+    var totalEstimate : TimeInterval
     let locationVector : [CLLocation]?
     var iteration : Int?
     var ratio : Double?
@@ -102,13 +103,14 @@ class CompressSensing : NSObject, NSCoding {
     init?(inputLocationVector: [CLLocation]) {
         
         self.blockSamples = 0
-        
         self.latArray_org = []
         self.lonArray_org = []
         self.lat_est = []
         self.lon_est = []
         self.latValArray = []
         self.lonValArray = []
+        
+        self.totalEstimate = 0
         
         // Extract the coordinates from the location vector if it exists
         guard !inputLocationVector.isEmpty else {
@@ -278,12 +280,11 @@ class CompressSensing : NSObject, NSCoding {
     }
     
     // UI update
-    private func updateProgress(obj:SettingsController, date:Date){
+    private func updateProgress(obj:SettingsController, diff: TimeInterval){
         print (progress)
         obj.progressBar.setProgress(progress, animated: true)
         //let prog_per = progress*100.0
         //obj.progressLabel.text = String(format: "%.1f%%", prog_per)
-        let diff = Date().timeIntervalSince(date)
         obj.progressLabel.text = String(format: "%.1f secs", diff)
     }
     
@@ -299,10 +300,7 @@ class CompressSensing : NSObject, NSCoding {
         
         for i in 0..<numberOfBlocks
         {
-            DispatchQueue.main.async{
-                self.updateProgress(obj:obj, date:date)
-            }
-            
+            let startIteration = Date()
             latArray_org.removeAll()
             lonArray_org.removeAll()
             lat_est.removeAll()
@@ -325,12 +323,20 @@ class CompressSensing : NSObject, NSCoding {
                 est_coord.append(CLLocationCoordinate2DMake(Double(lat_est[k]), Double(lon_est[k])))
             }
             progress += 1.0/Float(numberOfBlocks)
+            
+            let diff = Date().timeIntervalSince(startIteration)
+            //let diff = Date().timeIntervalSince(date)
+            
+            totalEstimate = Double(numberOfBlocks-i-1)*diff
+            DispatchQueue.main.async{
+                self.updateProgress(obj:obj, diff:self.totalEstimate)
+            }
         }
         
         let mse = MSE(lat_est: latTotal_est, lon_est: lonTotal_est, lat_org: latTotal_org, lon_org: lonTotal_org)
         let MSE_wm = Int(mse*1e5)
         DispatchQueue.main.async{
-            self.updateProgress(obj:obj,date:date)
+            //self.updateProgress(obj:obj,diff:diff)
             obj.mseLabel.text = String(format: "%d meters", MSE_wm)
         }
         return (est_coord, MSE_wm)

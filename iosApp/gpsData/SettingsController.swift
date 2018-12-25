@@ -119,8 +119,8 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
     @IBAction func applyButton(_ sender: UIButton) {
         //DispatchQueue.main.async {
         init_variable_params()
-        self.progressLabel.textColor = UIColor.red
-        self.mseLabel.textColor = UIColor.red
+        self.progressLabel.textColor = UIColor.blue
+        self.mseLabel.textColor = UIColor.blue
         
         let startDate = Date()
         
