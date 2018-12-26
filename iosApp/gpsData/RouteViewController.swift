@@ -126,10 +126,13 @@ class RouteViewController: UIViewController, MKMapViewDelegate, LocationTableVie
     
     //MARK: Private Properties
     private func showMSE()->(){
+        if (AvgMSE != nil)
+        {
         let alertMSE = UIAlertController(title: "Average MSE across entire path", message: nil, preferredStyle: UIAlertController.Style.alert)
         alertMSE.addAction(UIAlertAction(title: "Continue", style: UIAlertAction.Style.default, handler:nil))
         alertMSE.message = "\(AvgMSE!) meters"
         print("Average MSE is \(AvgMSE!) meters")
         self.present(alertMSE, animated: true, completion: nil)
+        }
     }
 }
