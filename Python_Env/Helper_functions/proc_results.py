@@ -35,6 +35,7 @@ import scipy.fftpack as ft
 
 from Helper_functions.framework_error import CFrameworkError
 from Helper_functions.framework_error import CErrorTypes
+from Helper_functions.csv_interpreter import merge_arrays
 
 # Bring the logger
 import logging
@@ -188,16 +189,14 @@ class cProcessFile:
     # Plot real path and reconstruction
     def plot_real_path_recon(self):
         logger.debug('Plotting real path and stitched reconstruction')
-        latlon_real = self.m_paths_latlon_org[:, :, :, 0].transpose(0, 2, 1).reshape(
-            (2, self.m_path_length * self.m_number_realization))
+        latlon_real = np.array([merge_arrays(self.m_paths_latlon_org[0, :, :, 0],self.m_path_length), merge_arrays(self.m_paths_latlon_org[1, :, :, 0],self.m_path_length)])
 
         plt.plot(latlon_real[1], latlon_real[0], '-*', label="Original real path")
         if self.m_bReconstruct:
             logger.debug('Plotting MSE of reconstructed paths latlon')
 
             for key in self.reconstructed_latlon_paths.keys():
-                r_path = self.reconstructed_latlon_paths[key][:, :, :, 0].transpose(0, 2, 1).reshape(
-                    (2, self.m_path_length * self.m_number_realization))
+                r_path = np.array([merge_arrays(self.reconstructed_latlon_paths[key][0, :, :, 0],self.m_path_length),merge_arrays(self.reconstructed_latlon_paths[key][1, :, :, 0],self.m_path_length)])
 
                 l2_r_latlon = np.sqrt(np.mean((latlon_real[0] - r_path[0]) ** 2 + (latlon_real[1] - r_path[1]) ** 2))
 
