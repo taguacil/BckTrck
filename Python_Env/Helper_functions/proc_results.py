@@ -586,26 +586,31 @@ class cProcessFile:
             plt.ylabel('MSE')
             plt.show()
 
+            font = {'family': 'normal',
+                    'size': 14}
+
+            matplotlib.rc('font', **font)
+
             if self.m_bReconstruct:
                 logger.debug('Plotting MSE of reconstructed paths WM')
 
                 for key in self.reconstructed_wm_paths.keys():
-                    plt.plot(x_axis, MSE_r_wm[key], '-*',
-                             label="MSE_WM for %s with %.1f %% SR" % (key, self.average_sampling_ratio[key] * 100))
-                    plt.plot(x_axis, max_error[key], '-x', label="Average Max Error for %s with %.1f %% SR" % (
-                        key, self.average_sampling_ratio[key] * 100))
+                    plt.plot(x_axis, MSE_r_wm[key], '-*')
+                             # label="MSE_WM for %s with %.1f %% SR" % (key, self.average_sampling_ratio[key] * 100))
+                    # plt.plot(x_axis, max_error[key], '-x', label="Average Max Error for %s with %.1f %% SR" % (
+                    #   key, self.average_sampling_ratio[key] * 100))
 
-            plt.plot(x_axis, MSE_noise_WM, '-*', label="MSE_WM")
+            # plt.plot(x_axis, MSE_noise_WM, '-*', label="MSE_WM")
             ax = plt.gca()
             ax.invert_xaxis()
             plt.yscale('log')
             plt.xscale('log')
             plt.grid()
-            plt.legend(loc="upper right")
-            plt.title('Mean square error for %d samples and %d iteratirons' % (
-                self.m_acquisition_length, self.m_number_realization))
+            plt.legend(("Optimal network", "Network variant 1", "Network variant 2", "Network variant 3"), loc="upper right")
+            # plt.title('Mean square error for %d samples and %d iteratirons' % (
+            #    self.m_acquisition_length, self.m_number_realization))
             plt.xlabel('Noise level (meters)')
-            plt.ylabel('MSE')
+            plt.ylabel('RMSE (meters)')
             plt.show()
 
     # Plot SNR - mean error rate
