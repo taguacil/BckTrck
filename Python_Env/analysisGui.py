@@ -26,6 +26,8 @@ from PyQt5 import QtWidgets
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
+import matplotlib
+import matplotlib.pyplot as plt
 import numpy as np
 
 import Helper_functions.analysisCompute
@@ -136,7 +138,27 @@ class AppForm(QtWidgets.QMainWindow):
         self.textbox.setText(str(self.sampling_ratios_values[0]) + ' ' + str(self.path_lengths_values[0]) + ' ' +
                              str(self.learning_rates_values[0]) + ' ' + str(self.noise_levels_values[0]))
 
+        self.individualPlot()
         self.on_draw()
+
+    def individualPlot(self):
+        font = {'family': 'normal',
+                'size': 14}
+
+        matplotlib.rc('font', **font)
+        plt.scatter(
+            self.table_lin[(self.table_lin.LearningRate == 0.1) & (self.table_lin.Noise == 20)]['SamplingRatio'],
+            self.table_lin[(self.table_lin.LearningRate == 0.1) & (self.table_lin.Noise == 20)]['PathLengths'],
+            c=self.table_lin[(self.table_lin.LearningRate == 0.1) & (self.table_lin.Noise == 20)]['MSE'],
+            cmap='rainbow_r'
+            )
+        plt.yscale('log')
+        plt.xlabel('Sampling ratio')
+        plt.ylabel('Path length')
+        cb = plt.colorbar()
+        cb.set_label('MSE (meters)')
+        plt.rcParams["figure.figsize"] = [10, 10]
+        plt.show()
 
     def save_plot(self):
         file_choices = "PNG (*.png)|*.png"

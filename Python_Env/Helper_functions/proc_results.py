@@ -27,13 +27,15 @@
 import numpy as np
 from matplotlib.colors import LogNorm
 import matplotlib.pyplot as plt
-import _pickle  as pickle
+import matplotlib
+import _pickle as pickle
 import platform
 from scipy import signal
 import scipy.fftpack as ft
 
 from Helper_functions.framework_error import CFrameworkError
 from Helper_functions.framework_error import CErrorTypes
+from Helper_functions.csv_interpreter import merge_arrays
 
 # Bring the logger
 import logging
@@ -187,16 +189,14 @@ class cProcessFile:
     # Plot real path and reconstruction
     def plot_real_path_recon(self):
         logger.debug('Plotting real path and stitched reconstruction')
-        latlon_real = self.m_paths_latlon_org[:, :, :, 0].transpose(0, 2, 1).reshape(
-            (2, self.m_path_length * self.m_number_realization))
+        latlon_real = np.array([merge_arrays(self.m_paths_latlon_org[0, :, :, 0],self.m_path_length), merge_arrays(self.m_paths_latlon_org[1, :, :, 0],self.m_path_length)])
 
         plt.plot(latlon_real[1], latlon_real[0], '-*', label="Original real path")
         if self.m_bReconstruct:
             logger.debug('Plotting MSE of reconstructed paths latlon')
 
             for key in self.reconstructed_latlon_paths.keys():
-                r_path = self.reconstructed_latlon_paths[key][:, :, :, 0].transpose(0, 2, 1).reshape(
-                    (2, self.m_path_length * self.m_number_realization))
+                r_path = np.array([merge_arrays(self.reconstructed_latlon_paths[key][0, :, :, 0],self.m_path_length),merge_arrays(self.reconstructed_latlon_paths[key][1, :, :, 0],self.m_path_length)])
 
                 l2_r_latlon = np.sqrt(np.mean((latlon_real[0] - r_path[0]) ** 2 + (latlon_real[1] - r_path[1]) ** 2))
 
@@ -649,6 +649,12 @@ class cProcessFile:
 
             l1_norm_lat = np.mean(np.linalg.norm(transformed_paths[0], ord=1, axis=0), axis=0)
             l1_norm_lon = np.mean(np.linalg.norm(transformed_paths[1], ord=1, axis=0), axis=0)
+
+            font = {'family': 'normal',
+                    'size': 14}
+
+            matplotlib.rc('font', **font)
+
             for per in range(percent_len):
                 value = (np.abs(transformed_paths[0, :, :, :]) / np.abs(transformed_paths[0, 0, :, :]) < percentiles[
                     per])
@@ -657,18 +663,19 @@ class cProcessFile:
                     self.transformed_paths[1, 0, :, :]) < percentiles[per]), axis=(0, 1))
 
             for i in range(percent_len):
-                plt.plot(x_axis, average_lat[i, :] * 100, "-*", label="%.2f %%" % (percentiles[i] * 100))
+                plt.plot(x_axis, average_lat[i, :] * 100, "-*", label="%.2f %% of maximum" % (percentiles[i] * 100))
 
             # Plotting percentages wrt. noise levels for latitude
             # ax = plt.gca()
             # ax.invert_xaxis()
             # plt.yscale('log')
-            plt.xscale('log')
+            #plt.xscale('log')
             plt.grid()
             plt.legend(loc="upper right")
-            plt.title('DCT analysis for latitude')
+            #plt.title('DCT analysis for latitude')
             plt.xlabel('Noise level (meters)')
-            plt.ylabel('Percentage of values below given percentile [%%]')
+            plt.ylabel('Percentage of values below given threshold')
+            plt.rcParams["figure.figsize"] = [10, 10]
             plt.show()
 
             for i in range(percent_len):
