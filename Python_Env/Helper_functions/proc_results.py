@@ -606,7 +606,8 @@ class cProcessFile:
             plt.yscale('log')
             plt.xscale('log')
             plt.grid()
-            plt.legend(("LASSO", "Optimal network", "Noisy fully sampled path"), loc="upper right")
+            #plt.legend(("Optimal network", "Network variant 1", "Network variant 2", "Network variant 3"), loc="upper right")
+            plt.legend(("LASSO", "LASSO with adaptive sampling", "Noisy fully sampled path"), loc="upper right")
             # plt.title('Mean square error for %d samples and %d iteratirons' % (
             #    self.m_acquisition_length, self.m_number_realization))
             plt.xlabel('Noise level (meters)')
