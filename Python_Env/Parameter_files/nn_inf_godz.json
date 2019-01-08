@@ -9,8 +9,8 @@
     "random_seed"               : 6468,
     "bUse_random_seed"          : false,
     
-    "noise_level_meter"         : [40,30,20,10,7,5,3,2,1,0.5,0.0005],
-    "noise_std_meter"           : 0,
+    "noise_level_meter"         : [40,30,20,10,7,5,3,2,1,0.5],
+    "noise_std_meter"           : [0],
     
     "bUse_static_init"          : true,
     "staticLat"                 : 0,
@@ -22,26 +22,11 @@
     "RCT_ALG_NN_Godzilla"       : {
         "bReconstruct"           : true,
         "sampling_ratio"         : 0.20,
-        "alpha"                  : 0.5,
-        "modelname"              : "Godzilla_08",
-        "save_nnModel"           : false
+        "alpha"                  : 0.8,
+        "modelname"              : "Godzilla_08_normal",
+        "save_nnModel"           : true
     },
 
-    "RCT_ALG_NN_Thor"           : {
-        "bReconstruct"           : true,
-        "sampling_ratio"         : 0.20,
-        "alpha"                  : 0.5,
-        "modelname"              : "Thor",
-        "save_nnModel"           : false
-    },
-
-    "RCT_ALG_LASSO"             : {
-        "bReconstruct_from_dct"     : true,
-        "bReconstruct"              : true,
-        "lasso_learning_rate"       : 0.01,
-        "sampling_ratio"            : 0.2
-    },
-        
     "PLOT"                      : {
         "bPlotAllrealizations"      : false,
         "bPlotLonLat_time_reconst"  : false,
