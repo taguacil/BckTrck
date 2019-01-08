@@ -43,6 +43,8 @@ class CompressSensing : NSObject, NSCoding {
     
     //MARK: Properties
     let nnModel = Godzilla_08_normal()
+    let NNCompute = true
+    let LASSOCompute = false
     
     var totalEstimate : TimeInterval
     let locationVector : [CLLocation]?
@@ -67,7 +69,7 @@ class CompressSensing : NSObject, NSCoding {
     var lonNN_est = Array<Double>()
     var latArrayNN_org: [Double]
     var lonArrayNN_org : [Double]
-
+    
     
     var meanLat = Float(0)
     var meanLon = Float(0)
@@ -312,25 +314,28 @@ class CompressSensing : NSObject, NSCoding {
     //MARK: Complete computation for 1 block length
     private func computeBlock() -> () {
         let downSampledIndices = randomSampling()
-        let dctMat = eyeDCT(downSampledIndices: downSampledIndices)
-        
         // LASSO
-        lassoReg(dctMat: dctMat)
-        IDCT_weights(downSampledIndices: downSampledIndices)
-        
+        if (LASSOCompute)
+        {
+            let dctMat = eyeDCT(downSampledIndices: downSampledIndices)
+            lassoReg(dctMat: dctMat)
+            IDCT_weights(downSampledIndices: downSampledIndices)
+        }
         // NN
-        guard let latNNout = try? nnModel.prediction(input: Godzilla_08_normalInput(input1:preprocess(Array: latValArray)!)) else {
-            fatalError("Unexpected runtime error.")
+        if (NNCompute)
+        {
+            guard let latNNout = try? nnModel.prediction(input: Godzilla_08_normalInput(input1:preprocess(Array: latValArray)!)) else {
+                fatalError("Unexpected runtime error.")
+            }
+            latNN_est = postprocess(NNout: latNNout.output1)
+            guard let lonNNout = try? nnModel.prediction(input: Godzilla_08_normalInput(input1:preprocess(Array: lonValArray)!)) else {
+                fatalError("Unexpected runtime error.")
+            }
+            lonNN_est = postprocess(NNout: lonNNout.output1)
+            
+            // Renormalize both lat/lon for NN
+            renormNN(downSampledIndices: downSampledIndices)
         }
-        latNN_est = postprocess(NNout: latNNout.output1)
-        guard let lonNNout = try? nnModel.prediction(input: Godzilla_08_normalInput(input1:preprocess(Array: lonValArray)!)) else {
-            fatalError("Unexpected runtime error.")
-        }
-        lonNN_est = postprocess(NNout: lonNNout.output1)
-        
-        // Renormalize both lat/lon for NN
-        renormNN(downSampledIndices: downSampledIndices)
-        
     }
     
     // UI update
@@ -414,8 +419,23 @@ class CompressSensing : NSObject, NSCoding {
             
             for k in 0..<blockLength!
             {
-                est_coord.append(CLLocationCoordinate2DMake(Double(lat_est[k]), Double(lon_est[k])))
-                est_coordNN.append(CLLocationCoordinate2DMake(latNN_est[k], lonNN_est[k]))
+                if (LASSOCompute)
+                {
+                    est_coord.append(CLLocationCoordinate2DMake(Double(lat_est[k]), Double(lon_est[k])))
+                }
+                else
+                {
+                    est_coord.append(CLLocationCoordinate2DMake(0,0))
+                }
+                if (NNCompute)
+                {
+                    est_coordNN.append(CLLocationCoordinate2DMake(latNN_est[k], lonNN_est[k]))
+                }
+                else
+                {
+                    est_coordNN.append(CLLocationCoordinate2DMake(0.0, 0.0))
+                }
+                
             }
             progress += 1.0/Float(numberOfBlocks)
             
@@ -429,8 +449,17 @@ class CompressSensing : NSObject, NSCoding {
         }
         
         let (mse,mseNN) = MSE(lat_est: latTotal_est, lon_est: lonTotal_est, lat_org: latTotal_org, lon_org: lonTotal_org,latNN_est: latTotalNN_est, lonNN_est: lonTotalNN_est, latNN_org: latTotalNN_org, lonNN_org: lonTotalNN_org)
-        let MSE_wm = Int(mse*1e5)
-        let MSENN_wm = Int(mseNN*1e5)
+        
+        var MSE_wm = 0
+        if (LASSOCompute)
+        {
+            MSE_wm = Int(mse*1e5)
+        }
+        var MSENN_wm = 0
+        if (NNCompute)
+        {
+            MSENN_wm = Int(mseNN*1e5)
+        }
         DispatchQueue.main.async{
             //self.updateProgress(obj:obj,diff:diff)
             obj.mseLabel.text = String(format: "%d meters, %d meters", MSE_wm, MSENN_wm)
