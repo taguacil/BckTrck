@@ -26,6 +26,7 @@ import Upsurge
 import MachineLearningKit
 import CoreLocation
 import os.log
+import CoreML
 
 extension Array {
     /// Picks `n` random elements (partial Fisher-Yates shuffle approach)
@@ -41,6 +42,8 @@ extension Array {
 class CompressSensing : NSObject, NSCoding {
     
     //MARK: Properties
+    let nnModel = Godzilla_08_normal()
+    
     var totalEstimate : TimeInterval
     let locationVector : [CLLocation]?
     var iteration : Int?
@@ -59,6 +62,10 @@ class CompressSensing : NSObject, NSCoding {
     var lon_est : [Float]
     var latValArray : Array<Float>
     var lonValArray : Array<Float>
+    
+    var latNN_est = Array<Double>()
+    var lonNN_est = Array<Double>()
+    
     var meanLat = Float(0)
     var meanLon = Float(0)
     var stdLat  = Float(0)
@@ -242,14 +249,19 @@ class CompressSensing : NSObject, NSCoding {
         weights_lon = try! lassModel.train(dctMat, output: lonValArray, initialWeights: initial_weights_lon, l1Penalty: l1_penalty!, tolerance: tolerance, iteration : iteration!)
     }
     
-    /* Performs IDCT of weights */
+    /* Performs IDCT of weights and renormalizes*/
     private func IDCT_weights(downSampledIndices: [Int]) {
         os_log("IDCT of weights", log: OSLog.default, type: .debug)
         var lat_cor = inverseDCT(weights_lat.column(1))
         var lon_cor = inverseDCT(weights_lon.column(1))
         lat_cor = Array(lat_cor*(1/Float(sqrt(ratio!*0.5*Double(blockLength!)))))
         lon_cor = Array(lon_cor*(1/Float(sqrt(ratio!*0.5*Double(blockLength!)))))
-        
+        renorm(downSampledIndices: downSampledIndices, lat_cor: lat_cor, lon_cor: lon_cor)
+    }
+    
+    /* Renormalization */
+    private func renorm(downSampledIndices: [Int], lat_cor: [Float], lon_cor: [Float]){
+        os_log("Renormalization LASSO", log: OSLog.default, type: .debug)
         var vec_lat = Array<Float>()
         var vec_lon = Array<Float>()
         
@@ -265,6 +277,25 @@ class CompressSensing : NSObject, NSCoding {
         lon_est = Array((lon_cor+delta_lon)*stdLon+meanLon)
     }
     
+    /* Renormalization NN */
+    private func renormNN(downSampledIndices: [Int]){
+        os_log("Renormalization NN", log: OSLog.default, type: .debug)
+        var vec_lat = Array<Double>()
+        var vec_lon = Array<Double>()
+        
+        for index in 0..<downSampledIndices.count
+        {
+            vec_lat.append(Double(latValArray[index])-latNN_est[downSampledIndices[index]])
+            vec_lon.append(Double(lonValArray[index])-lonNN_est[downSampledIndices[index]])
+        }
+        let delta_lat = mean(vec_lat)
+        let delta_lon = mean(vec_lon)
+        
+        latNN_est = Array((latNN_est+delta_lat)*Double(stdLat)+Double(meanLat))
+        lonNN_est = Array((lonNN_est+delta_lon)*Double(stdLon)+Double(meanLon))
+    }
+    
+    
     /* MSE */
     private func MSE(lat_est:Array<Float>, lon_est:Array<Float>, lat_org: Array<Float>, lon_org: Array<Float>) -> Float {
         let MSE = sqrt(measq((lat_est-lat_org))+measq((lon_est-lon_org)))
@@ -275,8 +306,24 @@ class CompressSensing : NSObject, NSCoding {
     private func computeBlock() -> () {
         let downSampledIndices = randomSampling()
         let dctMat = eyeDCT(downSampledIndices: downSampledIndices)
+        
+        // LASSO
         lassoReg(dctMat: dctMat)
         IDCT_weights(downSampledIndices: downSampledIndices)
+        
+        // NN
+        guard let latNNout = try? nnModel.prediction(input: Godzilla_08_normalInput(input1:preprocess(Array: latValArray)!)) else {
+            fatalError("Unexpected runtime error.")
+        }
+        latNN_est = postprocess(NNout: latNNout.output1)
+        guard let lonNNout = try? nnModel.prediction(input: Godzilla_08_normalInput(input1:preprocess(Array: lonValArray)!)) else {
+            fatalError("Unexpected runtime error.")
+        }
+        lonNN_est = postprocess(NNout: lonNNout.output1)
+        
+        // Renormalize both lat/lon for NN
+        renormNN(downSampledIndices: downSampledIndices)
+        
     }
     
     // UI update
@@ -288,8 +335,28 @@ class CompressSensing : NSObject, NSCoding {
         obj.progressLabel.text = String(format: "%.1f secs", diff)
     }
     
+    // Preprocess and prepare input for NeuralNetworks
+    private func preprocess(Array: [Float]) -> MLMultiArray? {
+        guard let array = try? MLMultiArray(shape: [51 as NSNumber], dataType: .double) else {
+            return nil
+        }
+        for (index, element) in Array.enumerated() {
+            array[index] = NSNumber(value: Double(element))
+        }
+        return array
+    }
+    
+    // Postprocess NN output
+    private func postprocess(NNout: MLMultiArray) -> [Double] {
+        let length = NNout.count
+        let doublePtr =  NNout.dataPointer.bindMemory(to: Double.self, capacity: length)
+        let doubleBuffer = UnsafeBufferPointer(start: doublePtr, count: length)
+        let output = Array(doubleBuffer)
+        return output
+    }
+    
     // Entire computation for all input vector
-    func compute(obj:SettingsController, date:Date) -> ([CLLocationCoordinate2D],Int) {
+    func compute(obj:SettingsController, date:Date) -> ([CLLocationCoordinate2D], [CLLocationCoordinate2D],Int) {
         let totalLength = locationVector!.count
         let numberOfBlocks = Int(floor(Double(totalLength / blockLength!)))
         var latTotal_est = Array<Float>()
@@ -297,6 +364,7 @@ class CompressSensing : NSObject, NSCoding {
         var latTotal_org = Array<Float>()
         var lonTotal_org = Array<Float>()
         var est_coord = [CLLocationCoordinate2D]()
+        var est_coordNN = [CLLocationCoordinate2D]()
         
         for i in 0..<numberOfBlocks
         {
@@ -308,11 +376,15 @@ class CompressSensing : NSObject, NSCoding {
             latValArray.removeAll()
             lonValArray.removeAll()
             
+            latNN_est.removeAll()
+            lonNN_est.removeAll()
+            
             for item in locationVector![i*(blockLength!)...((i+1)*blockLength!)-1] {
                 latArray_org.append(Float(item.coordinate.latitude))
                 lonArray_org.append(Float(item.coordinate.longitude))
             }
             computeBlock()
+            
             latTotal_est.append(contentsOf: lat_est)
             lonTotal_est.append(contentsOf: lon_est)
             latTotal_org.append(contentsOf: latArray_org)
@@ -321,6 +393,7 @@ class CompressSensing : NSObject, NSCoding {
             for k in 0..<blockLength!
             {
                 est_coord.append(CLLocationCoordinate2DMake(Double(lat_est[k]), Double(lon_est[k])))
+                est_coordNN.append(CLLocationCoordinate2DMake(latNN_est[k], lonNN_est[k]))
             }
             progress += 1.0/Float(numberOfBlocks)
             
@@ -339,7 +412,7 @@ class CompressSensing : NSObject, NSCoding {
             //self.updateProgress(obj:obj,diff:diff)
             obj.mseLabel.text = String(format: "%d meters", MSE_wm)
         }
-        return (est_coord, MSE_wm)
+        return (est_coord, est_coordNN, MSE_wm)
     }
     //MARK: Function to set parameters
     func setParam(maxIter:Int, pathLength:Int, samplingRatio:Double, learningRate:Float){

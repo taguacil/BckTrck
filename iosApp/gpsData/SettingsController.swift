@@ -42,6 +42,7 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
     var learningRate:Float?
     var locationVector : [CLLocation]?
     var est_coord : [CLLocationCoordinate2D]?
+    var est_coordNN : [CLLocationCoordinate2D]?
     var AvgMSE : Int?
     
     let alert = UIAlertController(title: "Computing", message: "please wait", preferredStyle: UIAlertController.Style.alert)
@@ -134,8 +135,9 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
                 {
                     os_log("Computation starts...", log: OSLog.default, type: .debug)
                     CS.setParam(maxIter: self.iterations!, pathLength: self.pathLength!, samplingRatio: self.samplingRatio!, learningRate: self.learningRate! )
-                    let (est_coord, AvgMSE) = CS.compute(obj:self, date:startDate)
+                    let (est_coord, est_coordNN, AvgMSE) = CS.compute(obj:self, date:startDate)
                     self.est_coord = est_coord
+                    self.est_coordNN = est_coordNN
                     self.AvgMSE = AvgMSE
                 }
                 DispatchQueue.main.async {
@@ -182,6 +184,7 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
             routeViewController.locationVector = locationVector
             sleep(2)
             routeViewController.est_coord = est_coord
+            routeViewController.est_coordNN = est_coordNN
             routeViewController.AvgMSE = AvgMSE
         default:
             fatalError("Unexpected Segue Identifier; \(String(describing: segue.identifier))")

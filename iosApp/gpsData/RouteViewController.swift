@@ -16,8 +16,10 @@ class RouteViewController: UIViewController, MKMapViewDelegate, LocationTableVie
     @IBOutlet weak var mapView: MKMapView!
     var locationVector : [CLLocation]?
     var est_coord : [CLLocationCoordinate2D]?
+    var est_coordNN : [CLLocationCoordinate2D]?
     var AvgMSE : Int?
     var isEstimated = false
+    var isEstimatedNN = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,12 +45,20 @@ class RouteViewController: UIViewController, MKMapViewDelegate, LocationTableVie
                     let polylineEst = MKPolyline(coordinates: est_coord, count: est_coord.count)
                     mapView.addOverlay(polylineEst)
                 }
+                isEstimated=false
+                
+                if let est_coordNN = est_coordNN
+                {
+                    isEstimatedNN = true
+                    let polylineEst = MKPolyline(coordinates: est_coordNN, count: est_coordNN.count)
+                    mapView.addOverlay(polylineEst)
+                }
                 else
                 {
                     // Add mappoints to Map
                     mapView.showAnnotations(annotations, animated: true)
                 }
-                isEstimated=false
+                isEstimatedNN=false
                 mapView.addOverlay(polyline)
                 
             }
@@ -96,6 +106,10 @@ class RouteViewController: UIViewController, MKMapViewDelegate, LocationTableVie
         let polylineRenderer = MKPolylineRenderer(overlay: overlay)
         if (isEstimated){
             polylineRenderer.strokeColor = UIColor.red
+        }
+        else if (isEstimatedNN)
+        {
+            polylineRenderer.strokeColor = UIColor.green
         }
         else{
             polylineRenderer.strokeColor = UIColor.blue

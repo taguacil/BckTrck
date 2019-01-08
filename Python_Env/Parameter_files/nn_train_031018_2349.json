@@ -3,7 +3,7 @@
     "filename"                  : "TrainingSet",
 
     "gps_freq_Hz"               : 1,
-    "realization"               : 100,
+    "realization"               : 50,
     "acquisition_time_sec"      : 256,
     "stepsize"                  : 1,
     
