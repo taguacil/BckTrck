@@ -65,6 +65,9 @@ class CompressSensing : NSObject, NSCoding {
     
     var latNN_est = Array<Double>()
     var lonNN_est = Array<Double>()
+    var latArrayNN_org: [Double]
+    var lonArrayNN_org : [Double]
+
     
     var meanLat = Float(0)
     var meanLon = Float(0)
@@ -116,6 +119,9 @@ class CompressSensing : NSObject, NSCoding {
         self.lon_est = []
         self.latValArray = []
         self.lonValArray = []
+        
+        self.latArrayNN_org = []
+        self.lonArrayNN_org = []
         
         self.totalEstimate = 0
         
@@ -297,10 +303,11 @@ class CompressSensing : NSObject, NSCoding {
     
     
     /* MSE */
-    private func MSE(lat_est:Array<Float>, lon_est:Array<Float>, lat_org: Array<Float>, lon_org: Array<Float>) -> Float {
+    private func MSE(lat_est:Array<Float>, lon_est:Array<Float>, lat_org: Array<Float>, lon_org: Array<Float>, latNN_est:Array<Double>, lonNN_est:Array<Double>, latNN_org: Array<Double>, lonNN_org: Array<Double>) -> (Float,Float) {
         let MSE = sqrt(measq((lat_est-lat_org))+measq((lon_est-lon_org)))
-        print("Total latlon MSE \(MSE)")
-        return MSE
+        let MSEnn = sqrt(measq((latNN_est-latNN_org))+measq((lonNN_est-lonNN_org)))
+        print("Total latlon MSE \(MSE), \(MSEnn)")
+        return (MSE, Float(MSEnn))
     }
     //MARK: Complete computation for 1 block length
     private func computeBlock() -> () {
@@ -356,7 +363,7 @@ class CompressSensing : NSObject, NSCoding {
     }
     
     // Entire computation for all input vector
-    func compute(obj:SettingsController, date:Date) -> ([CLLocationCoordinate2D], [CLLocationCoordinate2D],Int) {
+    func compute(obj:SettingsController, date:Date) -> ([CLLocationCoordinate2D], [CLLocationCoordinate2D],Int, Int) {
         let totalLength = locationVector!.count
         let numberOfBlocks = Int(floor(Double(totalLength / blockLength!)))
         var latTotal_est = Array<Float>()
@@ -365,6 +372,11 @@ class CompressSensing : NSObject, NSCoding {
         var lonTotal_org = Array<Float>()
         var est_coord = [CLLocationCoordinate2D]()
         var est_coordNN = [CLLocationCoordinate2D]()
+        
+        var latTotalNN_est = Array<Double>()
+        var lonTotalNN_est = Array<Double>()
+        var latTotalNN_org = Array<Double>()
+        var lonTotalNN_org = Array<Double>()
         
         for i in 0..<numberOfBlocks
         {
@@ -376,12 +388,17 @@ class CompressSensing : NSObject, NSCoding {
             latValArray.removeAll()
             lonValArray.removeAll()
             
+            latArrayNN_org.removeAll()
+            lonArrayNN_org.removeAll()
             latNN_est.removeAll()
             lonNN_est.removeAll()
             
             for item in locationVector![i*(blockLength!)...((i+1)*blockLength!)-1] {
                 latArray_org.append(Float(item.coordinate.latitude))
                 lonArray_org.append(Float(item.coordinate.longitude))
+                
+                latArrayNN_org.append(Double(item.coordinate.latitude))
+                lonArrayNN_org.append(Double(item.coordinate.longitude))
             }
             computeBlock()
             
@@ -389,6 +406,11 @@ class CompressSensing : NSObject, NSCoding {
             lonTotal_est.append(contentsOf: lon_est)
             latTotal_org.append(contentsOf: latArray_org)
             lonTotal_org.append(contentsOf: lonArray_org)
+            
+            latTotalNN_est.append(contentsOf: latNN_est)
+            lonTotalNN_est.append(contentsOf: lonNN_est)
+            latTotalNN_org.append(contentsOf: latArrayNN_org)
+            lonTotalNN_org.append(contentsOf: lonArrayNN_org)
             
             for k in 0..<blockLength!
             {
@@ -406,13 +428,14 @@ class CompressSensing : NSObject, NSCoding {
             }
         }
         
-        let mse = MSE(lat_est: latTotal_est, lon_est: lonTotal_est, lat_org: latTotal_org, lon_org: lonTotal_org)
+        let (mse,mseNN) = MSE(lat_est: latTotal_est, lon_est: lonTotal_est, lat_org: latTotal_org, lon_org: lonTotal_org,latNN_est: latTotalNN_est, lonNN_est: lonTotalNN_est, latNN_org: latTotalNN_org, lonNN_org: lonTotalNN_org)
         let MSE_wm = Int(mse*1e5)
+        let MSENN_wm = Int(mseNN*1e5)
         DispatchQueue.main.async{
             //self.updateProgress(obj:obj,diff:diff)
-            obj.mseLabel.text = String(format: "%d meters", MSE_wm)
+            obj.mseLabel.text = String(format: "%d meters, %d meters", MSE_wm, MSENN_wm)
         }
-        return (est_coord, est_coordNN, MSE_wm)
+        return (est_coord, est_coordNN, MSE_wm, MSENN_wm)
     }
     //MARK: Function to set parameters
     func setParam(maxIter:Int, pathLength:Int, samplingRatio:Double, learningRate:Float){

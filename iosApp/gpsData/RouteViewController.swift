@@ -18,6 +18,7 @@ class RouteViewController: UIViewController, MKMapViewDelegate, LocationTableVie
     var est_coord : [CLLocationCoordinate2D]?
     var est_coordNN : [CLLocationCoordinate2D]?
     var AvgMSE : Int?
+    var AvgMSENN : Int?
     var isEstimated = false
     var isEstimatedNN = false
     
@@ -144,8 +145,16 @@ class RouteViewController: UIViewController, MKMapViewDelegate, LocationTableVie
         {
         let alertMSE = UIAlertController(title: "Average MSE across entire path", message: nil, preferredStyle: UIAlertController.Style.alert)
         alertMSE.addAction(UIAlertAction(title: "Continue", style: UIAlertAction.Style.default, handler:nil))
-        alertMSE.message = "\(AvgMSE!) meters"
-        print("Average MSE is \(AvgMSE!) meters")
+        if (AvgMSENN != nil)
+        {
+            alertMSE.message = "\(AvgMSE!) meters, \(AvgMSENN!) meters "
+            print("Average MSE is \(AvgMSE!) meters, \(AvgMSENN!) meters")
+        }
+        else
+        {
+            alertMSE.message = "\(AvgMSE!) meters"
+            print("Average MSE is \(AvgMSE!) meters")
+        }
         self.present(alertMSE, animated: true, completion: nil)
         }
     }
