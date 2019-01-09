@@ -96,7 +96,8 @@
         "bReconstruct"           : false,
         "sampling_ratio"         : 0.25,
         "alpha"                  : 0.5,
-        "modelname"              : "default"
+        "modelname"              : "default",
+        "save_nnModel"           : false
     },
 
     "PLOT"                      : {
