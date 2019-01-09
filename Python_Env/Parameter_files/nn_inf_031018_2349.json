@@ -23,14 +23,16 @@
         "bReconstruct"           : true,
         "sampling_ratio"         : 0.20,
         "alpha"                  : 0.8,
-        "modelname"              : "Godzilla_08"
+        "modelname"              : "Godzilla_08",
+        "save_nnModel"           : false
     },
 
     "RCT_ALG_NN_Thor"           : {
         "bReconstruct"           : true,
         "sampling_ratio"         : 0.20,
         "alpha"                  : 0.5,
-        "modelname"              : "Thor_05_NAGD_0.01_0.9"
+        "modelname"              : "Thor_05_NAGD_0.01_0.9",
+        "save_nnModel"           : false
     },
 
     "RCT_ALG_NN_Loki"           : {

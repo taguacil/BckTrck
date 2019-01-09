@@ -26,6 +26,7 @@ import Upsurge
 import MachineLearningKit
 import CoreLocation
 import os.log
+import CoreML
 
 extension Array {
     /// Picks `n` random elements (partial Fisher-Yates shuffle approach)
@@ -41,6 +42,11 @@ extension Array {
 class CompressSensing : NSObject, NSCoding {
     
     //MARK: Properties
+    let nnModel = Godzilla_08_normal()
+    let NNCompute = true
+    let LASSOCompute = false
+    
+    var totalEstimate : TimeInterval
     let locationVector : [CLLocation]?
     var iteration : Int?
     var ratio : Double?
@@ -58,6 +64,13 @@ class CompressSensing : NSObject, NSCoding {
     var lon_est : [Float]
     var latValArray : Array<Float>
     var lonValArray : Array<Float>
+    
+    var latNN_est = Array<Double>()
+    var lonNN_est = Array<Double>()
+    var latArrayNN_org: [Double]
+    var lonArrayNN_org : [Double]
+    
+    
     var meanLat = Float(0)
     var meanLon = Float(0)
     var stdLat  = Float(0)
@@ -102,13 +115,17 @@ class CompressSensing : NSObject, NSCoding {
     init?(inputLocationVector: [CLLocation]) {
         
         self.blockSamples = 0
-        
         self.latArray_org = []
         self.lonArray_org = []
         self.lat_est = []
         self.lon_est = []
         self.latValArray = []
         self.lonValArray = []
+        
+        self.latArrayNN_org = []
+        self.lonArrayNN_org = []
+        
+        self.totalEstimate = 0
         
         // Extract the coordinates from the location vector if it exists
         guard !inputLocationVector.isEmpty else {
@@ -240,14 +257,19 @@ class CompressSensing : NSObject, NSCoding {
         weights_lon = try! lassModel.train(dctMat, output: lonValArray, initialWeights: initial_weights_lon, l1Penalty: l1_penalty!, tolerance: tolerance, iteration : iteration!)
     }
     
-    /* Performs IDCT of weights */
+    /* Performs IDCT of weights and renormalizes*/
     private func IDCT_weights(downSampledIndices: [Int]) {
         os_log("IDCT of weights", log: OSLog.default, type: .debug)
         var lat_cor = inverseDCT(weights_lat.column(1))
         var lon_cor = inverseDCT(weights_lon.column(1))
         lat_cor = Array(lat_cor*(1/Float(sqrt(ratio!*0.5*Double(blockLength!)))))
         lon_cor = Array(lon_cor*(1/Float(sqrt(ratio!*0.5*Double(blockLength!)))))
-        
+        renorm(downSampledIndices: downSampledIndices, lat_cor: lat_cor, lon_cor: lon_cor)
+    }
+    
+    /* Renormalization */
+    private func renorm(downSampledIndices: [Int], lat_cor: [Float], lon_cor: [Float]){
+        os_log("Renormalization LASSO", log: OSLog.default, type: .debug)
         var vec_lat = Array<Float>()
         var vec_lon = Array<Float>()
         
@@ -263,22 +285,90 @@ class CompressSensing : NSObject, NSCoding {
         lon_est = Array((lon_cor+delta_lon)*stdLon+meanLon)
     }
     
+    /* Renormalization NN */
+    private func renormNN(downSampledIndices: [Int]){
+        os_log("Renormalization NN", log: OSLog.default, type: .debug)
+        var vec_lat = Array<Double>()
+        var vec_lon = Array<Double>()
+        
+        for index in 0..<downSampledIndices.count
+        {
+            vec_lat.append(Double(latValArray[index])-latNN_est[downSampledIndices[index]])
+            vec_lon.append(Double(lonValArray[index])-lonNN_est[downSampledIndices[index]])
+        }
+        let delta_lat = mean(vec_lat)
+        let delta_lon = mean(vec_lon)
+        
+        latNN_est = Array((latNN_est+delta_lat)*Double(stdLat)+Double(meanLat))
+        lonNN_est = Array((lonNN_est+delta_lon)*Double(stdLon)+Double(meanLon))
+    }
+    
+    
     /* MSE */
-    private func MSE(lat_est:Array<Float>, lon_est:Array<Float>, lat_org: Array<Float>, lon_org: Array<Float>) -> Float {
+    private func MSE(lat_est:Array<Float>, lon_est:Array<Float>, lat_org: Array<Float>, lon_org: Array<Float>, latNN_est:Array<Double>, lonNN_est:Array<Double>, latNN_org: Array<Double>, lonNN_org: Array<Double>) -> (Float,Float) {
         let MSE = sqrt(measq((lat_est-lat_org))+measq((lon_est-lon_org)))
-        print("Total latlon MSE \(MSE)")
-        return MSE
+        let MSEnn = sqrt(measq((latNN_est-latNN_org))+measq((lonNN_est-lonNN_org)))
+        print("Total latlon MSE \(MSE), \(MSEnn)")
+        return (MSE, Float(MSEnn))
     }
     //MARK: Complete computation for 1 block length
     private func computeBlock() -> () {
         let downSampledIndices = randomSampling()
-        let dctMat = eyeDCT(downSampledIndices: downSampledIndices)
-        lassoReg(dctMat: dctMat)
-        IDCT_weights(downSampledIndices: downSampledIndices)
+        // LASSO
+        if (LASSOCompute)
+        {
+            let dctMat = eyeDCT(downSampledIndices: downSampledIndices)
+            lassoReg(dctMat: dctMat)
+            IDCT_weights(downSampledIndices: downSampledIndices)
+        }
+        // NN
+        if (NNCompute)
+        {
+            guard let latNNout = try? nnModel.prediction(input: Godzilla_08_normalInput(input1:preprocess(Array: latValArray)!)) else {
+                fatalError("Unexpected runtime error.")
+            }
+            latNN_est = postprocess(NNout: latNNout.output1)
+            guard let lonNNout = try? nnModel.prediction(input: Godzilla_08_normalInput(input1:preprocess(Array: lonValArray)!)) else {
+                fatalError("Unexpected runtime error.")
+            }
+            lonNN_est = postprocess(NNout: lonNNout.output1)
+            
+            // Renormalize both lat/lon for NN
+            renormNN(downSampledIndices: downSampledIndices)
+        }
+    }
+    
+    // UI update
+    private func updateProgress(obj:SettingsController, diff: TimeInterval){
+        print (progress)
+        obj.progressBar.setProgress(progress, animated: true)
+        //let prog_per = progress*100.0
+        //obj.progressLabel.text = String(format: "%.1f%%", prog_per)
+        obj.progressLabel.text = String(format: "%.1f secs", diff)
+    }
+    
+    // Preprocess and prepare input for NeuralNetworks
+    private func preprocess(Array: [Float]) -> MLMultiArray? {
+        guard let array = try? MLMultiArray(shape: [51 as NSNumber], dataType: .double) else {
+            return nil
+        }
+        for (index, element) in Array.enumerated() {
+            array[index] = NSNumber(value: Double(element))
+        }
+        return array
+    }
+    
+    // Postprocess NN output
+    private func postprocess(NNout: MLMultiArray) -> [Double] {
+        let length = NNout.count
+        let doublePtr =  NNout.dataPointer.bindMemory(to: Double.self, capacity: length)
+        let doubleBuffer = UnsafeBufferPointer(start: doublePtr, count: length)
+        let output = Array(doubleBuffer)
+        return output
     }
     
     // Entire computation for all input vector
-    func compute() -> ([CLLocationCoordinate2D],Int) {        
+    func compute(obj:SettingsController, date:Date) -> ([CLLocationCoordinate2D], [CLLocationCoordinate2D],Int, Int) {
         let totalLength = locationVector!.count
         let numberOfBlocks = Int(floor(Double(totalLength / blockLength!)))
         var latTotal_est = Array<Float>()
@@ -286,9 +376,16 @@ class CompressSensing : NSObject, NSCoding {
         var latTotal_org = Array<Float>()
         var lonTotal_org = Array<Float>()
         var est_coord = [CLLocationCoordinate2D]()
+        var est_coordNN = [CLLocationCoordinate2D]()
+        
+        var latTotalNN_est = Array<Double>()
+        var lonTotalNN_est = Array<Double>()
+        var latTotalNN_org = Array<Double>()
+        var lonTotalNN_org = Array<Double>()
         
         for i in 0..<numberOfBlocks
         {
+            let startIteration = Date()
             latArray_org.removeAll()
             lonArray_org.removeAll()
             lat_est.removeAll()
@@ -296,26 +393,78 @@ class CompressSensing : NSObject, NSCoding {
             latValArray.removeAll()
             lonValArray.removeAll()
             
+            latArrayNN_org.removeAll()
+            lonArrayNN_org.removeAll()
+            latNN_est.removeAll()
+            lonNN_est.removeAll()
+            
             for item in locationVector![i*(blockLength!)...((i+1)*blockLength!)-1] {
                 latArray_org.append(Float(item.coordinate.latitude))
                 lonArray_org.append(Float(item.coordinate.longitude))
+                
+                latArrayNN_org.append(Double(item.coordinate.latitude))
+                lonArrayNN_org.append(Double(item.coordinate.longitude))
             }
             computeBlock()
+            
             latTotal_est.append(contentsOf: lat_est)
             lonTotal_est.append(contentsOf: lon_est)
             latTotal_org.append(contentsOf: latArray_org)
             lonTotal_org.append(contentsOf: lonArray_org)
             
+            latTotalNN_est.append(contentsOf: latNN_est)
+            lonTotalNN_est.append(contentsOf: lonNN_est)
+            latTotalNN_org.append(contentsOf: latArrayNN_org)
+            lonTotalNN_org.append(contentsOf: lonArrayNN_org)
+            
             for k in 0..<blockLength!
             {
-                est_coord.append(CLLocationCoordinate2DMake(Double(lat_est[k]), Double(lon_est[k])))
+                if (LASSOCompute)
+                {
+                    est_coord.append(CLLocationCoordinate2DMake(Double(lat_est[k]), Double(lon_est[k])))
+                }
+                else
+                {
+                    est_coord.append(CLLocationCoordinate2DMake(0,0))
+                }
+                if (NNCompute)
+                {
+                    est_coordNN.append(CLLocationCoordinate2DMake(latNN_est[k], lonNN_est[k]))
+                }
+                else
+                {
+                    est_coordNN.append(CLLocationCoordinate2DMake(0.0, 0.0))
+                }
+                
             }
             progress += 1.0/Float(numberOfBlocks)
+            
+            let diff = Date().timeIntervalSince(startIteration)
+            //let diff = Date().timeIntervalSince(date)
+            
+            totalEstimate = Double(numberOfBlocks-i-1)*diff
+            DispatchQueue.main.async{
+                self.updateProgress(obj:obj, diff:self.totalEstimate)
+            }
         }
         
-        let mse = MSE(lat_est: latTotal_est, lon_est: lonTotal_est, lat_org: latTotal_org, lon_org: lonTotal_org)
-        let MSE_wm = Int(mse*1e5)
-        return (est_coord, MSE_wm)
+        let (mse,mseNN) = MSE(lat_est: latTotal_est, lon_est: lonTotal_est, lat_org: latTotal_org, lon_org: lonTotal_org,latNN_est: latTotalNN_est, lonNN_est: lonTotalNN_est, latNN_org: latTotalNN_org, lonNN_org: lonTotalNN_org)
+        
+        var MSE_wm = 0
+        if (LASSOCompute)
+        {
+            MSE_wm = Int(mse*1e5)
+        }
+        var MSENN_wm = 0
+        if (NNCompute)
+        {
+            MSENN_wm = Int(mseNN*1e5)
+        }
+        DispatchQueue.main.async{
+            //self.updateProgress(obj:obj,diff:diff)
+            obj.mseLabel.text = String(format: "%d meters, %d meters", MSE_wm, MSENN_wm)
+        }
+        return (est_coord, est_coordNN, MSE_wm, MSENN_wm)
     }
     //MARK: Function to set parameters
     func setParam(maxIter:Int, pathLength:Int, samplingRatio:Double, learningRate:Float){
