@@ -23,9 +23,11 @@
 import numpy as np
 import keras
 from keras.callbacks import EarlyStopping
+from keras.layers.advanced_activations import LeakyReLU
 import os
 import platform
 import matplotlib.pyplot as plt
+import coremltools
 
 # User-defined library import
 from Helper_functions.framework_error import CFrameworkError
@@ -68,6 +70,7 @@ class CNeuralNetwork:
         else:
             modelname_lat = resultsPath + struct[algorithm]["modelname"]
             modelname_lon = resultsPath + struct[algorithm]["modelname"]
+            self.save_nnModel = struct[algorithm]["save_nnModel"]
             try:
                 self.load_models(modelname_lat, modelname_lon)
             except FileNotFoundError:
@@ -95,41 +98,112 @@ class CNeuralNetwork:
 
     def design_nn(self):
         # Optimizers
-        ##nn_opt = keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
+        nn_opt = keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
         ##nn_opt = keras.optimizers.Adam(lr=0.01, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False) ## DIVERGENCE
         ##nn_opt = keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-8, decay=1e-6, amsgrad=False)
         ##nn_opt = keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-8, decay=1e-6, amsgrad=True)
-        nn_opt = keras.optimizers.SGD(lr=0.01, momentum=0.9, decay=1e-6, nesterov=True)
+        ##nn_opt = keras.optimizers.SGD(lr=0.01, momentum=0.9, decay=1e-6, nesterov=True)
 
         # For lat
-        """
         # Godzilla
         self.m_model_lat.add(
-            keras.layers.Dense(self.m_acquisition_length, activation=self.activation_fun,
+            keras.layers.Dense(self.m_acquisition_length, activation="linear",
                                input_shape=(self.number_of_samples,)))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+
         self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(keras.layers.Dense(256, activation="linear"))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+
         self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(keras.layers.Dense(48, activation="linear"))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+
         self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(keras.layers.Dense(256, activation="linear"))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+
         self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(keras.layers.Dense(48, activation="linear"))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+
         self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(keras.layers.Dense(256, activation="linear"))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+
         self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(keras.layers.Dense(256, activation="linear"))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+
         self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(keras.layers.Dense(48, activation="linear"))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+
         self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(keras.layers.Dense(256, activation="linear"))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+
         self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(48, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(keras.layers.Dense(48, activation="linear"))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+
         self.m_model_lat.add(keras.layers.Dropout(0.1))
-        self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(keras.layers.Dense(256, activation="linear"))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+
         self.m_model_lat.add(keras.layers.Dropout(0.1))
         self.m_model_lat.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
 
+        ## with kernel regularizer
+        """
+        self.m_model_lat.add(
+            keras.layers.Dense(self.m_acquisition_length, activation="linear",
+                               input_shape=(self.number_of_samples,)))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(256, activation="linear", kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(48, activation="linear", kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(256, activation="linear", kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(48, activation="linear", kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(256, activation="linear", kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(256, activation="linear", kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(48, activation="linear", kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(256, activation="linear", kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(48, activation="linear", kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(256, activation="linear", kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+
+        self.m_model_lat.add(keras.layers.Dropout(0.1))
+        self.m_model_lat.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
+        """
         """
         # Sparta
         self.m_model_lat.add(
@@ -149,8 +223,8 @@ class CNeuralNetwork:
         self.m_model_lat.add(keras.layers.Dropout(0.1))
         self.m_model_lat.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
         self.m_model_lat.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
-        
-        """
+
+
         # Pyro
         self.m_model_lat.add(
             keras.layers.Dense(self.m_acquisition_length, activation=self.activation_fun,
@@ -201,8 +275,7 @@ class CNeuralNetwork:
         self.m_model_lon.add(keras.layers.Dropout(0.1))
         self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
         self.m_model_lon.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
-        
-"""
+        """
         """
         # Pluto
         self.m_model_lon.add(
@@ -325,8 +398,9 @@ class CNeuralNetwork:
             json_file = open(modelpath_lat_json, 'r')
             loaded_model_json = json_file.read()
             json_file.close()
-            self.m_model_lat = keras.models.model_from_json(loaded_model_json,
-                                                            custom_objects={'activation_fun': self.activation_fun})
+            #self.m_model_lat = keras.models.model_from_json(loaded_model_json,
+            #                                                custom_objects={'activation_fun': self.activation_fun})
+            self.m_model_lat = keras.models.model_from_json(loaded_model_json)
             self.m_model_lat.load_weights(modelpath_lat_h5)
             bLatfound = True
         except FileNotFoundError:
@@ -346,6 +420,11 @@ class CNeuralNetwork:
                 self.m_model_lon = self.m_model_lat
             else:
                 raise FileNotFoundError
+        if self.save_nnModel:
+            modelName = modelname_lat + ".mlmodel"
+            coreml_model = coremltools.converters.keras.convert(self.m_model_lat)
+            coreml_model.visualize_spec()
+            coreml_model.save(modelName)
 
     def normalize_path_training(self, paths_latlon_org, paths_latlon_noisy):
         # Normalizing both downsampled and original data

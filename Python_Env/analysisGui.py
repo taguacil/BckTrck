@@ -199,7 +199,7 @@ class AppForm(QtWidgets.QMainWindow):
         try:
             self.data = map(float, stringVar.split())
             sliceTuple = list(self.data)
-        except ValueError:
+        except (ValueError, UnboundLocalError):
             print("Error in input value, displaying default")
 
         sampling_ratios_slice = self.sampling_ratios_values[self.sampling_ratios_values == sliceTuple[0]]
@@ -244,13 +244,13 @@ class AppForm(QtWidgets.QMainWindow):
         table[(table.LearningRate == learning_rates_slice) &
               (table.Noise == noise_levels_slice)]. \
             plot.scatter('SamplingRatio', 'PathLengths', c=column_iden, colormap='rainbow_r', ax=self.axes[0, 0],
-                         title='Lr <%.3f>, Noise <%.3f>' % (learning_rates_slice, noise_levels_slice),
+                         title='Lr <%.3f>, Noise <%.4f>' % (learning_rates_slice, noise_levels_slice),
                          logy=True, grid=bgrid)
 
         table[(table.PathLengths == path_lengths_slice) &
               (table.Noise == noise_levels_slice)]. \
             plot.scatter('SamplingRatio', 'LearningRate', c=column_iden, colormap='rainbow_r', ax=self.axes[0, 1],
-                         title='Pl <%d>, Noise <%.3f>' % (path_lengths_slice, noise_levels_slice),
+                         title='Pl <%d>, Noise <%.4f>' % (path_lengths_slice, noise_levels_slice),
                          logy=True, grid=bgrid)
 
         table[(table.LearningRate == learning_rates_slice) &
@@ -262,7 +262,7 @@ class AppForm(QtWidgets.QMainWindow):
         table[(table.SamplingRatio == sampling_ratios_slice) &
               (table.Noise == noise_levels_slice)]. \
             plot.scatter('PathLengths', 'LearningRate', c=column_iden, colormap='rainbow_r', ax=self.axes[1, 0],
-                         title='Sr <%.3f>, Noise <%.3f>' % (sampling_ratios_slice, noise_levels_slice),
+                         title='Sr <%.3f>, Noise <%.4f>' % (sampling_ratios_slice, noise_levels_slice),
                          logy=True, grid=bgrid)
 
         table[(table.LearningRate == learning_rates_slice) &
@@ -274,7 +274,7 @@ class AppForm(QtWidgets.QMainWindow):
         table[(table.SamplingRatio == sampling_ratios_slice) &
               (table.PathLengths == path_lengths_slice)]. \
             plot.scatter('LearningRate', 'Noise', c=column_iden, colormap='rainbow_r', ax=self.axes[1, 2],
-                         title='Lr <%.3f>, Noise <%.3f>' % (learning_rates_slice, noise_levels_slice),
+                         title='Lr <%.3f>, Noise <%.4f>' % (learning_rates_slice, noise_levels_slice),
                          logy=True, grid=bgrid)
 
         table[(table.LearningRate == learning_rates_slice) &

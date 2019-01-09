@@ -37,7 +37,8 @@ def noise_generator(params, positions_wm, noise_level):
     data_obj = cAWGN(params, noise_level)
     data_obj.generate_noisy_signal_dist()
     data_obj.add_noise_signal(positions_wm)
-    return data_obj.m_noisy_positions_wm, data_obj.m_noisy_positions_latlon, data_obj.noise_dist
+    noise_sq = np.sqrt(data_obj.noise[0, :] ** 2 + data_obj.noise[1, :] ** 2)
+    return data_obj.m_noisy_positions_wm, data_obj.m_noisy_positions_latlon, noise_sq
 
 
 class cAWGN:
