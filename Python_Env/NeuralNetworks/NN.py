@@ -45,7 +45,8 @@ else:
 workingDir = os.getcwd()
 resultsPath = workingDir + direc_ident + 'NeuralNetworks' + direc_ident + 'Models' + direc_ident
 
-#os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+
+# os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 
 class CNeuralNetwork:
     # Constructor
@@ -241,20 +242,26 @@ class CNeuralNetwork:
         )
 
         # For lon
-        
+
         # Loki
         self.m_model_lon.add(
             keras.layers.Dense(self.m_acquisition_length, activation=self.activation_fun,
                                input_shape=(self.number_of_samples,)))
-        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lon.add(
+            keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
         self.m_model_lon.add(keras.layers.Dropout(0.1))
-        self.m_model_lon.add(keras.layers.Dense(48, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
-        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lon.add(
+            keras.layers.Dense(48, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lon.add(
+            keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
         self.m_model_lon.add(keras.layers.Dropout(0.1))
-        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
-        self.m_model_lon.add(keras.layers.Dense(48, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lon.add(
+            keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lon.add(
+            keras.layers.Dense(48, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
         self.m_model_lon.add(keras.layers.Dropout(0.1))
-        self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
+        self.m_model_lon.add(
+            keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
         self.m_model_lon.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
         """
 
@@ -343,7 +350,7 @@ class CNeuralNetwork:
                 verbose=2
             )
 
-        if not (self.bTrainlon&self.bTrainlat):
+        if not (self.bTrainlon & self.bTrainlat):
             logger.warning("Please specify at least one model")
         return results_lat, results_lon
 
@@ -398,9 +405,11 @@ class CNeuralNetwork:
             json_file = open(modelpath_lat_json, 'r')
             loaded_model_json = json_file.read()
             json_file.close()
-            #self.m_model_lat = keras.models.model_from_json(loaded_model_json,
-            #                                                custom_objects={'activation_fun': self.activation_fun})
-            self.m_model_lat = keras.models.model_from_json(loaded_model_json)
+            if self.save_nnModel:
+                self.m_model_lat = keras.models.model_from_json(loaded_model_json)
+            else:
+                self.m_model_lat = keras.models.model_from_json(loaded_model_json,
+                                                                custom_objects={'activation_fun': self.activation_fun})
             self.m_model_lat.load_weights(modelpath_lat_h5)
             bLatfound = True
         except FileNotFoundError:
@@ -410,8 +419,11 @@ class CNeuralNetwork:
             json_file = open(modelpath_lon_json, 'r')
             loaded_model_json = json_file.read()
             json_file.close()
-            self.m_model_lon = keras.models.model_from_json(loaded_model_json,
-                                                            custom_objects={'activation_fun': self.activation_fun})
+            if self.save_nnModel:
+                self.m_model_lon = keras.models.model_from_json(loaded_model_json)
+            else:
+                self.m_model_lon = keras.models.model_from_json(loaded_model_json,
+                                                                custom_objects={'activation_fun': self.activation_fun})
             self.m_model_lon.load_weights(modelpath_lon_h5)
             if not bLatfound:
                 self.m_model_lat = self.m_model_lon
