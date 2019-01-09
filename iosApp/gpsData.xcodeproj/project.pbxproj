@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0F1AD95A21E523C100428BE8 /* Godzilla_08_normal.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 0F1AD95921E523C100428BE8 /* Godzilla_08_normal.mlmodel */; };
+		0F1AD95C21E5F8CB00428BE8 /* gpsData_test.csv in Resources */ = {isa = PBXBuildFile; fileRef = 0F1AD95B21E5F8CB00428BE8 /* gpsData_test.csv */; };
 		0F220D9B21C3F42900E12B7C /* SettingsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F220D9A21C3F42900E12B7C /* SettingsController.swift */; };
 		0F227BD4212764EA00CF2660 /* CompressSensing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F227BD3212764EA00CF2660 /* CompressSensing.swift */; };
 		0FAC8F04E72B9B5C53D738AE /* Pods_gpsDataTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 82F632CAC419EF20253B33FC /* Pods_gpsDataTests.framework */; };
@@ -46,6 +47,7 @@
 
 /* Begin PBXFileReference section */
 		0F1AD95921E523C100428BE8 /* Godzilla_08_normal.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; name = Godzilla_08_normal.mlmodel; path = ../../Python_Env/NeuralNetworks/Models/Godzilla_08_normal.mlmodel; sourceTree = "<group>"; };
+		0F1AD95B21E5F8CB00428BE8 /* gpsData_test.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = gpsData_test.csv; path = ../../../../Downloads/gpsData_test.csv; sourceTree = "<group>"; };
 		0F220D9A21C3F42900E12B7C /* SettingsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsController.swift; sourceTree = "<group>"; };
 		0F227BD3212764EA00CF2660 /* CompressSensing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompressSensing.swift; sourceTree = "<group>"; };
 		0FCF0528211F492000C3120B /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
@@ -155,6 +157,7 @@
 				0FE70D04211E05480087CD70 /* Info.plist */,
 				0FE70CFC211E05460087CD70 /* gpsData.xcdatamodeld */,
 				0F1AD95921E523C100428BE8 /* Godzilla_08_normal.mlmodel */,
+				0F1AD95B21E5F8CB00428BE8 /* gpsData_test.csv */,
 			);
 			path = gpsData;
 			sourceTree = "<group>";
@@ -310,6 +313,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0FE70D03211E05480087CD70 /* LaunchScreen.storyboard in Resources */,
+				0F1AD95C21E5F8CB00428BE8 /* gpsData_test.csv in Resources */,
 				0FE70D00211E05480087CD70 /* Assets.xcassets in Resources */,
 				0FE70CFB211E05460087CD70 /* Main.storyboard in Resources */,
 			);
