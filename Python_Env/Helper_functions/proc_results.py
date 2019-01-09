@@ -27,13 +27,15 @@
 import numpy as np
 from matplotlib.colors import LogNorm
 import matplotlib.pyplot as plt
-import _pickle  as pickle
+import matplotlib
+import _pickle as pickle
 import platform
 from scipy import signal
 import scipy.fftpack as ft
 
 from Helper_functions.framework_error import CFrameworkError
 from Helper_functions.framework_error import CErrorTypes
+from Helper_functions.csv_interpreter import merge_arrays
 
 # Bring the logger
 import logging
@@ -187,16 +189,14 @@ class cProcessFile:
     # Plot real path and reconstruction
     def plot_real_path_recon(self):
         logger.debug('Plotting real path and stitched reconstruction')
-        latlon_real = self.m_paths_latlon_org[:, :, :, 0].transpose(0, 2, 1).reshape(
-            (2, self.m_path_length * self.m_number_realization))
+        latlon_real = np.array([merge_arrays(self.m_paths_latlon_org[0, :, :, 0],self.m_path_length), merge_arrays(self.m_paths_latlon_org[1, :, :, 0],self.m_path_length)])
 
         plt.plot(latlon_real[1], latlon_real[0], '-*', label="Original real path")
         if self.m_bReconstruct:
             logger.debug('Plotting MSE of reconstructed paths latlon')
 
             for key in self.reconstructed_latlon_paths.keys():
-                r_path = self.reconstructed_latlon_paths[key][:, :, :, 0].transpose(0, 2, 1).reshape(
-                    (2, self.m_path_length * self.m_number_realization))
+                r_path = np.array([merge_arrays(self.reconstructed_latlon_paths[key][0, :, :, 0],self.m_path_length),merge_arrays(self.reconstructed_latlon_paths[key][1, :, :, 0],self.m_path_length)])
 
                 l2_r_latlon = np.sqrt(np.mean((latlon_real[0] - r_path[0]) ** 2 + (latlon_real[1] - r_path[1]) ** 2))
 
@@ -586,26 +586,32 @@ class cProcessFile:
             plt.ylabel('MSE')
             plt.show()
 
+            font = {'family': 'normal',
+                    'size': 14}
+
+            matplotlib.rc('font', **font)
+
             if self.m_bReconstruct:
                 logger.debug('Plotting MSE of reconstructed paths WM')
 
                 for key in self.reconstructed_wm_paths.keys():
-                    plt.plot(x_axis, MSE_r_wm[key], '-*',
-                             label="MSE_WM for %s with %.1f %% SR" % (key, self.average_sampling_ratio[key] * 100))
-                    plt.plot(x_axis, max_error[key], '-x', label="Average Max Error for %s with %.1f %% SR" % (
-                        key, self.average_sampling_ratio[key] * 100))
+                    plt.plot(x_axis, MSE_r_wm[key], '-*')
+                            #label="MSE_WM for %s with %.1f %% SR" % (key, self.average_sampling_ratio[key] * 100))
+                    # plt.plot(x_axis, max_error[key], '-x', label="Average Max Error for %s with %.1f %% SR" % (
+                    #   key, self.average_sampling_ratio[key] * 100))
 
-            plt.plot(x_axis, MSE_noise_WM, '-*', label="MSE_WM")
+            plt.plot(x_axis, MSE_noise_WM, '-*')
             ax = plt.gca()
             ax.invert_xaxis()
             plt.yscale('log')
             plt.xscale('log')
             plt.grid()
-            plt.legend(loc="upper right")
-            plt.title('Mean square error for %d samples and %d iteratirons' % (
-                self.m_acquisition_length, self.m_number_realization))
+            #plt.legend(("Optimal network", "Network variant 1", "Network variant 2", "Network variant 3"), loc="upper right")
+            plt.legend(("LASSO", "LASSO with adaptive sampling", "Noisy fully sampled path"), loc="upper right")
+            # plt.title('Mean square error for %d samples and %d iteratirons' % (
+            #    self.m_acquisition_length, self.m_number_realization))
             plt.xlabel('Noise level (meters)')
-            plt.ylabel('MSE')
+            plt.ylabel('RMSE (meters)')
             plt.show()
 
     # Plot SNR - mean error rate
@@ -649,6 +655,12 @@ class cProcessFile:
 
             l1_norm_lat = np.mean(np.linalg.norm(transformed_paths[0], ord=1, axis=0), axis=0)
             l1_norm_lon = np.mean(np.linalg.norm(transformed_paths[1], ord=1, axis=0), axis=0)
+
+            font = {'family': 'normal',
+                    'size': 14}
+
+            matplotlib.rc('font', **font)
+
             for per in range(percent_len):
                 value = (np.abs(transformed_paths[0, :, :, :]) / np.abs(transformed_paths[0, 0, :, :]) < percentiles[
                     per])
@@ -657,18 +669,19 @@ class cProcessFile:
                     self.transformed_paths[1, 0, :, :]) < percentiles[per]), axis=(0, 1))
 
             for i in range(percent_len):
-                plt.plot(x_axis, average_lat[i, :] * 100, "-*", label="%.2f %%" % (percentiles[i] * 100))
+                plt.plot(x_axis, average_lat[i, :] * 100, "-*", label="%.2f %% of maximum" % (percentiles[i] * 100))
 
             # Plotting percentages wrt. noise levels for latitude
             # ax = plt.gca()
             # ax.invert_xaxis()
             # plt.yscale('log')
-            plt.xscale('log')
+            #plt.xscale('log')
             plt.grid()
             plt.legend(loc="upper right")
-            plt.title('DCT analysis for latitude')
+            #plt.title('DCT analysis for latitude')
             plt.xlabel('Noise level (meters)')
-            plt.ylabel('Percentage of values below given percentile [%%]')
+            plt.ylabel('Percentage of values below given threshold')
+            plt.rcParams["figure.figsize"] = [10, 10]
             plt.show()
 
             for i in range(percent_len):
