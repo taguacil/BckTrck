@@ -2,7 +2,7 @@
     "bSimplified_Results"       : true,
     
     "gps_freq_Hz"               : 1,
-    "realization"               : 1000,
+    "realization"               : 100,
     "acquisition_time_sec"      : 256,
     "stepsize"                  : 1,
     
@@ -48,14 +48,6 @@
         "sampling_ratio"         : 0.20,
         "alpha"                  : 0.6,
         "modelname"              : "Thor_06",
-        "save_nnModel"           : false
-    },
-
-    "RCT_ALG_NN_Thor08_amsgrad"           : {
-        "bReconstruct"           : true,
-        "sampling_ratio"         : 0.20,
-        "alpha"                  : 0.8,
-        "modelname"              : "Thor_08_amsgrad",
         "save_nnModel"           : false
     },
 
@@ -135,6 +127,6 @@
         "bPlotAllrealizations"      : false,
         "bPlotLonLat_time_reconst"  : false,
         "bPlotMSE"                  : true,
-        "bPlotSNR"                  : true
+        "bPlotSNR"                  : false
     }
 }

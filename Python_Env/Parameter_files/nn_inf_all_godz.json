@@ -2,7 +2,7 @@
     "bSimplified_Results"       : true,
     
     "gps_freq_Hz"               : 1,
-    "realization"               : 1000,
+    "realization"               : 100,
     "acquisition_time_sec"      : 256,
     "stepsize"                  : 1,
     
@@ -119,6 +119,6 @@
         "bPlotAllrealizations"      : false,
         "bPlotLonLat_time_reconst"  : false,
         "bPlotMSE"                  : true,
-        "bPlotSNR"                  : true
+        "bPlotSNR"                  : false
     }
 }
