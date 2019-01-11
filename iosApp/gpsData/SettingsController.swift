@@ -129,7 +129,7 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
      })
      }*/
     
-    @IBAction func touchDown(_ sender: UISwitch) {
+    @IBAction func valueChanged(_ sender: UISwitch) {
         switch(sender.tag) {
         case 1:
             os_log("LASSO switch changed", log: OSLog.default, type: .debug)
