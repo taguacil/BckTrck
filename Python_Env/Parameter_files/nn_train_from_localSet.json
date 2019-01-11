@@ -26,8 +26,8 @@
         "sampling_ratio"         : 0.2,
         "alpha"                  : 0.8,
         "delta"                  : 0.0001,
-        "modelname_lat"          : "Godzilla_08_epsilon_decay_amsgrad_ker",
-        "modelname_lon"          : "Thor_08_epsilon_decay_amsgrad_ker"
+        "modelname_lat"          : "OptimalNet1",
+        "modelname_lon"          : "OptimalNet2"
     },
 
     "CSV_DATA"                  : {
