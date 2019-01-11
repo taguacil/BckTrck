@@ -27,7 +27,6 @@ from keras.layers.advanced_activations import LeakyReLU
 import os
 import platform
 import matplotlib.pyplot as plt
-import coremltools
 
 # User-defined library import
 from Helper_functions.framework_error import CFrameworkError
@@ -419,6 +418,8 @@ class CNeuralNetwork:
 
     def load_models(self, modelname_lat, modelname_lon):
         # Loads both models from unique names from directory NeuralNetworks/Models
+        if self.save_nnModel:
+            import coremltools
         modelpath_lat_json = modelname_lat + "_lat.json"
         modelpath_lon_json = modelname_lon + "_lon.json"
         modelpath_lat_h5 = modelname_lat + "_lat.h5"
