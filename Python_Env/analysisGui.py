@@ -26,6 +26,8 @@ from PyQt5 import QtWidgets
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
+import matplotlib
+import matplotlib.pyplot as plt
 import numpy as np
 
 import Helper_functions.analysisCompute
@@ -136,7 +138,27 @@ class AppForm(QtWidgets.QMainWindow):
         self.textbox.setText(str(self.sampling_ratios_values[0]) + ' ' + str(self.path_lengths_values[0]) + ' ' +
                              str(self.learning_rates_values[0]) + ' ' + str(self.noise_levels_values[0]))
 
+        self.individualPlot()
         self.on_draw()
+
+    def individualPlot(self):
+        font = {'family': 'normal',
+                'size': 14}
+
+        matplotlib.rc('font', **font)
+        plt.scatter(
+            self.table_lin[(self.table_lin.LearningRate == 0.1) & (self.table_lin.Noise == 20)]['SamplingRatio'],
+            self.table_lin[(self.table_lin.LearningRate == 0.1) & (self.table_lin.Noise == 20)]['PathLengths'],
+            c=self.table_lin[(self.table_lin.LearningRate == 0.1) & (self.table_lin.Noise == 20)]['MSE'],
+            cmap='rainbow_r'
+            )
+        plt.yscale('log')
+        plt.xlabel('Sampling ratio')
+        plt.ylabel('Path length')
+        cb = plt.colorbar()
+        cb.set_label('MSE (meters)')
+        plt.rcParams["figure.figsize"] = [10, 10]
+        plt.show()
 
     def save_plot(self):
         file_choices = "PNG (*.png)|*.png"
@@ -177,7 +199,7 @@ class AppForm(QtWidgets.QMainWindow):
         try:
             self.data = map(float, stringVar.split())
             sliceTuple = list(self.data)
-        except ValueError:
+        except (ValueError, UnboundLocalError):
             print("Error in input value, displaying default")
 
         sampling_ratios_slice = self.sampling_ratios_values[self.sampling_ratios_values == sliceTuple[0]]
@@ -222,13 +244,13 @@ class AppForm(QtWidgets.QMainWindow):
         table[(table.LearningRate == learning_rates_slice) &
               (table.Noise == noise_levels_slice)]. \
             plot.scatter('SamplingRatio', 'PathLengths', c=column_iden, colormap='rainbow_r', ax=self.axes[0, 0],
-                         title='Lr <%.3f>, Noise <%.3f>' % (learning_rates_slice, noise_levels_slice),
+                         title='Lr <%.3f>, Noise <%.4f>' % (learning_rates_slice, noise_levels_slice),
                          logy=True, grid=bgrid)
 
         table[(table.PathLengths == path_lengths_slice) &
               (table.Noise == noise_levels_slice)]. \
             plot.scatter('SamplingRatio', 'LearningRate', c=column_iden, colormap='rainbow_r', ax=self.axes[0, 1],
-                         title='Pl <%d>, Noise <%.3f>' % (path_lengths_slice, noise_levels_slice),
+                         title='Pl <%d>, Noise <%.4f>' % (path_lengths_slice, noise_levels_slice),
                          logy=True, grid=bgrid)
 
         table[(table.LearningRate == learning_rates_slice) &
@@ -240,7 +262,7 @@ class AppForm(QtWidgets.QMainWindow):
         table[(table.SamplingRatio == sampling_ratios_slice) &
               (table.Noise == noise_levels_slice)]. \
             plot.scatter('PathLengths', 'LearningRate', c=column_iden, colormap='rainbow_r', ax=self.axes[1, 0],
-                         title='Sr <%.3f>, Noise <%.3f>' % (sampling_ratios_slice, noise_levels_slice),
+                         title='Sr <%.3f>, Noise <%.4f>' % (sampling_ratios_slice, noise_levels_slice),
                          logy=True, grid=bgrid)
 
         table[(table.LearningRate == learning_rates_slice) &
@@ -252,7 +274,7 @@ class AppForm(QtWidgets.QMainWindow):
         table[(table.SamplingRatio == sampling_ratios_slice) &
               (table.PathLengths == path_lengths_slice)]. \
             plot.scatter('LearningRate', 'Noise', c=column_iden, colormap='rainbow_r', ax=self.axes[1, 2],
-                         title='Lr <%.3f>, Noise <%.3f>' % (learning_rates_slice, noise_levels_slice),
+                         title='Lr <%.3f>, Noise <%.4f>' % (learning_rates_slice, noise_levels_slice),
                          logy=True, grid=bgrid)
 
         table[(table.LearningRate == learning_rates_slice) &

@@ -328,6 +328,91 @@ class LocationTableViewController: UITableViewController, CLLocationManagerDeleg
     }
     
     private func loadLocation() -> [CLLocation]? {
+        let localDataSource = false
+        if (localDataSource)
+        {
+            return loadLocationCSV()
+        }
+        else
+        {
+            return loadLocationExisting()
+        }
+    }
+    
+    private func loadLocationCSV() -> [CLLocation]? {
+        
+        let kCSVFileName = "gpsData_test"
+        let kCSVFileExtension = ".csv"
+        
+        var localVector = [CLLocation]()
+        var loc_coords = CLLocationCoordinate2D()
+        var locationPoint = CLLocation()
+        
+        var data = readDataFromCSV(fileName: kCSVFileName, fileType: kCSVFileExtension)
+        if (data != nil)
+        {
+            data = cleanRows(file: data!)
+            let csvRows = csv(data: data!)
+            for(index, _) in csvRows.enumerated()
+            {
+                if ((index > 0) && (index < csvRows.count-1))
+                {
+                    loc_coords = CLLocationCoordinate2D(latitude: Double(csvRows[index][1])!, longitude: Double(csvRows[index][2])!)
+                    locationPoint = CLLocation(coordinate: loc_coords,
+                                               altitude: Double(csvRows[index][3])!,
+                                               horizontalAccuracy : Double(csvRows[index][7])!,
+                                               verticalAccuracy :  Double(csvRows[index][6])!,
+                                               timestamp: Date())
+                    localVector.append(locationPoint)
+                }
+
+            }
+            return localVector
+        }
+        else
+        {
+            return nil
+        }
+        
+    }
+    
+    private func loadLocationExisting() -> [CLLocation]? {
         return NSKeyedUnarchiver.unarchiveObject(withFile: CompressSensing.ArchiveURL.path) as? [CLLocation]
     }
+    
+    // parse csv file
+    private func readDataFromCSV(fileName:String, fileType: String)-> String!{
+        guard let filepath = Bundle.main.path(forResource: fileName, ofType: fileType)
+            else {
+                return nil
+        }
+        do {
+            var contents = try String(contentsOfFile: filepath, encoding: .utf8)
+            contents = cleanRows(file: contents)
+            return contents
+        } catch {
+            print("File Read Error for file \(filepath)")
+            return nil
+        }
+    }
+    
+    private func cleanRows(file:String)->String{
+        var cleanFile = file
+        cleanFile = cleanFile.replacingOccurrences(of: "\r", with: "\n")
+        cleanFile = cleanFile.replacingOccurrences(of: "\n\n", with: "\n")
+        //        cleanFile = cleanFile.replacingOccurrences(of: ";;", with: "")
+        //        cleanFile = cleanFile.replacingOccurrences(of: ";\n", with: "")
+        return cleanFile
+    }
+    
+    private func csv(data: String) -> [[String]] {
+        var result: [[String]] = []
+        let rows = data.components(separatedBy: "\n")
+        for row in rows {
+            let columns = row.components(separatedBy: ",")
+            result.append(columns)
+        }
+        return result
+    }
+
 }

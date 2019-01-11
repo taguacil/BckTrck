@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -127,7 +127,7 @@
 		102AACB5B6B67A24281FEA3B8EE74D14 /* Pods-gpsDataUITests.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-gpsDataUITests.modulemap"; sourceTree = "<group>"; };
 		13EA42DA2F3E9A622B5FCC54B4826A1B /* MachineLearningKit.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = MachineLearningKit.modulemap; sourceTree = "<group>"; };
 		15382BF575330C79FA6105A591A90EFE /* MatrixSlice.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MatrixSlice.swift; path = Sources/Upsurge/MatrixSlice.swift; sourceTree = "<group>"; };
-		19B54D5721B5F84D37D8F4C8261DEF62 /* Pods_gpsData.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_gpsData.framework; path = "Pods-gpsData.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		19B54D5721B5F84D37D8F4C8261DEF62 /* Pods_gpsData.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_gpsData.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1FC721BB84BF69DFBEF927F706BD3CFC /* TensorSlice.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TensorSlice.swift; path = Sources/Upsurge/TensorSlice.swift; sourceTree = "<group>"; };
 		2036795A526B333672AEAB53C066B75D /* Auxiliary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Auxiliary.swift; path = Sources/Upsurge/Auxiliary.swift; sourceTree = "<group>"; };
 		23101C431FB199B3B89EBD2AF8A1ADD3 /* ActivationFunctionType.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ActivationFunctionType.swift; path = MLKit/Classes/ANN/ActivationFunctionType.swift; sourceTree = "<group>"; };
@@ -154,8 +154,8 @@
 		5B752D974D8CCF2F0BE3E3F36BCD6692 /* Pods-gpsDataTests-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-gpsDataTests-dummy.m"; sourceTree = "<group>"; };
 		5F262AE33936C5FCDD3B197944CEB010 /* BiologicalProcessManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = BiologicalProcessManager.swift; path = "MLKit/Classes/Genetic Algorithms/BiologicalProcessManager.swift"; sourceTree = "<group>"; };
 		63AD4D009F5C6A9AE806CC33D72FD876 /* Pods-gpsData-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-gpsData-Info.plist"; sourceTree = "<group>"; };
-		68E845F2F7B4AA2D2748D36EAA294913 /* Upsurge.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Upsurge.framework; path = Upsurge.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		68EF01B710B90FA1B2D31C386B4849F9 /* MachineLearningKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = MachineLearningKit.framework; path = MachineLearningKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		68E845F2F7B4AA2D2748D36EAA294913 /* Upsurge.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Upsurge.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		68EF01B710B90FA1B2D31C386B4849F9 /* MachineLearningKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = MachineLearningKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6C9EECC39772C3BA163779E9D2FB763C /* Arithmetic.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Arithmetic.swift; path = Sources/Upsurge/Arithmetic.swift; sourceTree = "<group>"; };
 		714306E126E412B50DDA562B7F994E35 /* MLKit.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = MLKit.h; path = MLKit/Classes/MLKit.h; sourceTree = "<group>"; };
 		720EFB789C86D148392A9CFA6284C5A5 /* Pods-gpsData-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-gpsData-acknowledgements.plist"; sourceTree = "<group>"; };
@@ -182,15 +182,15 @@
 		ABBE68BDFC053EC8A6B6EEC8D19DF303 /* ValueArraySlice.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ValueArraySlice.swift; path = Sources/Upsurge/ValueArraySlice.swift; sourceTree = "<group>"; };
 		ADC2CBA92E44DDABBDA5CBB3074AE5F7 /* Pods-gpsDataUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-gpsDataUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		AE6619A33D76B5C308A37FC7A55B8525 /* Hyperbolic.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Hyperbolic.swift; path = Sources/Upsurge/Hyperbolic.swift; sourceTree = "<group>"; };
-		AED6363BCE2E6531967F22213D2BFCFE /* Pods_gpsDataTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_gpsDataTests.framework; path = "Pods-gpsDataTests.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		AED6363BCE2E6531967F22213D2BFCFE /* Pods_gpsDataTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_gpsDataTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B1542CE435917953A70C8BC790A5714D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS12.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
-		B36AB396275697EEE1A5B13BA8A38FE3 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		B36AB396275697EEE1A5B13BA8A38FE3 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		B65AE98D3F3392AE7454DFCAB2C8CF89 /* Complex.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Complex.swift; path = Sources/Upsurge/Complex.swift; sourceTree = "<group>"; };
 		B7EE3E4BF8FC10D4DE914CCFCB79EB37 /* PolynomialRegression.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PolynomialRegression.swift; path = MLKit/Classes/Regression/PolynomialRegression.swift; sourceTree = "<group>"; };
 		B8C2001D03706F7FA69FBC5EBAD9CB2E /* Pods-gpsDataTests.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.module; path = "Pods-gpsDataTests.modulemap"; sourceTree = "<group>"; };
 		C24DA8082A5B5BFA100E8078F9A6D25C /* Pods-gpsDataUITests-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-gpsDataUITests-umbrella.h"; sourceTree = "<group>"; };
 		C82595CAE87E2A71020B4825826AAFE7 /* Span.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Span.swift; path = Sources/Upsurge/Span.swift; sourceTree = "<group>"; };
-		C972EF67C3379204E5F7853984161CF3 /* Pods_gpsDataUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = Pods_gpsDataUITests.framework; path = "Pods-gpsDataUITests.framework"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C972EF67C3379204E5F7853984161CF3 /* Pods_gpsDataUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_gpsDataUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CAE033A7416658C31930691D2D90B4BE /* 2DTensorSlice.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = 2DTensorSlice.swift; path = Sources/Upsurge/2DTensorSlice.swift; sourceTree = "<group>"; };
 		CB402DEAD6685ABD19A01FD9E56B0A94 /* Layer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = Layer.swift; path = MLKit/Classes/ANN/Layer.swift; sourceTree = "<group>"; };
 		CBBB2FBD514A2E2FE732C3C7C71B0131 /* PointerUtilities.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PointerUtilities.swift; path = Sources/Upsurge/PointerUtilities.swift; sourceTree = "<group>"; };
@@ -281,7 +281,6 @@
 				866AEEFEFD30486234C2C83762D26E1A /* SimpleLinearRegression.swift */,
 				EFB3D91A20134E25B5A9AD96BE5248D5 /* Support Files */,
 			);
-			name = MachineLearningKit;
 			path = MachineLearningKit;
 			sourceTree = "<group>";
 		};
@@ -417,7 +416,6 @@
 				ABBE68BDFC053EC8A6B6EEC8D19DF303 /* ValueArraySlice.swift */,
 				A6E2E84B71F513B8A499C2AFA62262B6 /* Support Files */,
 			);
-			name = Upsurge;
 			path = Upsurge;
 			sourceTree = "<group>";
 		};
@@ -612,7 +610,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0930;
-				LastUpgradeCheck = 0930;
+				LastUpgradeCheck = 1010;
 			};
 			buildConfigurationList = 2D8E8EC45A3A1A1D94AE762CB5028504 /* Build configuration list for PBXProject "Pods" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -801,7 +799,6 @@
 			baseConfigurationReference = 9A53D333FB288DD29A4D85A136CFD920 /* Pods-gpsData.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -815,11 +812,7 @@
 				INFOPLIST_FILE = "Target Support Files/Pods-gpsData/Pods-gpsData-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MACH_O_TYPE = staticlib;
 				MODULEMAP_FILE = "Target Support Files/Pods-gpsData/Pods-gpsData.modulemap";
 				OTHER_LDFLAGS = "";
@@ -840,7 +833,6 @@
 			baseConfigurationReference = 57F636DF6381C183C9B1F0479EC4333F /* Pods-gpsDataTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -854,11 +846,7 @@
 				INFOPLIST_FILE = "Target Support Files/Pods-gpsDataTests/Pods-gpsDataTests-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MACH_O_TYPE = staticlib;
 				MODULEMAP_FILE = "Target Support Files/Pods-gpsDataTests/Pods-gpsDataTests.modulemap";
 				OTHER_LDFLAGS = "";
@@ -943,7 +931,6 @@
 			baseConfigurationReference = ADC2CBA92E44DDABBDA5CBB3074AE5F7 /* Pods-gpsDataUITests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -957,11 +944,7 @@
 				INFOPLIST_FILE = "Target Support Files/Pods-gpsDataUITests/Pods-gpsDataUITests-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MACH_O_TYPE = staticlib;
 				MODULEMAP_FILE = "Target Support Files/Pods-gpsDataUITests/Pods-gpsDataUITests.modulemap";
 				OTHER_LDFLAGS = "";
@@ -982,7 +965,6 @@
 			baseConfigurationReference = 7C87CC16BDCDEA0FA29585186853F699 /* Pods-gpsDataTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -996,11 +978,7 @@
 				INFOPLIST_FILE = "Target Support Files/Pods-gpsDataTests/Pods-gpsDataTests-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MACH_O_TYPE = staticlib;
 				MODULEMAP_FILE = "Target Support Files/Pods-gpsDataTests/Pods-gpsDataTests.modulemap";
 				OTHER_LDFLAGS = "";
@@ -1070,8 +1048,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRIP_INSTALLED_PRODUCT = NO;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 4.2;
 				SYMROOT = "${SRCROOT}/../build";
 			};
@@ -1081,7 +1058,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = DB0BC3E259FE88438C4C0B2E8FC52311 /* Upsurge.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
@@ -1095,11 +1071,7 @@
 				INFOPLIST_FILE = "Target Support Files/Upsurge/Upsurge-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MODULEMAP_FILE = "Target Support Files/Upsurge/Upsurge.modulemap";
 				PRODUCT_MODULE_NAME = Upsurge;
 				PRODUCT_NAME = Upsurge;
@@ -1118,7 +1090,6 @@
 			baseConfigurationReference = 29491BB908ED4F02C4587981C194CAE6 /* Pods-gpsData.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -1132,11 +1103,7 @@
 				INFOPLIST_FILE = "Target Support Files/Pods-gpsData/Pods-gpsData-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MACH_O_TYPE = staticlib;
 				MODULEMAP_FILE = "Target Support Files/Pods-gpsData/Pods-gpsData.modulemap";
 				OTHER_LDFLAGS = "";
@@ -1157,7 +1124,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9AC5566DD4B1AA12B879F37C51D2C0DD /* MachineLearningKit.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
@@ -1171,11 +1137,7 @@
 				INFOPLIST_FILE = "Target Support Files/MachineLearningKit/MachineLearningKit-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MODULEMAP_FILE = "Target Support Files/MachineLearningKit/MachineLearningKit.modulemap";
 				PRODUCT_MODULE_NAME = MachineLearningKit;
 				PRODUCT_NAME = MachineLearningKit;
@@ -1193,7 +1155,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = DB0BC3E259FE88438C4C0B2E8FC52311 /* Upsurge.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
@@ -1207,11 +1168,7 @@
 				INFOPLIST_FILE = "Target Support Files/Upsurge/Upsurge-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MODULEMAP_FILE = "Target Support Files/Upsurge/Upsurge.modulemap";
 				PRODUCT_MODULE_NAME = Upsurge;
 				PRODUCT_NAME = Upsurge;
@@ -1231,7 +1188,6 @@
 			baseConfigurationReference = CF722CE23A130F1D96BD97399B61115B /* Pods-gpsDataUITests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
@@ -1245,11 +1201,7 @@
 				INFOPLIST_FILE = "Target Support Files/Pods-gpsDataUITests/Pods-gpsDataUITests-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MACH_O_TYPE = staticlib;
 				MODULEMAP_FILE = "Target Support Files/Pods-gpsDataUITests/Pods-gpsDataUITests.modulemap";
 				OTHER_LDFLAGS = "";
@@ -1270,7 +1222,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9AC5566DD4B1AA12B879F37C51D2C0DD /* MachineLearningKit.xcconfig */;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CODE_SIGN_IDENTITY = "";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
@@ -1284,11 +1235,7 @@
 				INFOPLIST_FILE = "Target Support Files/MachineLearningKit/MachineLearningKit-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MODULEMAP_FILE = "Target Support Files/MachineLearningKit/MachineLearningKit.modulemap";
 				PRODUCT_MODULE_NAME = MachineLearningKit;
 				PRODUCT_NAME = MachineLearningKit;
