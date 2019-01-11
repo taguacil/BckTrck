@@ -40,11 +40,16 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
     var pathLength:Int?
     var samplingRatio:Double?
     var learningRate:Float?
+    var bNN : Bool?
+    var bLASSO : Bool?
     var locationVector : [CLLocation]?
     var est_coord : [CLLocationCoordinate2D]?
     var est_coordNN : [CLLocationCoordinate2D]?
     var AvgMSE : Int?
     var AvgMSENN : Int?
+    
+    @IBOutlet weak var switchLasso: UISwitch!
+    @IBOutlet weak var switchNN: UISwitch!
     
     let alert = UIAlertController(title: "Computing", message: "please wait", preferredStyle: UIAlertController.Style.alert)
     let alertParams = UIAlertController(title: "Invalid parameters!", message: "Parameters not correct, cannot proceed", preferredStyle: UIAlertController.Style.alert)
@@ -85,6 +90,12 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
         updateSaveButtonState()
         //progressBar.frame = CGRect(x: 10, y: 70, width: 250, height: 0)
         init_variable_params()
+        switchLasso.tag = 1
+        switchNN.tag = 2
+        switchLasso.setOn(false, animated: false)
+        switchNN.setOn(false, animated: false)
+        bLASSO = switchLasso.isOn
+        bNN = switchNN.isOn
         //alert.view.addSubview(progressBar)
         alertParams.addAction(UIAlertAction(title: "Continue", style: UIAlertAction.Style.default, handler:nil))
     }
@@ -118,6 +129,19 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
      })
      }*/
     
+    @IBAction func touchDown(_ sender: UISwitch) {
+        switch(sender.tag) {
+        case 1:
+            os_log("LASSO switch changed", log: OSLog.default, type: .debug)
+            bLASSO = switchLasso.isOn
+        case 2:
+            os_log("NN switch changed", log: OSLog.default, type: .debug)
+            bNN = switchNN.isOn
+        default:
+            fatalError("Unexpected Switch label; \(String(describing: sender.tag))")
+        }
+    }
+    
     @IBAction func applyButton(_ sender: UIButton) {
         //DispatchQueue.main.async {
         init_variable_params()
@@ -135,7 +159,7 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
                 if let CS = CompressSensing(inputLocationVector: self.locationVector!)
                 {
                     os_log("Computation starts...", log: OSLog.default, type: .debug)
-                    CS.setParam(maxIter: self.iterations!, pathLength: self.pathLength!, samplingRatio: self.samplingRatio!, learningRate: self.learningRate! )
+                    CS.setParam(maxIter: self.iterations!, pathLength: self.pathLength!, samplingRatio: self.samplingRatio!, learningRate: self.learningRate!, bLASSO: self.bLASSO!, bNN: self.bNN! )
                     let (est_coord, est_coordNN, AvgMSE, AvgMSENN) = CS.compute(obj:self, date:startDate)
                     self.est_coord = est_coord
                     self.est_coordNN = est_coordNN
@@ -162,6 +186,10 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
         samplingRatioTextField.text = "0.2"
         learningRateTextField.text = "0.01"
         updateSaveButtonState()
+        switchLasso?.setOn(false, animated: true)
+        switchNN?.setOn(false, animated: true)
+        bLASSO = false
+        bNN = false
     }
     
     
@@ -198,8 +226,11 @@ class SettingsController: UIViewController, UITextFieldDelegate, UINavigationCon
     //MARK: Private Methods
     private func updateSaveButtonState() {
         // Disable the Save button if the text field is empty.
-        let text = iterTextField.text ?? ""
-        applyButton.isEnabled = !text.isEmpty
+        let itertext = iterTextField.text ?? ""
+        let blockText = pathLengthTextField.text ?? ""
+        let lrText = learningRateTextField.text ?? ""
+        let srText = samplingRatioTextField.text ?? ""
+        applyButton.isEnabled = !(itertext.isEmpty || blockText.isEmpty || lrText.isEmpty || srText.isEmpty)
     }
     
     private func init_variable_params(){
