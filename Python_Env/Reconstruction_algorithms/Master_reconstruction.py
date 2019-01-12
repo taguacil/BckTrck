@@ -74,27 +74,15 @@ def reconstructor(params, path, algorithm, noise_dist):
     var = np.repeat(np.expand_dims(np.var(path, axis=1), axis=1), params['acquisition_length'], axis=1)
     normalized_path = (path - mean) / np.sqrt(var)
 
-    if algorithm == "RCT_ALG_LASSO" and params['RCT_ALG_LASSO']["bReconstruct"]:
+    if (("ALG_LASSO" in algorithm) or ("ALG_BFGS" in algorithm)) and params[algorithm]["bReconstruct"]:
         try:
-            temp, final_sampling_ratio = lassoOps(params['RCT_ALG_LASSO'], False, normalized_path, noise_dist)
+            temp, final_sampling_ratio = lassoOps(params[algorithm], False, normalized_path, noise_dist)
         except ValueError as valerr:
             raise CFrameworkError(valerr.args[0]) from valerr
 
-    if algorithm == "RCT_ALG_ADAPTIVE_LASSO" and params['RCT_ALG_ADAPTIVE_LASSO']["bReconstruct"]:
+    elif "ALG_ADAPTIVE" in algorithm and params[algorithm]["bReconstruct"]:
         try:
-            temp, final_sampling_ratio = lassoOps(params['RCT_ALG_ADAPTIVE_LASSO'], True, normalized_path, noise_dist)
-        except ValueError as valerr:
-            raise CFrameworkError(valerr.args[0]) from valerr
-
-    elif algorithm == "RCT_ALG_BFGS" and params['RCT_ALG_BFGS']["bReconstruct"]:
-        try:
-            temp, final_sampling_ratio = lassoOps(params['RCT_ALG_BFGS'], False, normalized_path, noise_dist)
-        except ValueError as valerr:
-            raise CFrameworkError(valerr.args[0]) from valerr
-
-    elif algorithm == "RCT_ALG_ADAPTIVE_BFGS" and params['RCT_ALG_ADAPTIVE_BFGS']["bReconstruct"]:
-        try:
-            temp, final_sampling_ratio = lassoOps(params['RCT_ALG_ADAPTIVE_BFGS'], True, normalized_path, noise_dist)
+            temp, final_sampling_ratio = lassoOps(params[algorithm], True, normalized_path, noise_dist)
         except ValueError as valerr:
             raise CFrameworkError(valerr.args[0]) from valerr
 
