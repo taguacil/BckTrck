@@ -27,7 +27,6 @@ from keras.layers.advanced_activations import LeakyReLU
 import os
 import platform
 import matplotlib.pyplot as plt
-import coremltools
 
 # User-defined library import
 from Helper_functions.framework_error import CFrameworkError
@@ -242,7 +241,7 @@ class CNeuralNetwork:
         )
 
         # For lon
-
+        """
         # Loki
         self.m_model_lon.add(
             keras.layers.Dense(self.m_acquisition_length, activation=self.activation_fun,
@@ -266,6 +265,7 @@ class CNeuralNetwork:
         """
 
         # Thor
+        """
         self.m_model_lon.add(
             keras.layers.Dense(self.m_acquisition_length, activation=self.activation_fun,
                                input_shape=(self.number_of_samples,)))
@@ -283,6 +283,29 @@ class CNeuralNetwork:
         self.m_model_lon.add(keras.layers.Dense(256, activation=self.activation_fun, kernel_regularizer=keras.regularizers.l2(0.01)))
         self.m_model_lon.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
         """
+        self.m_model_lon.add(
+            keras.layers.Dense(self.m_acquisition_length, activation="linear",
+                               input_shape=(self.number_of_samples,)))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lon.add(keras.layers.Dense(256, activation="linear"))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lon.add(keras.layers.Dense(48, activation="linear"))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lon.add(keras.layers.Dense(256, activation="linear"))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lon.add(keras.layers.Dense(256, activation="linear"))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lon.add(keras.layers.Dense(48, activation="linear"))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+        self.m_model_lon.add(keras.layers.Dropout(0.1))
+        self.m_model_lon.add(keras.layers.Dense(256, activation="linear"))
+        self.m_model_lat.add(LeakyReLU(alpha=self.alpha))  # add an advanced activation
+        self.m_model_lon.add(keras.layers.Dense(self.m_acquisition_length, activation="linear"))
         """
         # Pluto
         self.m_model_lon.add(
@@ -395,6 +418,8 @@ class CNeuralNetwork:
 
     def load_models(self, modelname_lat, modelname_lon):
         # Loads both models from unique names from directory NeuralNetworks/Models
+        if self.save_nnModel:
+            import coremltools
         modelpath_lat_json = modelname_lat + "_lat.json"
         modelpath_lon_json = modelname_lon + "_lon.json"
         modelpath_lat_h5 = modelname_lat + "_lat.h5"
