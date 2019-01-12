@@ -20,7 +20,7 @@
     "bTrainNetwork"             : false,
 
     "RCT_ALG_NN_Godzilla"       : {
-        "bReconstruct"           : true,
+        "bReconstruct"           : false,
         "sampling_ratio"         : 0.20,
         "alpha"                  : 0.8,
         "modelname"              : "Godzilla_08",
@@ -43,7 +43,7 @@
     
     "PLOT"                      : {
         "bPlotAllrealizations"      : false,
-        "bPlotLonLat_time_reconst"  : true,
+        "bPlotLonLat_time_reconst"  : false,
         "bPlotMSE"                  : false,
         "bPlotSNR"                  : false
     }
