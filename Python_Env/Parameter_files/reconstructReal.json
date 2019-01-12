@@ -43,7 +43,7 @@
     
     "PLOT"                      : {
         "bPlotAllrealizations"      : false,
-        "bPlotLonLat_time_reconst"  : false,
+        "bPlotLonLat_time_reconst"  : true,
         "bPlotMSE"                  : false,
         "bPlotSNR"                  : false
     }

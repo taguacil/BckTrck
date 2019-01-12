@@ -443,8 +443,8 @@ class cProcessFile:
                         for key in self.reconstructed_latlon_paths.keys():
                             r_path = self.reconstructed_latlon_paths[key]
                             plt.plot(x_axis, r_path[0, :, 0, noise], '-*',
-                                     label="Latitude for %s with %.1f %% sr for rl %.1f" % (
-                                         key, self.average_sampling_ratio[key] * 100, k))
+                                     label="Latitude for %s with %.1f %% sr" % (
+                                         key, self.average_sampling_ratio[key] * 100))
 
                 # Plotting Latitude
                 buf = "Noisy latitude for noise level %d (meters)" % (noise_level[noise])
