@@ -1,0 +1,116 @@
+{
+    "bSimplified_Results"       : true,
+    
+    "gps_freq_Hz"               : 1,
+    "realization"               : 100,
+    "acquisition_time_sec"      : 256,
+    "stepsize"                  : 1,
+    
+    "random_seed"               : 6468,
+    "bUse_random_seed"          : false,
+    
+    "noise_level_meter"         : [40,30,20,10,7,5,3,2,1,0.5],
+    "noise_std_meter"           : [3],
+    
+    "bUse_static_init"          : true,
+    "staticLat"                 : 0,
+    "staticLon"                 : 0,
+
+    "bReconstruct"              : true,
+    "bTrainNetwork"             : false,
+
+    "RCT_ALG_NN_Godz8"       : {
+        "bReconstruct"           : true,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.8,
+        "modelname"              : "Godzilla_08",
+        "save_nnModel"           : false
+    },
+
+    "RCT_ALG_NN_Pyro05"           : {
+        "bReconstruct"           : false,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.5,
+        "modelname"              : "Pyro",
+        "save_nnModel"           : false
+    },
+
+    "RCT_ALG_NN_sparta8_ker_nag"           : {
+        "bReconstruct"           : false,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.8,
+        "modelname"              : "Sparta_08_ker_only_NAG",
+        "save_nnModel"           : false
+    },
+
+    "RCT_ALG_NN_Loki8_ker_nag"           : {
+        "bReconstruct"           : true,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.8,
+        "modelname"              : "Loki_08_ker_only_NAG",
+        "save_nnModel"           : false
+    },
+
+    "RCT_ALG_NN_Pyro08"           : {
+        "bReconstruct"           : false,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.8,
+        "modelname"              : "Pyro_08",
+        "save_nnModel"           : false
+    },
+
+    "RCT_ALG_NN_Pluto08"           : {
+        "bReconstruct"           : false,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.8,
+        "modelname"              : "Pluto_08",
+        "save_nnModel"           : false
+},
+
+    "RCT_ALG_NN_Thor8_epsdeamsker"       : {
+        "bReconstruct"           : false,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.8,
+        "modelname"              : "Thor_08_epsilon_decay_amsgrad_ker",
+        "save_nnModel"           : false
+    },
+
+    "RCT_ALG_NN_Thor_08_nag_001_09"       : {
+        "bReconstruct"           : true,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.8,
+        "modelname"              : "Thor_08_NAG_0.01_0.9",
+        "save_nnModel"           : false
+    },
+
+    "RCT_ALG_NN_Thor08_amsgrad"           : {
+        "bReconstruct"           : false,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.8,
+        "modelname"              : "Thor_08_amsgrad",
+        "save_nnModel"           : false
+    },
+
+    "RCT_ALG_NN_Thor_08_nag_0001_09"       : {
+        "bReconstruct"           : false,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.8,
+        "modelname"              : "Thor_08_NAG_0.001_0.9",
+        "save_nnModel"           : false
+    },
+
+    "RCT_ALG_NN_Thor8"       : {
+        "bReconstruct"           : true,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.8,
+        "modelname"              : "Thor_08",
+        "save_nnModel"           : false
+    },
+
+    "PLOT"                      : {
+        "bPlotAllrealizations"      : false,
+        "bPlotLonLat_time_reconst"  : false,
+        "bPlotMSE"                  : true,
+        "bPlotSNR"                  : true
+    }
+}
