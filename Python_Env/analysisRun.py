@@ -62,6 +62,7 @@ class CRunAnalysis:
                     self.parameter_scan_files.append(file)
 
     def analyseNoise(self):
+        self.parameter_scan_files = np.sort(self.parameter_scan_files)
         number_of_points = len(self.parameter_scan_files)
         if number_of_points == 0:
             print('Wrong filenames identifier, no files found')
@@ -96,7 +97,7 @@ class CRunAnalysis:
                     noise_levels[i] = temp['noise_level_meter'][0]  # script designed with only one value of noise here
                     for key in reconstructed_latlon_paths.keys():
                         MSE_r_latlon[key][i] = temp["RESULTS"]['MSE_latlon'][key]
-                        final_sampling_ratio[key][:, i] = temp["RESULTS"]['final_sampling_ratio'][key][0]
+                        final_sampling_ratio[key][:, i] = temp["RESULTS"]['final_sampling_ratio'][key][:, 0]
 
         # Extra parameters required based on what is being plotted
         localStruct["noise_level_meter"] = noise_levels

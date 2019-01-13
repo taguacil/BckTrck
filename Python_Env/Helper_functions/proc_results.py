@@ -570,7 +570,7 @@ class cProcessFile:
                 for key in self.reconstructed_latlon_paths.keys():
                     plt.plot(x_axis, MSE_r_latlon[key], '-*',
                              label="MSE_latlon for %s with %.1f %% SR" % (
-                                 key, self.average_sampling_ratio[key] * 100))
+                                 key, np.mean(self.average_sampling_ratio[key]) * 100))
 
             # Plotting MSE
             plt.plot(x_axis, MSE_noise_latlon, '-*', label="MSE_latlon")
@@ -762,11 +762,11 @@ class cProcessFile:
 
         x_axis = self.m_noise_level_meter
         for key in self.reconstructed_latlon_paths.keys():
-            self.average_sampling_ratio[key] = np.mean(self.final_sampling_ratio[key])
+            self.average_sampling_ratio[key] = np.mean(self.final_sampling_ratio[key], axis=0)
 
             if self.m_plotStruct['bPlotAvgSR']:
                 logger.debug('Plotting average sampling ratio')
-                plt.plot(x_axis, self.final_sampling_ratio[key][0, :] * 100, '-*', label="Avg SR for %s" % key)
+                plt.plot(x_axis, self.average_sampling_ratio[key] * 100, '-*', label="Avg SR for %s" % key)
 
         # Plotting SNR
         if self.m_plotStruct['bPlotAvgSR']:
