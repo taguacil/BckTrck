@@ -84,7 +84,7 @@ def process_data(params):
         del params['RESULTS']['paths_latlon_noisy']
         del params['RESULTS']['reconstructed_latlon_paths']
         del params['RESULTS']['reconstructed_WM_paths']
-        del params['RESULTS']['final_sampling_ratio']
+        # del params['RESULTS']['final_sampling_ratio']
         del params['RESULTS']['noise_vals']
 
         if not params['TRANSFORM']['bDctTransform']:
@@ -770,7 +770,7 @@ class cProcessFile:
 
         # Plotting SNR
         if self.m_plotStruct['bPlotAvgSR']:
-            # plt.xscale('log')
+            plt.xscale('log')
             plt.grid()
             plt.legend(loc="upper right")
             plt.title('Average SR across different algorithms')
