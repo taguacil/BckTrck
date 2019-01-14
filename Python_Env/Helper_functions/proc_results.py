@@ -626,7 +626,7 @@ class cProcessFile:
                 for key in self.reconstructed_latlon_paths.keys():
                     plt.plot(x_axis, reconstructed_db_latlon[key], '-*',
                              label="SNR_latlon for %s with %.1f %% SR" % (
-                                 key, self.average_sampling_ratio[key] * 100))
+                                 key, np.mean(self.average_sampling_ratio[key]) * 100))
 
             # Plotting SNR
             plt.xscale('log')

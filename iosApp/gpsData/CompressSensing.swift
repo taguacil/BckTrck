@@ -42,7 +42,7 @@ extension Array {
 class CompressSensing : NSObject, NSCoding {
     
     //MARK: Properties
-    let nnModel = Godzilla_08_normal()
+    let nnModel = OptimalNet1()
     
     var totalEstimate : TimeInterval
     let locationVector : [CLLocation]?
@@ -324,11 +324,11 @@ class CompressSensing : NSObject, NSCoding {
         // NN
         if (NNCompute!)
         {
-            guard let latNNout = try? nnModel.prediction(input: Godzilla_08_normalInput(input1:preprocess(Array: latValArray)!)) else {
+            guard let latNNout = try? nnModel.prediction(input: OptimalNet1Input(input1:preprocess(Array: latValArray)!)) else {
                 fatalError("Unexpected runtime error.")
             }
             latNN_est = postprocess(NNout: latNNout.output1)
-            guard let lonNNout = try? nnModel.prediction(input: Godzilla_08_normalInput(input1:preprocess(Array: lonValArray)!)) else {
+            guard let lonNNout = try? nnModel.prediction(input: OptimalNet1Input(input1:preprocess(Array: lonValArray)!)) else {
                 fatalError("Unexpected runtime error.")
             }
             lonNN_est = postprocess(NNout: lonNNout.output1)
