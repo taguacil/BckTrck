@@ -1,0 +1,132 @@
+{
+    "realization"               : 500,
+    
+    "bUse_filename"             : true,
+    "filename"                  : "",
+     
+    "bSimplified_Results"       : true,
+     
+    "acquisition_time_sec"      : 256,
+    
+    "noise_level_meter"         : [0.0005], 
+    "noise_std_meter"           : [100,80,5,0],
+
+    "bReconstruct"              : true,
+
+    "bUse_static_init"          : true,
+    "staticLat"                 : 0,
+    "staticLon"                 : 0,
+
+    "RCT_ALG_NN_Godzilla"       : {
+        "bReconstruct"           : false,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.8,
+        "modelname"              : "Godzilla_08"
+    },
+
+    "RCT_ALG_LASSO_02"             : {
+        "bReconstruct_from_dct"     : true,
+        "bReconstruct"              : true,
+        "bUse_gaussian_matrix"      : false,
+        "lasso_learning_rate"       : 0.01,
+        "sampling_ratio"            : 0.2
+    },
+
+    "RCT_ALG_LASSO_04"             : {
+        "bReconstruct_from_dct"     : true,
+        "bReconstruct"              : true,
+        "bUse_gaussian_matrix"      : false,
+        "lasso_learning_rate"       : 0.01,
+        "sampling_ratio"            : 0.4
+    },
+
+    "RCT_ALG_LASSO_06"             : {
+        "bReconstruct_from_dct"     : true,
+        "bReconstruct"              : true,
+        "bUse_gaussian_matrix"      : false,
+        "lasso_learning_rate"       : 0.01,
+        "sampling_ratio"            : 0.6
+    },
+
+    "RCT_ALG_LASSO_08"             : {
+        "bReconstruct_from_dct"     : true,
+        "bReconstruct"              : true,
+        "bUse_gaussian_matrix"      : false,
+        "lasso_learning_rate"       : 0.01,
+        "sampling_ratio"            : 0.8
+    },
+
+    "RCT_ALG_LASSO_1"             : {
+        "bReconstruct_from_dct"     : true,
+        "bReconstruct"              : true,
+        "bUse_gaussian_matrix"      : false,
+        "lasso_learning_rate"       : 0.01,
+        "sampling_ratio"            : 1
+    },
+
+    "RCT_ALG_ADAPTIVE_LASSO_08_200"             : {
+        "bReconstruct_from_dct"     : true,
+        "bUse_gaussian_matrix"      : false,
+        "bReconstruct"              : true,
+        "lasso_learning_rate"       : 0.01,
+        "sampling_ratio"            : 0.2,
+        "forgetting_factor"         : 0.8,
+        "threshold_high"            : 0.51,
+        "threshold_low"             : 0.49,
+        "cap_param"                 : 1,
+        "error_baseline"            : [200]
+    },
+
+    "RCT_ALG_ADAPTIVE_LASSO_08_100"             : {
+        "bReconstruct_from_dct"     : true,
+        "bUse_gaussian_matrix"      : false,
+        "bReconstruct"              : true,
+        "lasso_learning_rate"       : 0.01,
+        "sampling_ratio"            : 0.2,
+        "forgetting_factor"         : 0.8,
+        "threshold_high"            : 0.51,
+        "threshold_low"             : 0.49,
+        "cap_param"                 : 1,
+        "error_baseline"            : [100]
+    },
+
+    "RCT_ALG_ADAPTIVE_LASSO_08_50"             : {
+        "bReconstruct_from_dct"     : true,
+        "bUse_gaussian_matrix"      : false,
+        "bReconstruct"              : true,
+        "lasso_learning_rate"       : 0.01,
+        "sampling_ratio"            : 0.2,
+        "forgetting_factor"         : 0.8,
+        "threshold_high"            : 0.51,
+        "threshold_low"             : 0.49,
+        "cap_param"                 : 1,
+        "error_baseline"            : [50]
+    },
+
+    "RCT_ALG_ADAPTIVE_LASSO_08_20"             : {
+        "bReconstruct_from_dct"     : true,
+        "bUse_gaussian_matrix"      : false,
+        "bReconstruct"              : true,
+        "lasso_learning_rate"       : 0.01,
+        "sampling_ratio"            : 0.2,
+        "forgetting_factor"         : 0.8,
+        "threshold_high"            : 0.51,
+        "threshold_low"             : 0.49,
+        "cap_param"                 : 1,
+        "error_baseline"            : [20]
+    },
+
+    "RCT_ALG_ADAPTIVE_LASSO_08_10"             : {
+        "bReconstruct_from_dct"     : true,
+        "bUse_gaussian_matrix"      : false,
+        "bReconstruct"              : true,
+        "lasso_learning_rate"       : 0.01,
+        "sampling_ratio"            : 0.2,
+        "forgetting_factor"         : 0.8,
+        "threshold_high"            : 0.51,
+        "threshold_low"             : 0.49,
+        "cap_param"                 : 1,
+        "error_baseline"            : [10]
+    }
+
+}

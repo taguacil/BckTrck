@@ -1,14 +1,18 @@
 {
-    "realization"               : 50,
+    "realization"               : 500,
+    
+    "bUse_filename"             : true,
+    "filename"                  : "",
+     
+    "bSimplified_Results"       : true,
+     
     "acquisition_time_sec"      : 256,
-    "random_seed"               : 8941,
-    "bUse_random_seed"          : true,
     
-    "noise_level_meter"         : [100,80,50,40,30,20,10,7,5,3,2,1,0.5],
+    "noise_level_meter"         : [0.0005], 
     "noise_std_meter"           : [100,80,5,0],
-    
+
     "bReconstruct"              : true,
-    
+
     "bUse_static_init"          : true,
     "staticLat"                 : 0,
     "staticLon"                 : 0,
@@ -60,7 +64,20 @@
         "sampling_ratio"            : 1
     },
 
-    "RCT_ALG_ADAPTIVE_LASSO"             : {
+    "RCT_ALG_ADAPTIVE_LASSO_005_100"             : {
+        "bReconstruct_from_dct"     : true,
+        "bUse_gaussian_matrix"      : false,
+        "bReconstruct"              : true,
+        "lasso_learning_rate"       : 0.01,
+        "sampling_ratio"            : 0.2,
+        "forgetting_factor"         : 0.05,
+        "threshold_high"            : 0.51,
+        "threshold_low"             : 0.49,
+        "cap_param"                 : 1,
+        "error_baseline"            : [100]
+    },
+
+    "RCT_ALG_ADAPTIVE_LASSO_01_100"             : {
         "bReconstruct_from_dct"     : true,
         "bUse_gaussian_matrix"      : false,
         "bReconstruct"              : true,
@@ -70,14 +87,33 @@
         "threshold_high"            : 0.51,
         "threshold_low"             : 0.49,
         "cap_param"                 : 1,
-        "error_baseline"            : [100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100]
+        "error_baseline"            : [100]
     },
-    
-    "PLOT"                      : {
-        "bPlotAllrealizations"      : false,
-        "bPlotMSE"                  : true,
-        "bPlotSNR"                  : true,
-        "bPlotAvgSR"                : true,
-        "bPlotAccuracy"             : false
+
+    "RCT_ALG_ADAPTIVE_LASSO_05_100"             : {
+        "bReconstruct_from_dct"     : true,
+        "bUse_gaussian_matrix"      : false,
+        "bReconstruct"              : true,
+        "lasso_learning_rate"       : 0.01,
+        "sampling_ratio"            : 0.2,
+        "forgetting_factor"         : 0.5,
+        "threshold_high"            : 0.51,
+        "threshold_low"             : 0.49,
+        "cap_param"                 : 1,
+        "error_baseline"            : [100]
+    },
+
+    "RCT_ALG_ADAPTIVE_LASSO_08_100"             : {
+        "bReconstruct_from_dct"     : true,
+        "bUse_gaussian_matrix"      : false,
+        "bReconstruct"              : true,
+        "lasso_learning_rate"       : 0.01,
+        "sampling_ratio"            : 0.2,
+        "forgetting_factor"         : 0.8,
+        "threshold_high"            : 0.51,
+        "threshold_low"             : 0.49,
+        "cap_param"                 : 1,
+        "error_baseline"            : [100]
     }
+
 }
