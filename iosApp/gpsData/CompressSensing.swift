@@ -43,8 +43,6 @@ class CompressSensing : NSObject, NSCoding {
     
     //MARK: Properties
     let nnModel = Godzilla_08_normal()
-    let NNCompute = true
-    let LASSOCompute = false
     
     var totalEstimate : TimeInterval
     let locationVector : [CLLocation]?
@@ -52,6 +50,8 @@ class CompressSensing : NSObject, NSCoding {
     var ratio : Double?
     var l1_penalty : Float? // learning rate
     var blockLength : Int?
+    var NNCompute : Bool?
+    var LASSOCompute : Bool?
     
     var progress = Float(0)
     
@@ -315,14 +315,14 @@ class CompressSensing : NSObject, NSCoding {
     private func computeBlock() -> () {
         let downSampledIndices = randomSampling()
         // LASSO
-        if (LASSOCompute)
+        if (LASSOCompute!)
         {
             let dctMat = eyeDCT(downSampledIndices: downSampledIndices)
             lassoReg(dctMat: dctMat)
             IDCT_weights(downSampledIndices: downSampledIndices)
         }
         // NN
-        if (NNCompute)
+        if (NNCompute!)
         {
             guard let latNNout = try? nnModel.prediction(input: Godzilla_08_normalInput(input1:preprocess(Array: latValArray)!)) else {
                 fatalError("Unexpected runtime error.")
@@ -419,7 +419,7 @@ class CompressSensing : NSObject, NSCoding {
             
             for k in 0..<blockLength!
             {
-                if (LASSOCompute)
+                if (LASSOCompute!)
                 {
                     est_coord.append(CLLocationCoordinate2DMake(Double(lat_est[k]), Double(lon_est[k])))
                 }
@@ -427,7 +427,7 @@ class CompressSensing : NSObject, NSCoding {
                 {
                     est_coord.append(CLLocationCoordinate2DMake(0,0))
                 }
-                if (NNCompute)
+                if (NNCompute!)
                 {
                     est_coordNN.append(CLLocationCoordinate2DMake(latNN_est[k], lonNN_est[k]))
                 }
@@ -451,12 +451,12 @@ class CompressSensing : NSObject, NSCoding {
         let (mse,mseNN) = MSE(lat_est: latTotal_est, lon_est: lonTotal_est, lat_org: latTotal_org, lon_org: lonTotal_org,latNN_est: latTotalNN_est, lonNN_est: lonTotalNN_est, latNN_org: latTotalNN_org, lonNN_org: lonTotalNN_org)
         
         var MSE_wm = 0
-        if (LASSOCompute)
+        if (LASSOCompute!)
         {
             MSE_wm = Int(mse*1e5)
         }
         var MSENN_wm = 0
-        if (NNCompute)
+        if (NNCompute!)
         {
             MSENN_wm = Int(mseNN*1e5)
         }
@@ -467,13 +467,15 @@ class CompressSensing : NSObject, NSCoding {
         return (est_coord, est_coordNN, MSE_wm, MSENN_wm)
     }
     //MARK: Function to set parameters
-    func setParam(maxIter:Int, pathLength:Int, samplingRatio:Double, learningRate:Float){
+    func setParam(maxIter:Int, pathLength:Int, samplingRatio:Double, learningRate:Float, bLASSO:Bool, bNN:Bool){
         os_log("Setting algorithm parameters", log: OSLog.default, type: .debug)
         iteration = maxIter
         blockLength = pathLength
         ratio = samplingRatio
         l1_penalty = learningRate
         blockSamples = Int(floor(Double(blockLength!)*ratio!)) // to sample in a block
+        LASSOCompute = bLASSO
+        NNCompute = bNN
     }
     
 }
