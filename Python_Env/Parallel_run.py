@@ -64,8 +64,9 @@ iterable_length = range(0, len(iterable_params), 1)
 numberOfArgument = len(sys.argv)
 if numberOfArgument == 2:
     flag = sys.argv[1]  # first argument should be the filenames identifier
+    configFile = sys.argv[2]
 else:
-    print('Filenames identifier must be given or too many arguments given')
+    print('Filenames identifier must be given and config file to be used or too many arguments given')
     sys.exit(0)
 
 
@@ -78,7 +79,7 @@ def CSNN_proc(index):
     noise_level_in = iterable_params[index][4]
 
     framework_model = cFramework()
-    framework_model.update_framework(['CSNN_proc', 'Parameter_files' + direc_ident + 'parallel_run_def.json'])
+    framework_model.update_framework(['CSNN_proc', configFile])
     framework_model.local_struct["realization"] = realization_in
     framework_model.local_struct["acquisition_time_sec"] = path_length_in
     framework_model.local_struct["noise_level_meter"] = [noise_level_in]
