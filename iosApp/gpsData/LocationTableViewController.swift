@@ -43,10 +43,16 @@ class LocationTableViewController: UITableViewController, CLLocationManagerDeleg
         enableBasicLocationServices()
         
         // Load any saved locationData.
-        if let savedLocation = loadLocation() {
+        /*if let savedLocation = loadLocation() {
             locationVector += savedLocation
-        }
+        }*/
+        chooseDataType()
     }
+    
+    /*override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        chooseDataType()
+    }*/
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -327,8 +333,9 @@ class LocationTableViewController: UITableViewController, CLLocationManagerDeleg
         }
     }
     
+    // Not used
     private func loadLocation() -> [CLLocation]? {
-        let localDataSource = false
+        let localDataSource = true
         if (localDataSource)
         {
             return loadLocationCSV()
@@ -414,5 +421,27 @@ class LocationTableViewController: UITableViewController, CLLocationManagerDeleg
         }
         return result
     }
+    
+    private func chooseDataType()->(){
+            let alert = UIAlertController(title: "Should I use the loaded CSV file ?", message: nil, preferredStyle: UIAlertController.Style.alert)
+        alert.addAction(UIAlertAction(title: "YES", style: UIAlertAction.Style.default, handler:{(action:UIAlertAction!) in
+            print("You have pressed yes")
+            if let savedLocation = self.loadLocationCSV() {
+                self.locationVector += savedLocation
+                self.tableView.reloadData()
+            }
+        }))
+        alert.addAction(UIAlertAction(title: "NO, use stored data", style: UIAlertAction.Style.default, handler:{(action:UIAlertAction!) in
+            print("You have pressed no")
+            if let savedLocation = self.loadLocationExisting() {
+                self.locationVector += savedLocation
+                self.tableView.reloadData()
+            }
+        }))
+
+            self.present(alert, animated: true, completion: nil)
+        
+    }
+
 
 }

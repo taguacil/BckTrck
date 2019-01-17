@@ -409,6 +409,20 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
+                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="eZU-I0-ZGe" userLabel="SwitchLasso">
+                                <rect key="frame" x="310" y="362" width="49" height="31"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <connections>
+                                    <action selector="valueChanged:" destination="yCj-wd-rEm" eventType="valueChanged" id="jU4-CY-h5m"/>
+                                </connections>
+                            </switch>
+                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Nnz-fj-Ckl" userLabel="SwitchNN">
+                                <rect key="frame" x="310" y="440" width="49" height="31"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <connections>
+                                    <action selector="valueChanged:" destination="yCj-wd-rEm" eventType="valueChanged" id="xTt-61-LAX"/>
+                                </connections>
+                            </switch>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
@@ -463,6 +477,8 @@
                         <outlet property="progressBar" destination="rG0-uM-oOv" id="Jhc-lC-4FG"/>
                         <outlet property="progressLabel" destination="vSa-Bf-FsT" id="h2g-0M-b9a"/>
                         <outlet property="samplingRatioTextField" destination="7Im-lk-Mf0" id="ylh-Co-GN1"/>
+                        <outlet property="switchLasso" destination="eZU-I0-ZGe" id="R0V-tp-PZb"/>
+                        <outlet property="switchNN" destination="Nnz-fj-Ckl" id="OQX-Fl-PpY"/>
                         <segue destination="0VA-zY-95g" kind="show" identifier="showReconstruct" id="pMR-Lj-gPh"/>
                     </connections>
                 </viewController>

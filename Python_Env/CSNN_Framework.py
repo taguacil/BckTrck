@@ -213,7 +213,8 @@ class cFramework:
             for lvl in range(noise_level_len):
                 for realization in range(numberOfRealizations):
                     # Generate random data
-                    self.logger.log(15, 'Generating random data for realization <%d>', realization)
+                    self.logger.log(15, 'Generating random data for lvl <%d> for realization <%d>',
+                                    local_struct['noise_level_meter'][lvl], realization)
                     if not use_csv_data:
                         (paths_wm_org[:, :, realization, lvl], paths_latlon_org[:, :, realization, lvl]) = \
                             random_2d_path_generator(local_struct)
