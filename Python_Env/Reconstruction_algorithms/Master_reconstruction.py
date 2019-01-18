@@ -103,7 +103,6 @@ def lassoOps(params, adaptive, normalized_path, noise_dist):
         adaptiveObj = cAdaptiveSampling(params, adaptive, noise_blocks[i])
         lassoObj = cLasso(params)
         samples, final_sampling_ratio = adaptiveObj.adaptiveSample()
-        print(samples)
         temp_lat.append(lassoObj.reconstructor(lat_blocks[i], samples))
         temp_lon.append(lassoObj.reconstructor(lon_blocks[i], samples))
         temp_ratios.append(final_sampling_ratio)
@@ -117,12 +116,34 @@ def lassoOps(params, adaptive, normalized_path, noise_dist):
 
 
 def bfgsOps(params, adaptive, normalized_path, noise_dist):
-    adaptiveObj = cAdaptiveSampling(params, adaptive, noise_dist)
-    bfgsObj = cBFGS(params)
-    samples, final_sampling_ratio = adaptiveObj.adaptiveSample()
-    normalized_lat = bfgsObj.bfgs_run(normalized_path[0], samples)
-    normalized_lon = bfgsObj.bfgs_run(normalized_path[1], samples)
-    temp = np.array([normalized_lat, normalized_lon])
+    if params["bSplit"]:
+        lat_blocks = split_array(normalized_path[0], params["block_length"], bOCS=params["bOCS"])
+        lon_blocks = split_array(normalized_path[1], params["block_length"], bOCS=params["bOCS"])
+        noise_blocks = split_array(noise_dist, params["block_length"], bOCS=params["bOCS"])
+        num_blocks = len(noise_blocks)
+    else:
+        lat_blocks = normalized_path[0].reshape(1, len(normalized_path[0]))
+        lon_blocks = normalized_path[1].reshape(1, len(normalized_path[1]))
+        noise_blocks = noise_dist.reshape(1, len(noise_dist))
+        num_blocks = 1
+
+    temp_lat = []
+    temp_lon = []
+    temp_ratios = []
+
+    for i in range(num_blocks):
+        adaptiveObj = cAdaptiveSampling(params, adaptive, noise_blocks[i])
+        bfgsObj = cBFGS(params)
+        samples, final_sampling_ratio = adaptiveObj.adaptiveSample()
+        temp_lat.append(bfgsObj.bfgs_run(lat_blocks[i], samples))
+        temp_lon.append(bfgsObj.bfgs_run(lon_blocks[i], samples))
+        temp_ratios.append(final_sampling_ratio)
+
+    final_lat = merge_arrays(np.array(temp_lat), params["block_length"], bOCS=params["bOCS"])
+    final_lon = merge_arrays(np.array(temp_lon), params["block_length"], bOCS=params["bOCS"])
+    final_sampling_ratio = np.mean(temp_ratios)
+    temp = np.array([final_lat, final_lon])
+    
     return temp, final_sampling_ratio
 
 
