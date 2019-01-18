@@ -1,6 +1,6 @@
 {
     "realization"               : 1,
-    "acquisition_time_sec"      : 2048,
+    "acquisition_time_sec"      : 512,
     "random_seed"               : 8941,
     "use_random_seed"           : true,
     
@@ -14,13 +14,24 @@
     "bReconstruct"              : true,
     
     "RCT_ALG_LASSO"             : {
-        "bReconstruct_from_dct"     : true,
-        "bReconstruct"              : true,
-        "bSplit"                    : true,
-        "bOCS"                      : true,
+        "bReconstruct_from_dct"     : false,
+        "bReconstruct"              : false,
+        "bSplit"                    : false,
+        "bOCS"                      : false,
         "block_length"              : 256,
         "lasso_learning_rate"       : 0.001,
         "sampling_ratio"            : 0.2
+    },
+
+    "RCT_ALG_NN_Godzilla"       : {
+        "bReconstruct"           : true,
+        "bSplit"                 : true,
+        "bOCS"                   : true,
+        "block_length"           : 256,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.8,
+        "modelname"              : "Godzilla_08",
+        "save_nnModel"           : false
     },
     
     "PLOT"                      : {

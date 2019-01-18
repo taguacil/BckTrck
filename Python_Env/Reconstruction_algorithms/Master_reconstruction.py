@@ -143,7 +143,7 @@ def bfgsOps(params, adaptive, normalized_path, noise_dist):
     final_lon = merge_arrays(np.array(temp_lon), params["block_length"], bOCS=params["bOCS"])
     final_sampling_ratio = np.mean(temp_ratios)
     temp = np.array([final_lat, final_lon])
-    
+
     return temp, final_sampling_ratio
 
 
@@ -173,7 +173,24 @@ def reconstructor(params, path, algorithm, noise_dist):
             logger.debug('Beginning inference')
             nn_name = algorithm + "Obj"
             temp = np.zeros((2, params['acquisition_length']))
-            temp[0], temp[1] = params[nn_name].nn_inference(normalized_path)
+            if params[algorithm]["bSplit"]:
+                lat_blocks = split_array(normalized_path[0], params[algorithm]["block_length"], bOCS=params[algorithm]["bOCS"])
+                lon_blocks = split_array(normalized_path[1], params[algorithm]["block_length"], bOCS=params[algorithm]["bOCS"])
+                noise_blocks = split_array(noise_dist, params[algorithm]["block_length"], bOCS=params[algorithm]["bOCS"])
+                num_blocks = len(noise_blocks)
+            else:
+                lat_blocks = normalized_path[0].reshape(1, len(normalized_path[0]))
+                lon_blocks = normalized_path[1].reshape(1, len(normalized_path[1]))
+                num_blocks = 1
+
+            temp_lat = []
+            temp_lon = []
+
+            for i in range(num_blocks):
+                block_lat, block_lon = params[nn_name].nn_inference(np.array([lat_blocks[i],lon_blocks[i]]))
+                temp_lat.append(block_lat[0])
+                temp_lon.append(block_lon[0])
+            temp[0], temp[1] = merge_arrays(np.array(temp_lat), params[algorithm]["block_length"], bOCS=params[algorithm]["bOCS"]), merge_arrays(np.array(temp_lon), params[algorithm]["block_length"], bOCS=params[algorithm]["bOCS"])
             final_sampling_ratio = params[algorithm]["sampling_ratio"]
         except (ValueError, KeyError) as valerr:
             logger.debug('NN value error with message <%s>', valerr.args[0])
