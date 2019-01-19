@@ -53,7 +53,10 @@ class cAdaptiveSampling:
     # Constructor
     def __init__(self, struct, bUseAdaptive, noise_dist):
         self.m_acquisition_length = len(noise_dist)  # because we do not have access to higher layer of struct
-        self.bUse_gaussian_matrix = struct['bUse_gaussian_matrix']
+        if "bUse_gaussian_matrix" in struct:
+            self.bUse_gaussian_matrix = struct['bUse_gaussian_matrix']
+        else:
+            self.bUse_gaussian_matrix = False
 
         if struct['sampling_ratio'] > 1:
             logger.debug("Sampling_ratio larger than 1")

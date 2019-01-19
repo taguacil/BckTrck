@@ -17,9 +17,8 @@
         "bReconstruct_from_dct"     : true,
         "bUse_gaussian_matrix"      : false,
         "bReconstruct"              : true,
-        "bSplit"                    : true,
-        "bOCS"                      : true,
-        "block_length"              : 128,
+        "buffer_length"             : 16,
+        "block_length"              : 256,
         "lasso_learning_rate"       : 0.01,
         "sampling_ratio"            : 0.2
     },
@@ -28,9 +27,8 @@
         "bReconstruct_from_dct"     : true,
         "bUse_gaussian_matrix"      : false,
         "bReconstruct"              : true,
-        "bSplit"                    : true,
-        "bOCS"                      : false,
-        "block_length"              : 128,
+        "buffer_length"             : 0,
+        "block_length"              : 256,
         "lasso_learning_rate"       : 0.01,
         "sampling_ratio"            : 0.2
     },

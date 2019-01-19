@@ -390,9 +390,10 @@ class CNeuralNetwork:
     def run(self, path, samples, acquisition_length):
         # Perform inference on given path
         if acquisition_length == self.m_acquisition_length:
-            path_dnw = path[:, samples].transpose()
+            path_dnw = path[samples].transpose()
+            path_in = np.array([path_dnw])
             # Check if vector length is the same as input layer is implicitly done by ValueError
-            return self.m_model_lat.predict(path_dnw)
+            return self.m_model_lat.predict(path_in)
         else:
             logger.debug("Input length is invalid")
             errdict = {"file": __file__, "message": "No NN model was chosen", "errorType": CErrorTypes.value}

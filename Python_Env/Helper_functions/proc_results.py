@@ -35,7 +35,6 @@ import scipy.fftpack as ft
 
 from Helper_functions.framework_error import CFrameworkError
 from Helper_functions.framework_error import CErrorTypes
-from Helper_functions.csv_interpreter import merge_arrays
 
 # Bring the logger
 import logging
@@ -189,18 +188,20 @@ class cProcessFile:
     # Plot real path and reconstruction
     def plot_real_path_recon(self):
         logger.debug('Plotting real path and stitched reconstruction')
-        latlon_real = np.array([merge_arrays(self.m_paths_latlon_org[0, :, :, 0],self.m_path_length), merge_arrays(self.m_paths_latlon_org[1, :, :, 0],self.m_path_length)])
 
-        plt.plot(latlon_real[1], latlon_real[0], '-*', label="Original real path")
+        plt.plot(self.m_paths_latlon_org[1, :, :, 0], self.m_paths_latlon_org[0, :, :, 0], '-*',
+                 label="Original real path")
         if self.m_bReconstruct:
             logger.debug('Plotting MSE of reconstructed paths latlon')
 
             for key in self.reconstructed_latlon_paths.keys():
-                r_path = np.array([merge_arrays(self.reconstructed_latlon_paths[key][0, :, :, 0],self.m_path_length),merge_arrays(self.reconstructed_latlon_paths[key][1, :, :, 0],self.m_path_length)])
+                l2_r_latlon = np.sqrt(np.mean(
+                    (self.m_paths_latlon_org[0, :, :, 0] - self.reconstructed_latlon_paths[key][0, :, :, 0]) ** 2 + (
+                                self.m_paths_latlon_org[1, :, :, 0] - self.reconstructed_latlon_paths[key][1, :, :,
+                                                                      0]) ** 2))
 
-                l2_r_latlon = np.sqrt(np.mean((latlon_real[0] - r_path[0]) ** 2 + (latlon_real[1] - r_path[1]) ** 2))
-
-                plt.plot(r_path[1], r_path[0], '-*',
+                plt.plot(self.reconstructed_latlon_paths[key][1, :, :, 0],
+                         self.reconstructed_latlon_paths[key][0, :, :, 0], '-*',
                          label="Path for %s with %.1f %% sampling ratio" % (
                              key, self.average_sampling_ratio[key] * 100))
                 logger.info('L2 for %s is %.6f' % (key, l2_r_latlon))
@@ -596,7 +597,7 @@ class cProcessFile:
 
                 for key in self.reconstructed_wm_paths.keys():
                     plt.plot(x_axis, MSE_r_wm[key], '-*')
-                            #label="MSE_WM for %s with %.1f %% SR" % (key, self.average_sampling_ratio[key] * 100))
+                    # label="MSE_WM for %s with %.1f %% SR" % (key, self.average_sampling_ratio[key] * 100))
                     # plt.plot(x_axis, max_error[key], '-x', label="Average Max Error for %s with %.1f %% SR" % (
                     #   key, self.average_sampling_ratio[key] * 100))
 
@@ -606,7 +607,7 @@ class cProcessFile:
             plt.yscale('log')
             plt.xscale('log')
             plt.grid()
-            #plt.legend(("Optimal network", "Network variant 1", "Network variant 2", "Network variant 3"), loc="upper right")
+            # plt.legend(("Optimal network", "Network variant 1", "Network variant 2", "Network variant 3"), loc="upper right")
             plt.legend(("LASSO", "LASSO with adaptive sampling", "Noisy fully sampled path"), loc="upper right")
             # plt.title('Mean square error for %d samples and %d iteratirons' % (
             #    self.m_acquisition_length, self.m_number_realization))
@@ -675,10 +676,10 @@ class cProcessFile:
             # ax = plt.gca()
             # ax.invert_xaxis()
             # plt.yscale('log')
-            #plt.xscale('log')
+            # plt.xscale('log')
             plt.grid()
             plt.legend(loc="upper right")
-            #plt.title('DCT analysis for latitude')
+            # plt.title('DCT analysis for latitude')
             plt.xlabel('Noise level (meters)')
             plt.ylabel('Percentage of values below given threshold')
             plt.rcParams["figure.figsize"] = [10, 10]

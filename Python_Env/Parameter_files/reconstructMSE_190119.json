@@ -1,0 +1,92 @@
+{
+    "realization"               : 1,
+    "acquisition_time_sec"      : 2048,
+    "random_seed"               : 8941,
+    "bUse_random_seed"          : true,
+    
+    "noise_level_meter"         : [0.5],
+    "noise_std_meter"           : [0],
+    
+    "bReconstruct"              : true,
+    
+    "bUse_static_init"          : true,
+    "staticLat"                 : 0,
+    "staticLon"                 : 0,
+
+    "RCT_ALG_LASSO_ocs_16"             : {
+        "bReconstruct_from_dct"     : true,
+        "bUse_gaussian_matrix"      : false,
+        "bReconstruct"              : false,
+        "buffer_length"             : 16,
+        "block_length"              : 256,
+        "lasso_learning_rate"       : 0.001,
+        "sampling_ratio"            : 0.2
+    },
+
+    "RCT_ALG_LASSO_ocs_64"             : {
+        "bReconstruct_from_dct"     : true,
+        "bUse_gaussian_matrix"      : false,
+        "bReconstruct"              : true,
+        "buffer_length"             : 64,
+        "block_length"              : 256,
+        "lasso_learning_rate"       : 0.0001,
+        "sampling_ratio"            : 1
+    },
+
+    "RCT_ALG_LASSO_no_ocs_split"             : {
+        "bReconstruct_from_dct"     : true,
+        "bUse_gaussian_matrix"      : false,
+        "bReconstruct"              : false,
+        "buffer_length"             : 0,
+        "block_length"              : 256,
+        "lasso_learning_rate"       : 0.001,
+        "sampling_ratio"            : 0.2
+    },
+
+    "RCT_ALG_LASSO_no_ocs_no_split"             : {
+        "bReconstruct_from_dct"     : true,
+        "bUse_gaussian_matrix"      : false,
+        "bReconstruct"              : false,
+        "buffer_length"             : 0,
+        "block_length"              : 2048,
+        "lasso_learning_rate"       : 0.001,
+        "sampling_ratio"            : 0.2
+    },
+
+      "RCT_ALG_NN_Godzilla_withOCS64"     : {
+        "bReconstruct"           : false,
+        "buffer_length"          : 64,
+        "block_length"           : 256,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.8,
+        "modelname"              : "Godzilla_08",
+        "save_nnModel"           : false
+    },
+
+    "RCT_ALG_NN_Godzilla_withOCS16"     : {
+        "bReconstruct"           : false,
+        "buffer_length"          : 16,
+        "block_length"           : 256,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.8,
+        "modelname"              : "Godzilla_08",
+        "save_nnModel"           : false
+    },
+
+    "RCT_ALG_NN_Godzilla_noOCS"     : {
+        "bReconstruct"           : false,
+        "buffer_length"          : 0,
+        "block_length"           : 256,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.8,
+        "modelname"              : "Godzilla_08",
+        "save_nnModel"           : false
+    },
+
+    "PLOT"                      : {
+        "bPlotAllrealizations"      : false,
+        "bPlotLonLat_time_reconst"  : true,
+        "bPlotWM_time_reconst"      : true,
+        "bPlotMSE"                  : true
+    }
+}

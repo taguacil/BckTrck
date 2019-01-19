@@ -75,7 +75,7 @@ class cRandomPath:
     def generate_wm_path(self):
         logger.debug("Generating a path of WM coordinates")
         initial_position_wm = geo.toWm(self.m_initial_position_latlon)
-        bearing = np.random.uniform(0, 2 * np.pi, (self.m_acquisition_length))
+        bearing = np.random.uniform(0, 2 * np.pi, self.m_acquisition_length)
 
         self.m_positions_wm[:, 0] = np.array([initial_position_wm.x, initial_position_wm.y])
         for i in range(self.m_acquisition_length - 1):

@@ -16,8 +16,7 @@
     "RCT_ALG_LASSO"             : {
         "bReconstruct_from_dct"     : false,
         "bReconstruct"              : false,
-        "bSplit"                    : false,
-        "bOCS"                      : false,
+        "buffer_length"             : 0,
         "block_length"              : 256,
         "lasso_learning_rate"       : 0.001,
         "sampling_ratio"            : 0.2
@@ -25,8 +24,7 @@
 
     "RCT_ALG_NN_Godzilla"       : {
         "bReconstruct"           : true,
-        "bSplit"                 : true,
-        "bOCS"                   : true,
+        "buffer_length"          : 16,
         "block_length"           : 256,
         "sampling_ratio"         : 0.20,
         "alpha"                  : 0.8,
