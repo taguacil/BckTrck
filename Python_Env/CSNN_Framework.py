@@ -81,7 +81,7 @@ class cFramework:
         self.logger = logging.getLogger('BckTrk')
         REALIZATION_log = 15
         logLevel = REALIZATION_log  # can be logging.INFO or DEBUG
-        # logLevel = logging.DEBUG
+        #logLevel = logging.DEBUG
         self.logger.setLevel(logLevel)
 
         # create file handler which logs even debug messages

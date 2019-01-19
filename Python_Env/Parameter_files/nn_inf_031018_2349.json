@@ -2,7 +2,7 @@
     "bSimplified_Results"       : true,
     
     "gps_freq_Hz"               : 1,
-    "realization"               : 1000,
+    "realization"               : 10,
     "acquisition_time_sec"      : 256,
     "stepsize"                  : 1,
     
@@ -39,21 +39,24 @@
         "bReconstruct"           : false,
         "sampling_ratio"         : 0.20,
         "alpha"                  : 0.8,
-        "modelname"              : "Loki_08"
+        "modelname"              : "Loki_08",
+        "save_nnModel"           : false
     },
 
     "RCT_ALG_NN_Pyro"           : {
         "bReconstruct"           : true,
         "sampling_ratio"         : 0.20,
         "alpha"                  : 0.6,
-        "modelname"              : "Pyro_06"
+        "modelname"              : "Pyro_06",
+        "save_nnModel"           : false
     },
 
     "RCT_ALG_NN_Pluto"           : {
         "bReconstruct"           : true,
         "sampling_ratio"         : 0.20,
         "alpha"                  : 0.6,
-        "modelname"              : "Pluto_06"
+        "modelname"              : "Pluto_06",
+        "save_nnModel"           : false
     },
 
     "PLOT"                      : {

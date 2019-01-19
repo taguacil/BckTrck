@@ -19,18 +19,33 @@
     "bReconstruct"              : true,
     "bTrainNetwork"             : false,
 
-    "RCT_ALG_NN_Godzilla"       : {
+    "RCT_ALG_NN_Godzilla_noOCS"     : {
         "bReconstruct"           : false,
+        "buffer_length"          : 0,
+        "block_length"           : 256,
         "sampling_ratio"         : 0.20,
         "alpha"                  : 0.8,
         "modelname"              : "Godzilla_08",
         "save_nnModel"           : false
     },
 
-    "RCT_ALG_LASSO"             : {
+    "RCT_ALG_LASSO_no_ocs_split"             : {
         "bReconstruct_from_dct"     : true,
+        "bUse_gaussian_matrix"      : false,
         "bReconstruct"              : true,
-        "lasso_learning_rate"       : 0.01,
+        "buffer_length"             : 0,
+        "block_length"              : 256,
+        "lasso_learning_rate"       : 0.001,
+        "sampling_ratio"            : 0.2
+    },
+
+    "RCT_ALG_LASSO_ocs64_split"             : {
+        "bReconstruct_from_dct"     : true,
+        "bUse_gaussian_matrix"      : false,
+        "bReconstruct"              : true,
+        "buffer_length"             : 64,
+        "block_length"              : 256,
+        "lasso_learning_rate"       : 0.001,
         "sampling_ratio"            : 0.2
     },
     
@@ -38,7 +53,7 @@
         "bUse_csv_data"             : true,
         "bPlot_real_path"           : true,
         "csv_path"                  : "CSV_data/gpsNew.csv",
-        "path_length"               : 256
+        "path_length"               : 1024
     },
     
     "PLOT"                      : {

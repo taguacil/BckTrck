@@ -46,10 +46,8 @@ class cBFGS:
         self.bUseSciGradient = True  # HardCoded
 
     # argument definition
-    def bfgs_run(self, path, samples):
+    def run(self, path, samples, acquisition_length):
         logger.debug("BFGS starting")
-
-        acquisition_length = len(path)
 
         D = ft.dct(np.eye(acquisition_length), norm='ortho')
         # Initial values
