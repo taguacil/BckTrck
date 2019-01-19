@@ -46,7 +46,7 @@ def identify_algorithms(params):
     return temp
 
 
-def split_array(arr, l, bOCS=True):
+def split_array(arr, l, bOCS=False):
     size = int(arr.shape[0])
     overlap = int(l / 2)
     last = int((size / overlap) * overlap)
@@ -65,7 +65,7 @@ def split_array(arr, l, bOCS=True):
     return np.array(blocks)
 
 
-def merge_arrays(lis, l, bOCS=True):
+def merge_arrays(lis, l, bOCS=False):
     if bOCS:
         temp = lis[0, :int(3 * l / 4)]
         size = lis.shape[0]
@@ -83,64 +83,52 @@ def merge_arrays(lis, l, bOCS=True):
     return temp
 
 
-def lassoOps(params, adaptive, normalized_path, noise_dist):
-    if params["bSplit"]:
-        lat_blocks = split_array(normalized_path[0], params["block_length"], bOCS=params["bOCS"])
-        lon_blocks = split_array(normalized_path[1], params["block_length"], bOCS=params["bOCS"])
-        noise_blocks = split_array(noise_dist, params["block_length"], bOCS=params["bOCS"])
-        num_blocks = len(noise_blocks)
-    else:
-        lat_blocks = normalized_path[0].reshape(1, len(normalized_path[0]))
-        lon_blocks = normalized_path[1].reshape(1, len(normalized_path[1]))
-        noise_blocks = noise_dist.reshape(1, len(noise_dist))
-        num_blocks = 1
+def DevOps(algorithm, params, normalized_path, noise_dist):
+    params_alg = params[algorithm]
+    blockLength = params_alg["block_length"]
+    acquisitionLength = params["acquisition_length"]
+    useOCS = params_alg["bOCS"]
+    adaptive = False
 
-    temp_lat = []
-    temp_lon = []
-    temp_ratios = []
+    num_blocks = np.floor(acquisitionLength / blockLength)  # must be a multiple for now
+    if "ADAPTIVE" in algorithm:
+        logger.debug("Adaptive sampling enabaled")
+        adaptive = True
+    if "LASSO" in algorithm:
+        devObj = cLasso(params_alg)
+    elif "BFGS" in algorithm:
+        devObj = cBFGS(params_alg)
+    elif "NN" in algorithm:
+        logger.debug('Entering NN reconstruction')
+        logger.debug('Beginning inference')
+        nn_name = algorithm + "Obj"
+        devObj = params[nn_name]
+
+    if num_blocks == 0:
+        logger.debug("Number of blocks must be > 0")
+        errdict = {"file": __file__, "message": "Number of blocks must be > 0", "errorType": CErrorTypes.value}
+        raise ValueError(errdict)
+    elif num_blocks == 1:
+        lat_blocks = normalized_path[0].reshape(1, acquisitionLength)
+        lon_blocks = normalized_path[1].reshape(1, acquisitionLength)
+        noise_blocks = noise_dist.reshape(1, acquisitionLength)
+    else:
+        lat_blocks = split_array(normalized_path[0], blockLength, bOCS=useOCS)
+        lon_blocks = split_array(normalized_path[1], blockLength, bOCS=useOCS)
+        noise_blocks = split_array(noise_dist, blockLength, bOCS=useOCS)
+
+    temp_lat = np.zeros(blockLength, num_blocks)
+    temp_lon = np.zeros(blockLength, num_blocks)
+    temp_ratios = np.zeros(num_blocks)
 
     for i in range(num_blocks):
-        adaptiveObj = cAdaptiveSampling(params, adaptive, noise_blocks[i])
-        lassoObj = cLasso(params)
-        samples, final_sampling_ratio = adaptiveObj.adaptiveSample()
-        temp_lat.append(lassoObj.reconstructor(lat_blocks[i], samples))
-        temp_lon.append(lassoObj.reconstructor(lon_blocks[i], samples))
-        temp_ratios.append(final_sampling_ratio)
+        adaptiveObj = cAdaptiveSampling(params_alg, adaptive, noise_blocks[i])
+        samples, temp_ratios[i] = adaptiveObj.adaptiveSample()
+        temp_lat[:, i] = devObj.run(lat_blocks[i], samples, blockLength)
+        temp_lon[:, i] = devObj.run(lon_blocks[i], samples, blockLength)
 
-    final_lat = merge_arrays(np.array(temp_lat), params["block_length"], bOCS=params["bOCS"])
-    final_lon = merge_arrays(np.array(temp_lon), params["block_length"], bOCS=params["bOCS"])
-    final_sampling_ratio = np.mean(temp_ratios)
-    temp = np.array([final_lat, final_lon])
-
-    return temp, final_sampling_ratio
-
-
-def bfgsOps(params, adaptive, normalized_path, noise_dist):
-    if params["bSplit"]:
-        lat_blocks = split_array(normalized_path[0], params["block_length"], bOCS=params["bOCS"])
-        lon_blocks = split_array(normalized_path[1], params["block_length"], bOCS=params["bOCS"])
-        noise_blocks = split_array(noise_dist, params["block_length"], bOCS=params["bOCS"])
-        num_blocks = len(noise_blocks)
-    else:
-        lat_blocks = normalized_path[0].reshape(1, len(normalized_path[0]))
-        lon_blocks = normalized_path[1].reshape(1, len(normalized_path[1]))
-        noise_blocks = noise_dist.reshape(1, len(noise_dist))
-        num_blocks = 1
-
-    temp_lat = []
-    temp_lon = []
-    temp_ratios = []
-
-    for i in range(num_blocks):
-        adaptiveObj = cAdaptiveSampling(params, adaptive, noise_blocks[i])
-        bfgsObj = cBFGS(params)
-        samples, final_sampling_ratio = adaptiveObj.adaptiveSample()
-        temp_lat.append(bfgsObj.bfgs_run(lat_blocks[i], samples))
-        temp_lon.append(bfgsObj.bfgs_run(lon_blocks[i], samples))
-        temp_ratios.append(final_sampling_ratio)
-
-    final_lat = merge_arrays(np.array(temp_lat), params["block_length"], bOCS=params["bOCS"])
-    final_lon = merge_arrays(np.array(temp_lon), params["block_length"], bOCS=params["bOCS"])
+    final_lat = merge_arrays(temp_lat, blockLength, bOCS=useOCS)
+    final_lon = merge_arrays(temp_lon, blockLength, bOCS=useOCS)
     final_sampling_ratio = np.mean(temp_ratios)
     temp = np.array([final_lat, final_lon])
 
@@ -155,45 +143,11 @@ def reconstructor(params, path, algorithm, noise_dist):
     var = np.repeat(np.expand_dims(np.var(path, axis=1), axis=1), params['acquisition_length'], axis=1)
     normalized_path = (path - mean) / np.sqrt(var)
 
-    if (("ALG_LASSO" in algorithm) or ("ALG_BFGS" in algorithm)) and params[algorithm]["bReconstruct"]:
+    if params[algorithm]["bReconstruct"]:
         try:
-            temp, final_sampling_ratio = lassoOps(params[algorithm], False, normalized_path, noise_dist)
-        except ValueError as valerr:
-            raise CFrameworkError(valerr.args[0]) from valerr
-
-    elif "ALG_ADAPTIVE" in algorithm and params[algorithm]["bReconstruct"]:
-        try:
-            temp, final_sampling_ratio = lassoOps(params[algorithm], True, normalized_path, noise_dist)
-        except ValueError as valerr:
-            raise CFrameworkError(valerr.args[0]) from valerr
-
-    elif "NN" in algorithm and params[algorithm]["bReconstruct"]:
-        logger.debug('Entering NN reconstruction')
-        try:
-            logger.debug('Beginning inference')
-            nn_name = algorithm + "Obj"
-            temp = np.zeros((2, params['acquisition_length']))
-            if params[algorithm]["bSplit"]:
-                lat_blocks = split_array(normalized_path[0], params[algorithm]["block_length"], bOCS=params[algorithm]["bOCS"])
-                lon_blocks = split_array(normalized_path[1], params[algorithm]["block_length"], bOCS=params[algorithm]["bOCS"])
-                noise_blocks = split_array(noise_dist, params[algorithm]["block_length"], bOCS=params[algorithm]["bOCS"])
-                num_blocks = len(noise_blocks)
-            else:
-                lat_blocks = normalized_path[0].reshape(1, len(normalized_path[0]))
-                lon_blocks = normalized_path[1].reshape(1, len(normalized_path[1]))
-                num_blocks = 1
-
-            temp_lat = []
-            temp_lon = []
-
-            for i in range(num_blocks):
-                block_lat, block_lon = params[nn_name].nn_inference(np.array([lat_blocks[i],lon_blocks[i]]))
-                temp_lat.append(block_lat[0])
-                temp_lon.append(block_lon[0])
-            temp[0], temp[1] = merge_arrays(np.array(temp_lat), params[algorithm]["block_length"], bOCS=params[algorithm]["bOCS"]), merge_arrays(np.array(temp_lon), params[algorithm]["block_length"], bOCS=params[algorithm]["bOCS"])
-            final_sampling_ratio = params[algorithm]["sampling_ratio"]
+            temp, final_sampling_ratio = DevOps(algorithm, params, normalized_path, noise_dist)
         except (ValueError, KeyError) as valerr:
-            logger.debug('NN value error with message <%s>', valerr.args[0])
+            logger.debug('<%s> value error with message <%s>', algorithm, valerr.args[0])
             errdict = {"file": __file__, "message": valerr.args[0], "errorType": CErrorTypes.value}
             raise CFrameworkError(errdict) from valerr
 

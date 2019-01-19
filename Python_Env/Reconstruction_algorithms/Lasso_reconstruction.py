@@ -38,11 +38,10 @@ class cLasso:
         self.bUse_gaussian_matrix = struct['bUse_gaussian_matrix']
 
     # Reconstruction function
-    def reconstructor(self, path, samples):
+    def run(self, path, samples, acquisition_length):
         if self.reconstruct_from_dct:
             logger.debug("LASSO reconstruction with DCT transform")
 
-            acquisition_length = len(path)
             D = ft.dct(np.eye(acquisition_length), norm='ortho')
 
             if self.bUse_gaussian_matrix:

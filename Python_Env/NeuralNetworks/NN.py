@@ -387,20 +387,16 @@ class CNeuralNetwork:
             self.m_model_lon.summary(print_fn=self.custom_print)
         return True
 
-    def nn_inference(self, path_latlon_noisy):
-        # Perform inference on given path 
-        samples = np.sort(np.random.choice(self.m_acquisition_length, self.number_of_samples, replace=False))
-        path_latlon_noisy_dnw = path_latlon_noisy[:, samples].transpose()
-
-        path_lat = np.array([path_latlon_noisy_dnw[:, 0]])
-        path_lon = np.array([path_latlon_noisy_dnw[:, 1]])
-
-
-        # Check if vector length is the same as input layer is implicitly done by ValueError
-        path_lat_reconst = self.m_model_lat.predict(path_lat)
-        path_lon_reconst = self.m_model_lat.predict(path_lon)
-
-        return path_lat_reconst, path_lon_reconst
+    def run(self, path, samples, acquisition_length):
+        # Perform inference on given path
+        if acquisition_length == self.m_acquisition_length:
+            path_dnw = path[:, samples].transpose()
+            # Check if vector length is the same as input layer is implicitly done by ValueError
+            return self.m_model_lat.predict(path_dnw)
+        else:
+            logger.debug("Input length is invalid")
+            errdict = {"file": __file__, "message": "No NN model was chosen", "errorType": CErrorTypes.value}
+            raise CFrameworkError(errdict)
 
     def save_models(self, modelname_lat, modelname_lon):
         # serialize model to JSON
