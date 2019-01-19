@@ -2,7 +2,7 @@
     "bSimplified_Results"       : true,
     
     "gps_freq_Hz"               : 1,
-    "realization"               : 100,
+    "realization"               : 1000,
     "acquisition_time_sec"      : 256,
     "stepsize"                  : 1,
     
@@ -10,7 +10,7 @@
     "bUse_random_seed"          : false,
     
     "noise_level_meter"         : [40,30,20,10,7,5,3,2,1,0.5],
-    "noise_std_meter"           : [0],
+    "noise_std_meter"           : [3],
     
     "bUse_static_init"          : true,
     "staticLat"                 : 0,
@@ -19,12 +19,36 @@
     "bReconstruct"              : true,
     "bTrainNetwork"             : false,
 
-    "RCT_ALG_NN_Godzilla"       : {
+    "RCT_ALG_NN_Optimal1"       : {
         "bReconstruct"           : true,
         "sampling_ratio"         : 0.20,
         "alpha"                  : 0.8,
-        "modelname"              : "Godzilla_08_normal",
-        "save_nnModel"           : true
+        "modelname"              : "OptimalNet1",
+        "save_nnModel"           : false
+    },
+
+    "RCT_ALG_NN_Optimal2"       : {
+        "bReconstruct"           : true,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.8,
+        "modelname"              : "OptimalNet2",
+        "save_nnModel"           : false
+    },
+
+    "RCT_ALG_NN_Deep1"       : {
+        "bReconstruct"           : true,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.8,
+        "modelname"              : "Deep1",
+        "save_nnModel"           : false
+    },
+
+    "RCT_ALG_NN_Deep2"       : {
+        "bReconstruct"           : true,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.8,
+        "modelname"              : "Deep2",
+        "save_nnModel"           : false
     },
 
     "PLOT"                      : {

@@ -59,7 +59,7 @@ class CNeuralNetwork:
             errdict = {"file": __file__, "message": "Sampling_ratio larger than 1", "errorType": CErrorTypes.value}
             raise CFrameworkError(errdict)
 
-        self.m_acquisition_length = struct['acquisition_length']
+        self.m_acquisition_length = struct[algorithm]['block_length']
         self.alpha = struct[algorithm]["alpha"]
         if struct['bTrainNetwork']:
             self.m_model_lat = keras.Sequential()
@@ -79,7 +79,7 @@ class CNeuralNetwork:
                 errdict = {"file": __file__, "message": message, "errorType": CErrorTypes.value}
                 raise CFrameworkError(errdict)
 
-        self.number_of_samples = int(struct[algorithm]["sampling_ratio"] * struct["acquisition_length"])
+        self.number_of_samples = int(struct[algorithm]["sampling_ratio"] * struct[algorithm]["block_length"])
         self.realizations = struct['realization']
 
         if self.number_of_samples <= 0:
@@ -394,6 +394,7 @@ class CNeuralNetwork:
 
         path_lat = np.array([path_latlon_noisy_dnw[:, 0]])
         path_lon = np.array([path_latlon_noisy_dnw[:, 1]])
+
 
         # Check if vector length is the same as input layer is implicitly done by ValueError
         path_lat_reconst = self.m_model_lat.predict(path_lat)
