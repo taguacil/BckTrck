@@ -75,6 +75,9 @@ def process_data(params):
 
         params["RESULTS"]["reconstructed_db_latlon"] = reconstructed_db_latlon
         params["RESULTS"]["MSE_latlon"] = MSE_r_latlon
+        params["RESULTS"]["MSE_r_wm"] = MSE_r_wm
+        params["RESULTS"]["MSE_noise_WM"] = MSE_noise_WM
+        params["RESULTS"]["MSE_noise_latlon"] = MSE_noise_latlon
 
     if params["bSimplified_Results"]:  # TODO logic will only work after csv is integrated
         del params['RESULTS']['paths_wm_org']

@@ -43,10 +43,12 @@ workingDir = os.getcwd()
 resultsPath = workingDir + direc_ident + 'Logs' + direc_ident
 
 WORKERS = 16
-NUMBER_POINTS = 50e3
+# NUMBER_POINTS = 50e3
+NUMBER_POINTS = 64e3
 
 iterable_params = []
-noise_levels = [100, 80, 50, 40, 30, 20, 10, 7, 5, 3, 2, 1, 0.5]
+# noise_levels = [100, 80, 50, 40, 30, 20, 10, 7, 5, 3, 2, 1, 0.5]
+noise_levels = [40, 30, 20, 10, 7, 5, 3, 2, 1, 0.5]
 lasso_learning_rates = [0.01]
 sampling_ratios = [0.2]
 path_lengths = [256]
@@ -62,7 +64,7 @@ iterable_length = range(0, len(iterable_params), 1)
 
 # Business logic for input arguments to main function
 numberOfArgument = len(sys.argv)
-if numberOfArgument == 2:
+if numberOfArgument == 3:
     flag = sys.argv[1]  # first argument should be the filenames identifier
     configFile = sys.argv[2]
 else:
