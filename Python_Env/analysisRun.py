@@ -100,8 +100,8 @@ class CRunAnalysis:
                     print("Error loading file <%s>, skipping...") % txt_file_read
                 else:
                     noise_levels[i] = temp['noise_level_meter'][0]  # script designed with only one value of noise here
-                    MSE_noise_WM = temp['MSE_noise_WM'][0]
-                    MSE_noise_latlon = temp['MSE_noise_latlon'][0]
+                    MSE_noise_WM[i] = temp["RESULTS"]['MSE_noise_WM'][0]
+                    MSE_noise_latlon[i] = temp["RESULTS"]['MSE_noise_latlon'][0]
 
                     for key in reconstructed_db_latlon.keys():
                         MSE_r_latlon[key][i] = temp["RESULTS"]['MSE_latlon'][key]
@@ -119,13 +119,13 @@ class CRunAnalysis:
         localStruct["RESULTS"]["MSE_noise_WM"] = MSE_noise_WM
         localStruct["RESULTS"]["MSE_noise_latlon"] = MSE_noise_latlon
 
-        localStruct['RESULTS']['reconstructed_latlon_paths'] = 0
+        localStruct['RESULTS']['reconstructed_latlon_paths'] = reconstructed_db_latlon # for compatibility
         localStruct['RESULTS']['paths_wm_org'] = 0
         localStruct['RESULTS']['paths_latlon_org'] = 0
         localStruct['RESULTS']['paths_wm_noisy'] = 0
         localStruct['RESULTS']['paths_latlon_noisy'] = 0
         localStruct['RESULTS']['transformed_paths'] = 0
-        localStruct['RESULTS']['reconstructed_WM_paths'] = 0
+        localStruct['RESULTS']['reconstructed_WM_paths'] = reconstructed_db_latlon  # for compatibility
         localStruct['RESULTS']['noise_vals'] = 0
         # What to plot
         localStruct["PLOT"]['bPlotMSE'] = True

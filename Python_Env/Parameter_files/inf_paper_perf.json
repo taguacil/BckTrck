@@ -29,6 +29,26 @@
         "save_nnModel"           : false
     },
 
+    "RCT_ALG_NN_Godzilla_withOCS16"     : {
+        "bReconstruct"           : true,
+        "buffer_length"          : 16,
+        "block_length"           : 256,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.8,
+        "modelname"              : "Godzilla_08",
+        "save_nnModel"           : false
+    },
+
+    "RCT_ALG_NN_Godzilla_withOCS64"     : {
+        "bReconstruct"           : true,
+        "buffer_length"          : 64,
+        "block_length"           : 256,
+        "sampling_ratio"         : 0.20,
+        "alpha"                  : 0.8,
+        "modelname"              : "Godzilla_08",
+        "save_nnModel"           : false
+    },
+
     "RCT_ALG_ADAPTIVE_LASSO"             : {
         "bReconstruct_from_dct"     : true,
         "bUse_gaussian_matrix"      : false,
@@ -41,7 +61,7 @@
         "threshold_high"            : 0.51,
         "threshold_low"             : 0.49,
         "cap_param"                 : 1,
-        "error_baseline"            : [70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70,70]
+        "error_baseline"            : [70,70,70,70,70,70,70,70,70,70]
     },
 
     "RCT_ALG_LASSO_no_ocs_no_split"             : {
@@ -52,12 +72,32 @@
         "block_length"              : 256,
         "lasso_learning_rate"       : 0.01,
         "sampling_ratio"            : 0.2
-    },   
+    },
+
+    "RCT_ALG_LASSO_ocs_16"             : {
+        "bReconstruct_from_dct"     : true,
+        "bUse_gaussian_matrix"      : false,
+        "bReconstruct"              : true,
+        "buffer_length"             : 16,
+        "block_length"              : 256,
+        "lasso_learning_rate"       : 0.01,
+        "sampling_ratio"            : 0.2
+    },
+
+    "RCT_ALG_LASSO_ocs_64"             : {
+        "bReconstruct_from_dct"     : true,
+        "bUse_gaussian_matrix"      : false,
+        "bReconstruct"              : true,
+        "buffer_length"             : 64,
+        "block_length"              : 256,
+        "lasso_learning_rate"       : 0.01,
+        "sampling_ratio"            : 0.2
+    },
 
     "PLOT"                      : {
         "bPlotAllrealizations"      : false,
         "bPlotLonLat_time_reconst"  : false,
-        "bPlotMSE"                  : true,
-        "bPlotSNR"                  : true
+        "bPlotMSE"                  : false,
+        "bPlotSNR"                  : false
     }
 }
