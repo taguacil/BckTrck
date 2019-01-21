@@ -79,6 +79,10 @@ def process_data(params):
         params["RESULTS"]["MSE_noise_WM"] = MSE_noise_WM
         params["RESULTS"]["MSE_noise_latlon"] = MSE_noise_latlon
 
+    for key in list(params):
+        if "Obj" in key:
+            del params[key]
+
     if params["bSimplified_Results"]:  # TODO logic will only work after csv is integrated
         del params['RESULTS']['paths_wm_org']
         del params['RESULTS']['paths_latlon_org']
