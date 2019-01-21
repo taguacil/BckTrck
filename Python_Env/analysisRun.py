@@ -75,14 +75,19 @@ class CRunAnalysis:
         noise_level_len = number_of_points
         numberOfRealizations = temp['realization']
 
-        reconstructed_latlon_paths = temp["RESULTS"]['reconstructed_db_latlon']
+        reconstructed_db_latlon = temp["RESULTS"]['reconstructed_db_latlon']
 
         noise_levels = np.zeros(noise_level_len)
+        MSE_noise_WM = np.zeros(noise_level_len)
+        MSE_noise_latlon = np.zeros(noise_level_len)
+
         MSE_r_latlon = {}
+        MSE_r_wm = {}
         final_sampling_ratio = {}
 
-        for key in reconstructed_latlon_paths.keys():
-            MSE_r_latlon[key] = np.zeros(len(noise_levels))
+        for key in reconstructed_db_latlon.keys():
+            MSE_r_latlon[key] = np.zeros(noise_level_len)
+            MSE_r_wm[key] = np.zeros(noise_level_len)
             final_sampling_ratio[key] = np.zeros((numberOfRealizations, noise_level_len))
 
         for i in range(number_of_points):
@@ -95,8 +100,12 @@ class CRunAnalysis:
                     print("Error loading file <%s>, skipping...") % txt_file_read
                 else:
                     noise_levels[i] = temp['noise_level_meter'][0]  # script designed with only one value of noise here
-                    for key in reconstructed_latlon_paths.keys():
+                    MSE_noise_WM[i] = temp["RESULTS"]['MSE_noise_WM'][0]
+                    MSE_noise_latlon[i] = temp["RESULTS"]['MSE_noise_latlon'][0]
+
+                    for key in reconstructed_db_latlon.keys():
                         MSE_r_latlon[key][i] = temp["RESULTS"]['MSE_latlon'][key]
+                        MSE_r_wm[key][i] = temp["RESULTS"]['MSE_r_wm'][key]
                         final_sampling_ratio[key][:, i] = temp["RESULTS"]['final_sampling_ratio'][key][:, 0]
 
         # Extra parameters required based on what is being plotted
@@ -104,14 +113,19 @@ class CRunAnalysis:
 
         # Results to be saved
         localStruct["RESULTS"]['final_sampling_ratio'] = final_sampling_ratio
-        localStruct["RESULTS"]['MSE_latlon'] = MSE_r_latlon
-        localStruct['RESULTS']['reconstructed_latlon_paths'] = reconstructed_latlon_paths
+        localStruct["RESULTS"]["reconstructed_db_latlon"] = reconstructed_db_latlon
+        localStruct["RESULTS"]["MSE_latlon"] = MSE_r_latlon
+        localStruct["RESULTS"]["MSE_r_wm"] = MSE_r_wm
+        localStruct["RESULTS"]["MSE_noise_WM"] = MSE_noise_WM
+        localStruct["RESULTS"]["MSE_noise_latlon"] = MSE_noise_latlon
+
+        localStruct['RESULTS']['reconstructed_latlon_paths'] = reconstructed_db_latlon # for compatibility
         localStruct['RESULTS']['paths_wm_org'] = 0
         localStruct['RESULTS']['paths_latlon_org'] = 0
         localStruct['RESULTS']['paths_wm_noisy'] = 0
         localStruct['RESULTS']['paths_latlon_noisy'] = 0
         localStruct['RESULTS']['transformed_paths'] = 0
-        localStruct['RESULTS']['reconstructed_WM_paths'] = 0
+        localStruct['RESULTS']['reconstructed_WM_paths'] = reconstructed_db_latlon  # for compatibility
         localStruct['RESULTS']['noise_vals'] = 0
         # What to plot
         localStruct["PLOT"]['bPlotMSE'] = True
@@ -128,4 +142,6 @@ if __name__ == "__main__":
     data_obj.plotAvgSR()
     data_obj.plotAccuracy()
     dummy = np.zeros(len(struct["noise_level_meter"]))
-    data_obj.plot_MSE(dummy, dummy, dummy, dummy, struct["RESULTS"]['MSE_latlon'])
+    data_obj.plot_MSE(struct["RESULTS"]['MSE_noise_WM'], struct["RESULTS"]['MSE_noise_latlon'],
+                      struct["RESULTS"]['MSE_r_wm'],
+                      dummy, struct["RESULTS"]['MSE_latlon'])
