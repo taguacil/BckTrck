@@ -1,0 +1,55 @@
+{
+    "bSimplified_Results"       : true,
+    
+    "gps_freq_Hz"               : 1,
+    "realization"               : 10,
+    "acquisition_time_sec"      : 256,
+    "stepsize"                  : 1,
+    
+    "random_seed"               : 6468,
+    "bUse_random_seed"          : false,
+    
+    "noise_level_meter"         : [10,7,5,3,2,1,0.5,0.0005],
+    "noise_std_meter"           : [3],
+    
+    "bUse_static_init"          : true,
+    "staticLat"                 : 0,
+    "staticLon"                 : 0,
+
+    "bReconstruct"              : true,
+    "bTrainNetwork"             : false,
+
+    "RCT_ALG_NN_Pred1"       : {
+        "bReconstruct"           : false,
+        "buffer_length"          : 0,
+        "block_length"           : 256,
+        "sampling_ratio"         : 0.875,
+        "alpha"                  : 0.8,
+        "modelname"              : "Pred1",
+        "save_nnModel"           : false
+    },
+
+    "RCT_ALG_NN_Pred2"       : {
+        "bReconstruct"           : false,
+        "buffer_length"          : 0,
+        "block_length"           : 256,
+        "sampling_ratio"         : 0.875,
+        "alpha"                  : 0.8,
+        "modelname"              : "Pred2",
+        "save_nnModel"           : false
+    },
+
+    "CSV_DATA"                  : {
+        "bUse_csv_data"             : true,
+        "bPlot_real_path"           : true,
+        "csv_path"                  : "CSV_data/gpsLocationTest2.csv",
+        "path_length"               : 256
+    },
+
+    "PLOT"                      : {
+        "bPlotAllrealizations"      : false,
+        "bPlotLonLat_time_reconst"  : true,
+        "bPlotMSE"                  : true,
+        "bPlotSNR"                  : true
+    }
+}

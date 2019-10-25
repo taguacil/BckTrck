@@ -172,6 +172,7 @@ class LocationTableViewController: UITableViewController, CLLocationManagerDeleg
         let newIndexPath = IndexPath(row: locationVector.count, section: 0)
         
         locationVector.append(userLocation)
+        //sendRequest(locationData: userLocation)
         delegate?.updateLocation(self, didGetNewLocation: userLocation)
         tableView.insertRows(at: [newIndexPath], with: .automatic)
     }
@@ -193,6 +194,85 @@ class LocationTableViewController: UITableViewController, CLLocationManagerDeleg
         print("Error \(error)")
     }
     
+    private func jsonify(inputString: String)-> String?
+    {
+        let data = inputString.data(using: .utf8)!
+        var token = String()
+        do {
+            if let jsonArray = try JSONSerialization.jsonObject(with: data, options : .allowFragments) as? [Dictionary<String,Any>]
+            {
+               //print(jsonArray) // use the json here
+               token = jsonArray[0]["access_token"] as! String
+            } else {
+                print("bad json")
+                return nil
+            }
+        } catch let error as NSError {
+            print(error)
+        }
+        return token
+    }
+    
+    private func getToken()-> String?
+    {
+        let semaphore = DispatchSemaphore (value: 0)
+        var respString = String()
+        
+        let parameters = "username=taimir.aguacil@trapezegroup.com&password=taimir93&client_id=avoc&client_secret=04c1b5de-ee13-4400-8cfd-8abffa04023c&grant_type=password"
+        let postData =  parameters.data(using: .utf8)
+
+        var request = URLRequest(url: URL(string: "https://sso-test.amotech.io/auth/realms/AMOTECH/protocol/openid-connect/token")!,timeoutInterval: Double.infinity)
+        request.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+
+        request.httpMethod = "POST"
+        request.httpBody = postData
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+          guard let data = data else {
+            print(String(describing: error))
+            return
+          }
+          respString = "[" + String(data: data, encoding: .utf8)! + "]"
+          print(respString)
+          semaphore.signal()
+        }
+
+        task.resume()
+        semaphore.wait()
+        let token = self.jsonify(inputString: respString)
+        return token
+    }
+    
+    private func sendRequest(locationData:CLLocation)
+    {
+        let semaphore = DispatchSemaphore (value: 0)
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+        //dateFormatter.dateStyle = DateFormatter.Style.short
+        //dateFormatter.timeStyle = .medium
+        let convertedDate = dateFormatter.string(from: locationData.timestamp)
+        let token = getToken()
+        let default_token = ""
+        var request = URLRequest(url: URL(string: "https://avoc-test.amotech.io/buildathon/passengertracker?deviceId=g6vvtyyrjclh&timestamp=\(convertedDate)&longitude=\(locationData.coordinate.longitude)&latitude=\(locationData.coordinate.latitude)&bearing=\(locationData.course)&speed=\(locationData.speed)&accuracy=\(locationData.horizontalAccuracy)")!,timeoutInterval: Double.infinity)
+        request.addValue("Bearer \(token ?? default_token)", forHTTPHeaderField: "Authorization")
+
+        request.httpMethod = "GET"
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+          guard let data = data else {
+            print(String(describing: error))
+            return
+          }
+          print(String(data: data, encoding: .utf8)!)
+          semaphore.signal()
+        }
+
+        task.resume()
+        semaphore.wait()
+    }
     //MARK: Actions
     @objc func flipBtnAction(sender: UIBarButtonItem)
     {
@@ -230,8 +310,11 @@ class LocationTableViewController: UITableViewController, CLLocationManagerDeleg
             for item in locationVector {
                 
                 let dateFormatter = DateFormatter()
-                dateFormatter.dateStyle = DateFormatter.Style.short
-                dateFormatter.timeStyle = .medium
+                dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+                dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+                dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+                //dateFormatter.dateStyle = DateFormatter.Style.short
+                //dateFormatter.timeStyle = .medium
                 let convertedDate = dateFormatter.string(from: item.timestamp)
                 
                 
@@ -371,6 +454,9 @@ class LocationTableViewController: UITableViewController, CLLocationManagerDeleg
                                                verticalAccuracy :  Double(csvRows[index][6])!,
                                                timestamp: Date())
                     localVector.append(locationPoint)
+                    // Send http request
+                    self.sendRequest(locationData: locationPoint)
+                    sleep(1)
                 }
 
             }

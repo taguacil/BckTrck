@@ -4,14 +4,14 @@
     "bGenerateData"             : false,
 
     "gps_freq_Hz"               : 1,
-    "realization"               : 10000,
+    "realization"               : 100,
     "acquisition_time_sec"      : 256,
     "stepsize"                  : 1,
 
     "random_seed"               : 1000,
     "bUse_random_seed"          : false,
 
-    "noise_level_meter"         : [40,35,30,25,20,15,10,9,8,7,6,5,4,3,2,1,0.0005],
+    "noise_level_meter"         : [10,7,5,3,2,1,0.5,0.0005],
     "noise_std_meter"           : [0],
 
     "bUse_static_init"          : true,
@@ -22,12 +22,14 @@
 
      "Train_NN"             : {
         "bPlotTrainResults"      : true,
-        "bUseGeneratedData"      : true,
-        "sampling_ratio"         : 0.2,
+        "bUseGeneratedData"      : false,
+        "block_length"           : 256,
+        "buffer_length"          : 0,
+        "sampling_ratio"         : 0.875,
         "alpha"                  : 0.8,
         "delta"                  : 0.0001,
-        "modelname_lat"          : "Deep1",
-        "modelname_lon"          : "Deep2"
+        "modelname_lat"          : "Pred1",
+        "modelname_lon"          : "Pred2"
     },
 
     "CSV_DATA"                  : {

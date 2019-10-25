@@ -452,7 +452,7 @@ class cProcessFile:
                             r_path = self.reconstructed_latlon_paths[key]
                             plt.plot(x_axis, r_path[0, :, 0, noise], '-*',
                                      label="Latitude for %s with %.1f %% sr" % (
-                                         key, self.average_sampling_ratio[key] * 100))
+                                         key, np.mean(self.average_sampling_ratio[key]) * 100))
 
                 # Plotting Latitude
                 buf = "Noisy latitude for noise level %d (meters)" % (noise_level[noise])
@@ -485,7 +485,7 @@ class cProcessFile:
                             r_path = self.reconstructed_latlon_paths[key]
                             plt.plot(x_axis, r_path[1, :, 0, noise], '-*',
                                      label="Longitude for %s with %.1f %% sampling ratio" % (
-                                         key, self.average_sampling_ratio[key] * 100))
+                                         key, np.mean(self.average_sampling_ratio[key]) * 100))
 
                 # Plotting Longitude
                 buf = "Noisy longitude for noise level %d (meters)" % (noise_level[noise])
@@ -510,7 +510,7 @@ class cProcessFile:
                             r_path = self.reconstructed_wm_paths[key]
                             plt.plot(x_axis, r_path[0, :, k, noise], '-*',
                                      label="x for %s with %.1f %% sampling ratio" % (
-                                         key, self.average_sampling_ratio[key] * 100))
+                                         key, np.mean(self.average_sampling_ratio[key]) * 100))
 
                 else:
                     logger.warning('Plotting only first realization for visibility')
@@ -523,7 +523,7 @@ class cProcessFile:
                             r_path = self.reconstructed_wm_paths[key]
                             plt.plot(x_axis, r_path[0, :, 0, noise], '-*',
                                      label="x for %s with %.1f %% sampling ratio" % (
-                                         key, self.average_sampling_ratio[key] * 100))
+                                         key, np.mean(self.average_sampling_ratio[key]) * 100))
 
                 # Plotting Latitude
                 buf = "Noisy x for noise level %d (meters)" % (noise_level[noise])
@@ -544,7 +544,7 @@ class cProcessFile:
                             r_path = self.reconstructed_wm_paths[key]
                             plt.plot(x_axis, r_path[1, :, 0, noise], '-*',
                                      label="y for %s with %.1f %% sampling ratio" % (
-                                         key, self.average_sampling_ratio[key] * 100))
+                                         key, np.mean(self.average_sampling_ratio[key]) * 100))
 
                 else:
                     plt.plot(x_axis, paths_wm_org[1, :, 0], '-*', label="Original y")
@@ -555,7 +555,7 @@ class cProcessFile:
                             r_path = self.reconstructed_wm_paths[key]
                             plt.plot(x_axis, r_path[1, :, 0, noise], '-*',
                                      label="y for %s with %.1f %% sampling ratio" % (
-                                         key, self.average_sampling_ratio[key] * 100))
+                                         key, np.mean(self.average_sampling_ratio[key]) * 100))
 
                 # Plotting Longitude
                 buf = "Noisy y for noise level %d (meters)" % (noise_level[noise])

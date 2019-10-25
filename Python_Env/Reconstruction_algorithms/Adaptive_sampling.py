@@ -138,6 +138,7 @@ class cAdaptiveSampling:
                                                           self.m_acquisition_length]) / self.m_acquisition_length
                 samples = gaussian_matrix
             else:
-                samples = np.sort(np.random.choice(self.m_acquisition_length, number_of_samples, replace=False))
+                #samples = np.sort(np.random.choice(self.m_acquisition_length, number_of_samples, replace=False))
+                samples = np.arange(0, number_of_samples, 1)
 
         return samples, final_sampling_ratio

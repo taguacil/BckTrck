@@ -322,7 +322,8 @@ class CNeuralNetwork:
 
     def train_nn(self, org_latlon, input_latlon_noisy):
         # First we normalize
-        samples = np.sort(np.random.choice(self.m_acquisition_length, self.number_of_samples, replace=False))
+        #samples = np.sort(np.random.choice(self.m_acquisition_length, self.number_of_samples, replace=False))
+        samples = np.arange(0, self.number_of_samples,1)
         downsampled_latlon = input_latlon_noisy[:, samples, :, :]
 
         paths_latlon_org, paths_latlon_noisy = self.normalize_path_training(org_latlon, downsampled_latlon)
